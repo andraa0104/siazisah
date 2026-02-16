@@ -65,7 +65,10 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="m in masjidList" :key="m.id" class="hover:bg-gray-50">
+              <template v-if="isLoading">
+                <SkeletonCard v-for="i in 5" :key="i" type="table-row" />
+              </template>
+              <tr v-else v-for="m in masjidList" :key="m.id" class="hover:bg-gray-50">
                 <td class="px-6 py-4">
                   <div class="font-medium text-gray-900">{{ m.nama }}</div>
                 </td>
@@ -102,7 +105,10 @@
         </div>
         <!-- Mobile List -->
         <div class="md:hidden space-y-3">
-          <div
+          <template v-if="isLoading">
+            <SkeletonCard v-for="i in 4" :key="i" type="list-item" />
+          </template>
+          <div v-else
             v-for="m in masjidList"
             :key="m.id"
             class="bg-white rounded-xl shadow-md p-4"
@@ -191,14 +197,16 @@
         <div class="flex gap-3 pt-4">
           <button
             type="submit"
-            class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium"
+            :disabled="isSaving"
+            class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50"
           >
-            <i class="fas fa-save mr-2"></i>Simpan
+            <i class="fas fa-save mr-2"></i>{{ isSaving ? 'Menyimpan...' : 'Simpan' }}
           </button>
           <button
             type="button"
             @click="closeModal"
-            class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-medium"
+            :disabled="isSaving"
+            class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-medium disabled:opacity-50"
           >
             Batal
           </button>
@@ -206,6 +214,7 @@
       </form>
     </Modal>
 
+    <LoadingOverlay :show="isSaving" message="Menyimpan data..." />
     <Toast :message="toast.message" :type="toast.type" />
   </div>
 </template>
@@ -215,6 +224,8 @@ import { ref, onMounted } from "vue";
 import Sidebar from "../../components/Sidebar.vue";
 import Modal from "../../components/Modal.vue";
 import Toast from "../../components/Toast.vue";
+import SkeletonCard from "../../components/SkeletonCard.vue";
+import LoadingOverlay from "../../components/LoadingOverlay.vue";
 import api from "../../api";
 
 const menuItems = [
@@ -231,6 +242,8 @@ const showSidebar = ref(false);
 const masjidList = ref([]);
 const showModal = ref(false);
 const editingId = ref(null);
+const isLoading = ref(true);
+const isSaving = ref(false);
 const form = ref({
   nama: "",
   alamat: "",
@@ -240,11 +253,14 @@ const form = ref({
 const toast = ref({ message: "", type: "success" });
 
 const loadMasjid = async () => {
+  isLoading.value = true;
   try {
     const { data } = await api.getMasjid();
     if (data.success) masjidList.value = data.data || [];
   } catch (error) {
     console.error(error);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -268,6 +284,7 @@ const deleteMasjid = async (id) => {
 };
 
 const saveMasjid = async () => {
+  isSaving.value = true;
   try {
     const { data } = editingId.value
       ? await api.updateMasjid(editingId.value, form.value)
@@ -285,6 +302,8 @@ const saveMasjid = async () => {
     }
   } catch (error) {
     toast.value = { message: "Gagal menyimpan data", type: "error" };
+  } finally {
+    isSaving.value = false;
   }
 };
 

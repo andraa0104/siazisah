@@ -32,7 +32,17 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="m in mustahiqList" :key="m.id" class="hover:bg-gray-50">
+              <!-- Loading Skeleton -->
+              <template v-if="isLoading">
+                <tr v-for="i in 5" :key="i">
+                  <td colspan="6" class="px-6 py-4">
+                    <SkeletonCard type="table-row" />
+                  </td>
+                </tr>
+              </template>
+              
+              <!-- Actual Data -->
+              <tr v-else v-for="m in mustahiqList" :key="m.id" class="hover:bg-gray-50">
                 <td class="px-6 py-4"><div class="font-medium text-gray-900">{{ m.nama }}</div></td>
                 <td class="px-6 py-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">{{ m.jenis_penerima }}</span></td>
                 <td class="px-6 py-4 text-sm text-gray-900">{{ m.alamat }}</td>
@@ -52,7 +62,13 @@
         </div>
         <!-- Mobile List -->
         <div class="md:hidden space-y-3">
-          <div v-for="m in mustahiqList" :key="m.id" class="bg-white rounded-xl shadow-md p-4">
+          <!-- Loading Skeleton -->
+          <template v-if="isLoading">
+            <SkeletonCard v-for="i in 5" :key="i" type="list-item" />
+          </template>
+          
+          <!-- Actual Data -->
+          <div v-else v-for="m in mustahiqList" :key="m.id" class="bg-white rounded-xl shadow-md p-4">
             <div class="flex justify-between items-start mb-2">
               <p class="font-medium text-gray-900">{{ m.nama }}</p>
               <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">{{ m.jenis_penerima }}</span>
@@ -133,6 +149,7 @@
     </Modal>
 
     <Toast :message="toast.message" :type="toast.type" />
+    <LoadingOverlay :show="isSaving" message="Menyimpan data..." />
   </div>
 </template>
 
@@ -142,6 +159,8 @@ import Swal from 'sweetalert2'
 import Sidebar from '../../components/Sidebar.vue'
 import Modal from '../../components/Modal.vue'
 import Toast from '../../components/Toast.vue'
+import SkeletonCard from '../../components/SkeletonCard.vue'
+import LoadingOverlay from '../../components/LoadingOverlay.vue'
 import api from '../../api'
 
 const menuItems = [
@@ -158,13 +177,18 @@ const showModal = ref(false)
 const editingId = ref(null)
 const form = ref({ nama: '', jenis_penerima: '', alamat: '', lokasi: '', rt: '', telepon: '' })
 const toast = ref({ message: '', type: 'success' })
+const isLoading = ref(true)
+const isSaving = ref(false)
 
 const loadMustahiq = async () => {
+  isLoading.value = true
   try {
     const { data } = await api.getMustahiq()
     if (data.success) mustahiqList.value = data.data || []
   } catch (error) {
     console.error(error)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -219,6 +243,8 @@ const saveMustahiq = async () => {
     }
   } catch (error) {
     toast.value = { message: 'Gagal menyimpan data', type: 'error' }
+  } finally {
+    isSaving.value = false
   }
 }
 

@@ -1,7 +1,13 @@
 import axios from 'axios'
 
+// Auto-detect backend URL based on current hostname
+const getBackendURL = () => {
+  const hostname = window.location.hostname;
+  return `http://${hostname}:8082/api`;
+}
+
 const api = axios.create({
-  baseURL: 'http://localhost:8082/api',
+  baseURL: getBackendURL(),
   headers: {'Content-Type': 'application/json'}
 })
 
@@ -19,6 +25,8 @@ export default {
   getPublicDashboard: () => api.get('/public/dashboard'),
   getPublicMasjid: () => api.get('/public/masjid'),
   getPublicMasjidStats: (id) => api.get(`/public/masjid/${id}/stats`),
+  getPublicPengurusMasjid: (id) => api.get(`/public/masjid/${id}/pengurus-masjid`),
+  getPublicPengurusZakat: (id) => api.get(`/public/masjid/${id}/pengurus-zakat`),
   
   // Superadmin
   getMasjid: () => api.get('/superadmin/masjid'),
@@ -34,6 +42,13 @@ export default {
   // Petugas
   getMyMasjid: () => api.get('/petugas/masjid'),
   updateMyMasjid: (data) => api.put('/petugas/masjid', data),
+  
+  getPengurusMasjid: () => api.get('/petugas/pengurus-masjid'),
+  savePengurusMasjid: (data) => api.post('/petugas/pengurus-masjid', data),
+  
+  getPengurusZakat: () => api.get('/petugas/pengurus-zakat'),
+  savePengurusZakat: (data) => api.post('/petugas/pengurus-zakat', data),
+  deletePengurusZakat: (id) => api.delete(`/petugas/pengurus-zakat/${id}`),
   
   getMuzakki: () => api.get('/petugas/muzakki'),
   createMuzakki: (data) => api.post('/petugas/muzakki', data),

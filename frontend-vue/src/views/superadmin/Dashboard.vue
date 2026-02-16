@@ -25,7 +25,10 @@
 
       <main class="flex-1 overflow-y-auto p-4 md:p-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-          <div v-for="stat in stats" :key="stat.label" class="bg-white rounded-xl shadow-md p-6">
+          <template v-if="isLoading">
+            <SkeletonCard v-for="i in 4" :key="i" type="stat" />
+          </template>
+          <div v-else v-for="stat in stats" :key="stat.label" class="bg-white rounded-xl shadow-md p-6">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-gray-500 text-sm">{{ stat.label }}</p>
@@ -70,10 +73,12 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import Sidebar from '../../components/Sidebar.vue'
+import SkeletonCard from '../../components/SkeletonCard.vue'
 import api from '../../api'
 
 const authStore = useAuthStore()
 const showSidebar = ref(false)
+const isLoading = ref(true)
 
 const menuItems = [
   { path: '/superadmin', label: 'Dashboard', icon: 'fas fa-home' },
@@ -89,6 +94,7 @@ const stats = ref([
 ])
 
 onMounted(async () => {
+  isLoading.value = true
   try {
     const [publicData, usersData] = await Promise.all([
       api.getPublicDashboard(),
@@ -106,6 +112,8 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error(error)
+  } finally {
+    isLoading.value = false
   }
 })
 </script>

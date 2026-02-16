@@ -15,14 +15,16 @@ func NewTransaksiZakatRepository(db *sql.DB) *TransaksiZakatRepository {
 
 func (r *TransaksiZakatRepository) Create(transaksi *models.TransaksiZakat) error {
 	query := `INSERT INTO transaksi_zakat (masjid_id, muzakki_id, jenis_zakat, bentuk_zakat, jenis_harta, 
-			  nominal_harta, persentase_zakat, kelas_zakat, jumlah_orang, nominal_per_orang, total_wajib, 
+			  nominal_harta, persentase_zakat, kelas_zakat, jumlah_orang, jumlah_hari_fidyah, 
+			  standar_beras_per_jiwa, kg_beras_dibayar, harga_beras_per_kg, nominal_per_orang, total_wajib, 
 			  total_dibayar, infaq_tambahan, keterangan, tahun, tanggal_bayar) 
-			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	result, err := r.DB.Exec(query, transaksi.MasjidID, transaksi.MuzakkiID, transaksi.JenisZakat,
 		transaksi.BentukZakat, transaksi.JenisHarta, transaksi.NominalHarta, transaksi.PersentaseZakat,
-		transaksi.KelasZakat, transaksi.JumlahOrang, transaksi.NominalPerOrang,
-		transaksi.TotalWajib, transaksi.TotalDibayar, transaksi.InfaqTambahan, transaksi.Keterangan,
-		transaksi.Tahun, transaksi.TanggalBayar)
+		transaksi.KelasZakat, transaksi.JumlahOrang, transaksi.JumlahHariFidyah,
+		transaksi.StandarBerasPerJiwa, transaksi.KgBerasDibayar, transaksi.HargaBerasPerKg,
+		transaksi.NominalPerOrang, transaksi.TotalWajib, transaksi.TotalDibayar, transaksi.InfaqTambahan,
+		transaksi.Keterangan, transaksi.Tahun, transaksi.TanggalBayar)
 	if err != nil {
 		return err
 	}
@@ -34,19 +36,21 @@ func (r *TransaksiZakatRepository) Create(transaksi *models.TransaksiZakat) erro
 func (r *TransaksiZakatRepository) FindByID(id int) (*models.TransaksiZakat, error) {
 	transaksi := &models.TransaksiZakat{}
 	query := `SELECT t.id, t.masjid_id, t.muzakki_id, t.jenis_zakat, t.bentuk_zakat, t.jenis_harta,
-			  t.nominal_harta, t.persentase_zakat, t.kelas_zakat, t.jumlah_orang, t.nominal_per_orang, 
+			  t.nominal_harta, t.persentase_zakat, t.kelas_zakat, t.jumlah_orang, t.jumlah_hari_fidyah,
+			  t.standar_beras_per_jiwa, t.kg_beras_dibayar, t.harga_beras_per_kg, t.nominal_per_orang, 
 			  t.total_wajib, t.total_dibayar, t.infaq_tambahan, t.keterangan, t.tahun, t.tanggal_bayar, 
-			  t.created_at, t.updated_at, m.nama, m.alamat
+			  t.created_at, t.updated_at, m.nama, m.alamat, m.telepon
 			  FROM transaksi_zakat t
 			  JOIN muzakki m ON t.muzakki_id = m.id
 			  WHERE t.id = ?`
 	err := r.DB.QueryRow(query, id).Scan(
 		&transaksi.ID, &transaksi.MasjidID, &transaksi.MuzakkiID, &transaksi.JenisZakat,
 		&transaksi.BentukZakat, &transaksi.JenisHarta, &transaksi.NominalHarta, &transaksi.PersentaseZakat,
-		&transaksi.KelasZakat, &transaksi.JumlahOrang, &transaksi.NominalPerOrang,
-		&transaksi.TotalWajib, &transaksi.TotalDibayar, &transaksi.InfaqTambahan, &transaksi.Keterangan,
-		&transaksi.Tahun, &transaksi.TanggalBayar, &transaksi.CreatedAt, &transaksi.UpdatedAt,
-		&transaksi.MuzakkiNama, &transaksi.MuzakkiAlamat,
+		&transaksi.KelasZakat, &transaksi.JumlahOrang, &transaksi.JumlahHariFidyah,
+		&transaksi.StandarBerasPerJiwa, &transaksi.KgBerasDibayar, &transaksi.HargaBerasPerKg,
+		&transaksi.NominalPerOrang, &transaksi.TotalWajib, &transaksi.TotalDibayar, &transaksi.InfaqTambahan,
+		&transaksi.Keterangan, &transaksi.Tahun, &transaksi.TanggalBayar, &transaksi.CreatedAt, &transaksi.UpdatedAt,
+		&transaksi.MuzakkiNama, &transaksi.MuzakkiAlamat, &transaksi.MuzakkiTelepon,
 	)
 	if err != nil {
 		return nil, err
@@ -56,9 +60,10 @@ func (r *TransaksiZakatRepository) FindByID(id int) (*models.TransaksiZakat, err
 
 func (r *TransaksiZakatRepository) GetByMasjidID(masjidID int) ([]models.TransaksiZakat, error) {
 	query := `SELECT t.id, t.masjid_id, t.muzakki_id, t.jenis_zakat, t.bentuk_zakat, t.jenis_harta,
-			  t.nominal_harta, t.persentase_zakat, t.kelas_zakat, t.jumlah_orang, t.nominal_per_orang, 
+			  t.nominal_harta, t.persentase_zakat, t.kelas_zakat, t.jumlah_orang, t.jumlah_hari_fidyah,
+			  t.standar_beras_per_jiwa, t.kg_beras_dibayar, t.harga_beras_per_kg, t.nominal_per_orang, 
 			  t.total_wajib, t.total_dibayar, t.infaq_tambahan, t.keterangan, t.tahun, t.tanggal_bayar, 
-			  t.created_at, t.updated_at, m.nama, m.alamat
+			  t.created_at, t.updated_at, m.nama, m.alamat, m.telepon
 			  FROM transaksi_zakat t
 			  JOIN muzakki m ON t.muzakki_id = m.id
 			  WHERE t.masjid_id = ? 
@@ -74,10 +79,11 @@ func (r *TransaksiZakatRepository) GetByMasjidID(masjidID int) ([]models.Transak
 		var transaksi models.TransaksiZakat
 		err := rows.Scan(&transaksi.ID, &transaksi.MasjidID, &transaksi.MuzakkiID, &transaksi.JenisZakat,
 			&transaksi.BentukZakat, &transaksi.JenisHarta, &transaksi.NominalHarta, &transaksi.PersentaseZakat,
-			&transaksi.KelasZakat, &transaksi.JumlahOrang, &transaksi.NominalPerOrang,
-			&transaksi.TotalWajib, &transaksi.TotalDibayar, &transaksi.InfaqTambahan, &transaksi.Keterangan,
-			&transaksi.Tahun, &transaksi.TanggalBayar, &transaksi.CreatedAt, &transaksi.UpdatedAt,
-			&transaksi.MuzakkiNama, &transaksi.MuzakkiAlamat)
+			&transaksi.KelasZakat, &transaksi.JumlahOrang, &transaksi.JumlahHariFidyah,
+			&transaksi.StandarBerasPerJiwa, &transaksi.KgBerasDibayar, &transaksi.HargaBerasPerKg,
+			&transaksi.NominalPerOrang, &transaksi.TotalWajib, &transaksi.TotalDibayar, &transaksi.InfaqTambahan,
+			&transaksi.Keterangan, &transaksi.Tahun, &transaksi.TanggalBayar, &transaksi.CreatedAt, &transaksi.UpdatedAt,
+			&transaksi.MuzakkiNama, &transaksi.MuzakkiAlamat, &transaksi.MuzakkiTelepon)
 		if err != nil {
 			continue
 		}
@@ -88,9 +94,10 @@ func (r *TransaksiZakatRepository) GetByMasjidID(masjidID int) ([]models.Transak
 
 func (r *TransaksiZakatRepository) GetByMasjidIDAndYear(masjidID, tahun int) ([]models.TransaksiZakat, error) {
 	query := `SELECT t.id, t.masjid_id, t.muzakki_id, t.jenis_zakat, t.bentuk_zakat, t.jenis_harta,
-			  t.nominal_harta, t.persentase_zakat, t.kelas_zakat, t.jumlah_orang, t.nominal_per_orang, 
+			  t.nominal_harta, t.persentase_zakat, t.kelas_zakat, t.jumlah_orang, t.jumlah_hari_fidyah,
+			  t.standar_beras_per_jiwa, t.kg_beras_dibayar, t.harga_beras_per_kg, t.nominal_per_orang, 
 			  t.total_wajib, t.total_dibayar, t.infaq_tambahan, t.keterangan, t.tahun, t.tanggal_bayar, 
-			  t.created_at, t.updated_at, m.nama, m.alamat
+			  t.created_at, t.updated_at, m.nama, m.alamat, m.telepon
 			  FROM transaksi_zakat t
 			  JOIN muzakki m ON t.muzakki_id = m.id
 			  WHERE t.masjid_id = ? AND t.tahun = ?
@@ -106,10 +113,11 @@ func (r *TransaksiZakatRepository) GetByMasjidIDAndYear(masjidID, tahun int) ([]
 		var transaksi models.TransaksiZakat
 		err := rows.Scan(&transaksi.ID, &transaksi.MasjidID, &transaksi.MuzakkiID, &transaksi.JenisZakat,
 			&transaksi.BentukZakat, &transaksi.JenisHarta, &transaksi.NominalHarta, &transaksi.PersentaseZakat,
-			&transaksi.KelasZakat, &transaksi.JumlahOrang, &transaksi.NominalPerOrang,
-			&transaksi.TotalWajib, &transaksi.TotalDibayar, &transaksi.InfaqTambahan, &transaksi.Keterangan,
-			&transaksi.Tahun, &transaksi.TanggalBayar, &transaksi.CreatedAt, &transaksi.UpdatedAt,
-			&transaksi.MuzakkiNama, &transaksi.MuzakkiAlamat)
+			&transaksi.KelasZakat, &transaksi.JumlahOrang, &transaksi.JumlahHariFidyah,
+			&transaksi.StandarBerasPerJiwa, &transaksi.KgBerasDibayar, &transaksi.HargaBerasPerKg,
+			&transaksi.NominalPerOrang, &transaksi.TotalWajib, &transaksi.TotalDibayar, &transaksi.InfaqTambahan,
+			&transaksi.Keterangan, &transaksi.Tahun, &transaksi.TanggalBayar, &transaksi.CreatedAt, &transaksi.UpdatedAt,
+			&transaksi.MuzakkiNama, &transaksi.MuzakkiAlamat, &transaksi.MuzakkiTelepon)
 		if err != nil {
 			continue
 		}

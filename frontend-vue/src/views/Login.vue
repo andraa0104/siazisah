@@ -47,15 +47,24 @@
           </button>
         </form>
 
-        <div class="mt-6 text-center">
-          <router-link to="/public" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
-            <i class="fas fa-globe mr-1"></i>Lihat Dashboard Publik
-          </router-link>
+        <div class="mt-6 text-center space-y-2">
+          <div>
+            <router-link to="/public" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+              <i class="fas fa-globe mr-1"></i>Lihat Dashboard Publik
+            </router-link>
+          </div>
+          <div>
+            <router-link to="/" class="text-gray-600 hover:text-gray-700 text-sm font-medium">
+              <i class="fas fa-arrow-left mr-1"></i>Kembali ke Beranda
+            </router-link>
+          </div>
         </div>
       </div>
 
       <p class="text-center text-gray-600 text-sm mt-6">© 2024 SI-AZISAH. All rights reserved.</p>
     </div>
+
+    <LoadingOverlay :show="loading" message="Memproses login..." />
   </div>
 </template>
 
@@ -63,6 +72,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import LoadingOverlay from '../components/LoadingOverlay.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

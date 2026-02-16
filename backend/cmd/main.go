@@ -22,6 +22,7 @@ func main() {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	masjidRepo := repository.NewMasjidRepository(db)
+	pengurusRepo := repository.NewPengurusRepository(db)
 	muzakkiRepo := repository.NewMuzakkiRepository(db)
 	mustahiqRepo := repository.NewMustahiqRepository(db)
 	transaksiRepo := repository.NewTransaksiZakatRepository(db)
@@ -30,6 +31,7 @@ func main() {
 	authHandler := handlers.NewAuthHandler(userRepo)
 	userHandler := handlers.NewUserHandler(userRepo)
 	masjidHandler := handlers.NewMasjidHandler(masjidRepo)
+	pengurusHandler := handlers.NewPengurusHandler(pengurusRepo)
 	muzakkiHandler := handlers.NewMuzakkiHandler(muzakkiRepo)
 	mustahiqHandler := handlers.NewMustahiqHandler(mustahiqRepo)
 	transaksiHandler := handlers.NewTransaksiHandler(transaksiRepo, muzakkiRepo)
@@ -44,6 +46,11 @@ func main() {
 		public.GET("/dashboard", publicHandler.GetPublicDashboard)
 		public.GET("/masjid", publicHandler.GetAllMasjid)
 		public.GET("/masjid/:id/stats", publicHandler.GetMasjidStats)
+		public.GET("/masjid/:id/pengurus-masjid", pengurusHandler.GetPengurusMasjidPublic)
+		public.GET("/masjid/:id/pengurus-zakat", pengurusHandler.GetPengurusZakatPublic)
+		public.GET("/stats/fitrah", publicHandler.GetZakatFitrahStats)
+		public.GET("/stats/mal", publicHandler.GetZakatMalStats)
+		public.GET("/stats/fidyah", publicHandler.GetFidyahStats)
 	}
 
 	// Auth routes
@@ -79,6 +86,13 @@ func main() {
 		{
 			petugas.GET("/masjid", masjidHandler.GetMyMasjid)
 			petugas.PUT("/masjid", masjidHandler.UpdateMyMasjid)
+
+			petugas.GET("/pengurus-masjid", pengurusHandler.GetPengurusMasjid)
+			petugas.POST("/pengurus-masjid", pengurusHandler.SavePengurusMasjid)
+			
+			petugas.GET("/pengurus-zakat", pengurusHandler.GetPengurusZakat)
+			petugas.POST("/pengurus-zakat", pengurusHandler.SavePengurusZakat)
+			petugas.DELETE("/pengurus-zakat/:id", pengurusHandler.DeletePengurusZakat)
 
 			petugas.GET("/muzakki", muzakkiHandler.GetAll)
 			petugas.POST("/muzakki", muzakkiHandler.Create)

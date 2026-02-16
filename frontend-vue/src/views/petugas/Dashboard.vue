@@ -27,8 +27,11 @@
       </header>
 
       <main class="flex-1 overflow-y-auto p-4 md:p-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-          <div v-for="stat in stats" :key="stat.label" :class="`bg-gradient-to-br ${stat.gradient} rounded-xl shadow-lg p-6 text-white`">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+          <template v-if="isLoading">
+            <SkeletonCard v-for="i in 9" :key="i" type="stat" />
+          </template>
+          <div v-else v-for="stat in stats" :key="stat.label" :class="`bg-gradient-to-br ${stat.gradient} rounded-xl shadow-lg p-6 text-white`">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-white text-opacity-90 text-sm">{{ stat.label }}</p>
@@ -84,6 +87,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import Sidebar from '../../components/Sidebar.vue'
+import SkeletonCard from '../../components/SkeletonCard.vue'
 import api from '../../api'
 
 const authStore = useAuthStore()
@@ -96,36 +100,62 @@ const menuItems = [
 ]
 
 const masjidName = ref('Loading...')
+const masjidId = ref(null)
 const showSidebar = ref(false)
+const isLoading = ref(true)
 const stats = ref([
-  { label: 'Total Dizakati', value: 0, icon: 'fas fa-users', gradient: 'from-blue-500 to-blue-600' },
-  { label: 'Total Transaksi', value: 0, icon: 'fas fa-receipt', gradient: 'from-purple-500 to-purple-600' },
-  { label: 'Total Zakat', value: 'Rp 0', icon: 'fas fa-coins', gradient: 'from-yellow-500 to-yellow-600' },
-  { label: 'Muzakki', value: 0, icon: 'fas fa-hand-holding-heart', gradient: 'from-green-500 to-green-600' }
+  { label: 'Fitrah Uang', value: 'Rp 0', icon: 'fas fa-money-bill-wave', gradient: 'from-green-500 to-green-600' },
+  { label: 'Fitrah Beras', value: '0 Kg', icon: 'fas fa-wheat', gradient: 'from-amber-500 to-amber-600' },
+  { label: 'Zakat Mal', value: 'Rp 0', icon: 'fas fa-coins', gradient: 'from-blue-500 to-blue-600' },
+  { label: 'Fidyah Uang', value: 'Rp 0', icon: 'fas fa-hand-holding-usd', gradient: 'from-yellow-500 to-yellow-600' },
+  { label: 'Fidyah Beras', value: '0 Kg', icon: 'fas fa-seedling', gradient: 'from-lime-500 to-lime-600' },
+  { label: 'Total Infaq', value: 'Rp 0', icon: 'fas fa-heart', gradient: 'from-purple-500 to-purple-600' },
+  { label: 'Total Muzakki', value: '0', icon: 'fas fa-users', gradient: 'from-teal-500 to-teal-600' },
+  { label: 'Total Transaksi', value: '0', icon: 'fas fa-receipt', gradient: 'from-rose-500 to-rose-600' },
+  { label: 'Total Dizakati', value: '0', icon: 'fas fa-user-check', gradient: 'from-sky-500 to-sky-600' }
 ])
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount)
 }
 
+const formatNumber = (value) => {
+  return Number(value || 0).toLocaleString('id-ID')
+}
+
 onMounted(async () => {
+  isLoading.value = true
   try {
-    const [masjidData, transaksiData] = await Promise.all([
-      api.getMyMasjid(),
-      api.getTransaksi()
-    ])
+    // Get masjid data first to get masjid_id
+    const masjidData = await api.getMyMasjid()
     
-    if (masjidData.data.success) masjidName.value = masjidData.data.data.nama
-    if (transaksiData.data.success) {
-      const totalDizakati = transaksiData.data.data.reduce((sum, t) => sum + (t.jumlah_orang || 0), 0)
-      stats.value[0].value = totalDizakati
-      stats.value[1].value = transaksiData.data.data.length
-      const total = transaksiData.data.data.reduce((sum, t) => sum + t.total_dibayar, 0)
-      stats.value[2].value = formatCurrency(total)
-      stats.value[3].value = new Set(transaksiData.data.data.map(t => t.muzakki_id)).size
+    if (masjidData.data.success && masjidData.data.data) {
+      masjidName.value = masjidData.data.data.nama
+      masjidId.value = masjidData.data.data.id
+      
+      // Get detailed stats for this masjid
+      const statsData = await api.getPublicMasjidStats(masjidId.value)
+      
+      if (statsData.data.success && statsData.data.data) {
+        const d = statsData.data.data
+        const transaksi = Array.isArray(d.transaksi) ? d.transaksi : []
+        const totalTransaksi = transaksi.length
+        const totalMuzakki = new Set(transaksi.map((item) => item.muzakki_nama)).size
+        stats.value[0].value = formatCurrency(d.total_zakat_fitrah_uang || 0)
+        stats.value[1].value = `${Number(d.total_zakat_fitrah_beras_kg || 0).toLocaleString('id-ID')} Kg`
+        stats.value[2].value = formatCurrency(d.total_zakat_mal || 0)
+        stats.value[3].value = formatCurrency(d.total_fidyah_uang || 0)
+        stats.value[4].value = `${Number(d.total_fidyah_beras_kg || 0).toLocaleString('id-ID')} Kg`
+        stats.value[5].value = formatCurrency(d.total_infaq || 0)
+        stats.value[6].value = formatNumber(totalMuzakki)
+        stats.value[7].value = formatNumber(totalTransaksi)
+        stats.value[8].value = formatNumber(d.total_muzakki || 0)
+      }
     }
   } catch (error) {
     console.error(error)
+  } finally {
+    isLoading.value = false
   }
 })
 </script>

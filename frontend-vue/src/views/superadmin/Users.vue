@@ -31,7 +31,10 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="u in petugasList" :key="u.id" class="hover:bg-gray-50">
+              <template v-if="isLoading">
+                <SkeletonCard v-for="i in 5" :key="i" type="table-row" />
+              </template>
+              <tr v-else v-for="u in petugasList" :key="u.id" class="hover:bg-gray-50">
                 <td class="px-6 py-4"><div class="font-medium text-gray-900">{{ u.username }}</div></td>
                 <td class="px-6 py-4 text-sm text-gray-900">{{ u.full_name }}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">{{ u.email }}</td>
@@ -50,7 +53,10 @@
         </div>
         <!-- Mobile List -->
         <div class="md:hidden space-y-3">
-          <div v-for="u in petugasList" :key="u.id" class="bg-white rounded-xl shadow-md p-4">
+          <template v-if="isLoading">
+            <SkeletonCard v-for="i in 4" :key="i" type="list-item" />
+          </template>
+          <div v-else v-for="u in petugasList" :key="u.id" class="bg-white rounded-xl shadow-md p-4">
             <p class="font-medium text-gray-900 mb-1">{{ u.full_name }}</p>
             <div class="space-y-1 text-sm mb-3">
               <p class="text-gray-600">@{{ u.username }}</p>
@@ -98,14 +104,15 @@
           </div>
         </div>
         <div class="flex gap-3 pt-4">
-          <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium">
-            <i class="fas fa-save mr-2"></i>Simpan
+          <button type="submit" :disabled="isSaving" class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50">
+            <i class="fas fa-save mr-2"></i>{{ isSaving ? 'Menyimpan...' : 'Simpan' }}
           </button>
-          <button type="button" @click="closeModal" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-medium">Batal</button>
+          <button type="button" @click="closeModal" :disabled="isSaving" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-medium disabled:opacity-50">Batal</button>
         </div>
       </form>
     </Modal>
 
+    <LoadingOverlay :show="isSaving" message="Menyimpan data..." />
     <Toast :message="toast.message" :type="toast.type" />
   </div>
 </template>
@@ -115,6 +122,8 @@ import { ref, computed, onMounted } from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
 import Modal from '../../components/Modal.vue'
 import Toast from '../../components/Toast.vue'
+import SkeletonCard from '../../components/SkeletonCard.vue'
+import LoadingOverlay from '../../components/LoadingOverlay.vue'
 import api from '../../api'
 
 const menuItems = [
@@ -128,6 +137,8 @@ const usersList = ref([])
 const masjidList = ref([])
 const showModal = ref(false)
 const editingId = ref(null)
+const isLoading = ref(true)
+const isSaving = ref(false)
 const form = ref({ username: '', email: '', full_name: '', password: '', masjid_id: '' })
 const toast = ref({ message: '', type: 'success' })
 
@@ -139,6 +150,7 @@ const getMasjidName = (id) => {
 }
 
 const loadData = async () => {
+  isLoading.value = true
   try {
     const [usersData, masjidData] = await Promise.all([
       api.getUsers(),
@@ -148,6 +160,8 @@ const loadData = async () => {
     if (masjidData.data.success) masjidList.value = masjidData.data.data || []
   } catch (error) {
     console.error(error)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -171,6 +185,7 @@ const deleteUser = async (id) => {
 }
 
 const saveUser = async () => {
+  isSaving.value = true
   try {
     const payload = { ...form.value, role: 'petugas', is_active: true }
     if (editingId.value && !payload.password) delete payload.password
@@ -186,6 +201,8 @@ const saveUser = async () => {
     }
   } catch (error) {
     toast.value = { message: 'Gagal menyimpan data', type: 'error' }
+  } finally {
+    isSaving.value = false
   }
 }
 
