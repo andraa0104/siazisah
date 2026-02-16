@@ -25,7 +25,6 @@
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Lengkap</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Masjid</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
               </tr>
@@ -37,7 +36,6 @@
               <tr v-else v-for="u in petugasList" :key="u.id" class="hover:bg-gray-50">
                 <td class="px-6 py-4"><div class="font-medium text-gray-900">{{ u.username }}</div></td>
                 <td class="px-6 py-4 text-sm text-gray-900">{{ u.full_name }}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">{{ u.email }}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">{{ getMasjidName(u.masjid_id) }}</td>
                 <td class="px-6 py-4 text-sm">
                   <button @click="editUser(u)" class="text-blue-600 hover:text-blue-900 mr-3">
@@ -60,7 +58,6 @@
             <p class="font-medium text-gray-900 mb-1">{{ u.full_name }}</p>
             <div class="space-y-1 text-sm mb-3">
               <p class="text-gray-600">@{{ u.username }}</p>
-              <p class="text-gray-600">{{ u.email }}</p>
               <p class="text-gray-600">{{ getMasjidName(u.masjid_id) }}</p>
             </div>
             <div class="flex gap-2">
@@ -83,10 +80,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">Username *</label>
             <input v-model="form.username" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-            <input v-model="form.email" type="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-          </div>
+          <!-- Email field removed -->
           <div class="col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap *</label>
             <input v-model="form.full_name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
@@ -98,7 +92,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Masjid *</label>
             <select v-model="form.masjid_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-              <option value="">Pilih Masjid</option>
+              <option value="">Pilih Masjid ({{ masjidList.length }} tersedia)</option>
               <option v-for="m in masjidList" :key="m.id" :value="m.id">{{ m.nama }}</option>
             </select>
           </div>
@@ -139,7 +133,7 @@ const showModal = ref(false)
 const editingId = ref(null)
 const isLoading = ref(true)
 const isSaving = ref(false)
-const form = ref({ username: '', email: '', full_name: '', password: '', masjid_id: '' })
+const form = ref({ username: '', full_name: '', password: '', masjid_id: '' })
 const toast = ref({ message: '', type: 'success' })
 
 const petugasList = computed(() => usersList.value.filter(u => u.role === 'petugas'))
@@ -156,10 +150,13 @@ const loadData = async () => {
       api.getUsers(),
       api.getMasjid()
     ])
+    console.log('Users Response:', usersData.data)
+    console.log('Masjid Response:', masjidData.data)
     if (usersData.data.success) usersList.value = usersData.data.data || []
     if (masjidData.data.success) masjidList.value = masjidData.data.data || []
+    console.log('Masjid List:', masjidList.value)
   } catch (error) {
-    console.error(error)
+    console.error('Error loading data:', error)
   } finally {
     isLoading.value = false
   }
@@ -167,7 +164,7 @@ const loadData = async () => {
 
 const editUser = (u) => {
   editingId.value = u.id
-  form.value = { username: u.username, email: u.email, full_name: u.full_name, password: '', masjid_id: u.masjid_id }
+  form.value = { username: u.username, full_name: u.full_name, password: '', masjid_id: u.masjid_id }
   showModal.value = true
 }
 
@@ -209,7 +206,7 @@ const saveUser = async () => {
 const closeModal = () => {
   showModal.value = false
   editingId.value = null
-  form.value = { username: '', email: '', full_name: '', password: '', masjid_id: '' }
+  form.value = { username: '', full_name: '', password: '', masjid_id: '' }
 }
 
 onMounted(loadData)

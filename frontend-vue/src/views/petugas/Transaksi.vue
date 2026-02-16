@@ -692,7 +692,11 @@ const loadTransaksi = async () => {
   isLoading.value = true
   try {
     const { data } = await api.getTransaksi()
-    if (data.success) transaksiList.value = data.data || []
+    console.log('Transaksi Response:', data)
+    if (data.success) {
+      transaksiList.value = data.data || []
+      console.log('Transaksi List Length:', transaksiList.value.length)
+    }
   } catch (error) {
     console.error(error)
   } finally {

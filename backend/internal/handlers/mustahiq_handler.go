@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -43,6 +44,7 @@ func (h *MustahiqHandler) GetAll(c *gin.Context) {
 		return
 	}
 
+	fmt.Printf("GetAll Mustahiq - MasjidID: %d, Count: %d\n", *masjidID.(*int), len(mustahiqs))
 	c.JSON(http.StatusOK, models.Response{Success: true, Data: mustahiqs})
 }
 

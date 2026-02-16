@@ -14,9 +14,9 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(user *models.User) error {
-	query := `INSERT INTO users (username, email, password, full_name, role, masjid_id, is_active) 
-			  VALUES (?, ?, ?, ?, ?, ?, ?)`
-	result, err := r.DB.Exec(query, user.Username, user.Email, user.Password, user.FullName, user.Role, user.MasjidID, user.IsActive)
+	query := `INSERT INTO users (username, password, full_name, role, masjid_id, is_active) 
+			  VALUES (?, ?, ?, ?, ?, ?)`
+	result, err := r.DB.Exec(query, user.Username, user.Password, user.FullName, user.Role, user.MasjidID, user.IsActive)
 	if err != nil {
 		return err
 	}
@@ -27,10 +27,10 @@ func (r *UserRepository) Create(user *models.User) error {
 
 func (r *UserRepository) FindByUsername(username string) (*models.User, error) {
 	user := &models.User{}
-	query := `SELECT id, username, email, password, full_name, role, masjid_id, is_active, created_at, updated_at 
+	query := `SELECT id, username, password, full_name, role, masjid_id, is_active, created_at, updated_at 
 			  FROM users WHERE username = ?`
 	err := r.DB.QueryRow(query, username).Scan(
-		&user.ID, &user.Username, &user.Email, &user.Password, &user.FullName,
+		&user.ID, &user.Username, &user.Password, &user.FullName,
 		&user.Role, &user.MasjidID, &user.IsActive, &user.CreatedAt, &user.UpdatedAt,
 	)
 	if err != nil {
@@ -41,10 +41,10 @@ func (r *UserRepository) FindByUsername(username string) (*models.User, error) {
 
 func (r *UserRepository) FindByID(id int) (*models.User, error) {
 	user := &models.User{}
-	query := `SELECT id, username, email, password, full_name, role, masjid_id, is_active, created_at, updated_at 
+	query := `SELECT id, username, password, full_name, role, masjid_id, is_active, created_at, updated_at 
 			  FROM users WHERE id = ?`
 	err := r.DB.QueryRow(query, id).Scan(
-		&user.ID, &user.Username, &user.Email, &user.Password, &user.FullName,
+		&user.ID, &user.Username, &user.Password, &user.FullName,
 		&user.Role, &user.MasjidID, &user.IsActive, &user.CreatedAt, &user.UpdatedAt,
 	)
 	if err != nil {
@@ -54,7 +54,7 @@ func (r *UserRepository) FindByID(id int) (*models.User, error) {
 }
 
 func (r *UserRepository) GetAll() ([]models.User, error) {
-	query := `SELECT id, username, email, full_name, role, masjid_id, is_active, created_at, updated_at 
+	query := `SELECT id, username, full_name, role, masjid_id, is_active, created_at, updated_at 
 			  FROM users ORDER BY created_at DESC`
 	rows, err := r.DB.Query(query)
 	if err != nil {
@@ -65,7 +65,7 @@ func (r *UserRepository) GetAll() ([]models.User, error) {
 	var users []models.User
 	for rows.Next() {
 		var user models.User
-		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.FullName, &user.Role, &user.MasjidID, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.Role, &user.MasjidID, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			continue
 		}
@@ -75,7 +75,7 @@ func (r *UserRepository) GetAll() ([]models.User, error) {
 }
 
 func (r *UserRepository) GetByMasjidID(masjidID int) ([]models.User, error) {
-	query := `SELECT id, username, email, full_name, role, masjid_id, is_active, created_at, updated_at 
+	query := `SELECT id, username, full_name, role, masjid_id, is_active, created_at, updated_at 
 			  FROM users WHERE masjid_id = ? ORDER BY created_at DESC`
 	rows, err := r.DB.Query(query, masjidID)
 	if err != nil {
@@ -86,7 +86,7 @@ func (r *UserRepository) GetByMasjidID(masjidID int) ([]models.User, error) {
 	var users []models.User
 	for rows.Next() {
 		var user models.User
-		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.FullName, &user.Role, &user.MasjidID, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.Role, &user.MasjidID, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			continue
 		}
@@ -96,8 +96,8 @@ func (r *UserRepository) GetByMasjidID(masjidID int) ([]models.User, error) {
 }
 
 func (r *UserRepository) Update(user *models.User) error {
-	query := `UPDATE users SET username=?, email=?, full_name=?, role=?, masjid_id=?, is_active=? WHERE id=?`
-	_, err := r.DB.Exec(query, user.Username, user.Email, user.FullName, user.Role, user.MasjidID, user.IsActive, user.ID)
+	query := `UPDATE users SET username=?, full_name=?, role=?, masjid_id=?, is_active=? WHERE id=?`
+	_, err := r.DB.Exec(query, user.Username, user.FullName, user.Role, user.MasjidID, user.IsActive, user.ID)
 	return err
 }
 

@@ -184,6 +184,8 @@ const loadMustahiq = async () => {
   isLoading.value = true
   try {
     const { data } = await api.getMustahiq()
+    console.log('Mustahiq Response:', data)
+    console.log('Mustahiq List Length:', data.data?.length || 0)
     if (data.success) mustahiqList.value = data.data || []
   } catch (error) {
     console.error(error)

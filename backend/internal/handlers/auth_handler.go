@@ -29,6 +29,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	user, err := h.userRepo.FindByUsername(req.Username)
 	if err != nil {
+		// Log the actual error for debugging
+		println("FindByUsername error:", err.Error())
 		c.JSON(http.StatusUnauthorized, models.Response{
 			Success: false,
 			Message: "Invalid username or password",
@@ -45,6 +47,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
+		// Log for debugging
+		println("Password check failed for user:", user.Username)
+		println("Input password:", req.Password)
+		println("Stored hash exists:", len(user.Password) > 0)
 		c.JSON(http.StatusUnauthorized, models.Response{
 			Success: false,
 			Message: "Invalid username or password",

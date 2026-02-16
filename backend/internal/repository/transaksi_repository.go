@@ -59,23 +59,27 @@ func (r *TransaksiZakatRepository) FindByID(id int) (*models.TransaksiZakat, err
 }
 
 func (r *TransaksiZakatRepository) GetByMasjidID(masjidID int) ([]models.TransaksiZakat, error) {
+	// Use LEFT JOIN to include transaksi even if muzakki doesn't exist
 	query := `SELECT t.id, t.masjid_id, t.muzakki_id, t.jenis_zakat, t.bentuk_zakat, t.jenis_harta,
 			  t.nominal_harta, t.persentase_zakat, t.kelas_zakat, t.jumlah_orang, t.jumlah_hari_fidyah,
 			  t.standar_beras_per_jiwa, t.kg_beras_dibayar, t.harga_beras_per_kg, t.nominal_per_orang, 
 			  t.total_wajib, t.total_dibayar, t.infaq_tambahan, t.keterangan, t.tahun, t.tanggal_bayar, 
-			  t.created_at, t.updated_at, m.nama, m.alamat, m.telepon
+			  t.created_at, t.updated_at, COALESCE(m.nama, 'Unknown'), COALESCE(m.alamat, ''), COALESCE(m.telepon, '')
 			  FROM transaksi_zakat t
-			  JOIN muzakki m ON t.muzakki_id = m.id
+			  LEFT JOIN muzakki m ON t.muzakki_id = m.id
 			  WHERE t.masjid_id = ? 
 			  ORDER BY t.tanggal_bayar DESC, t.created_at DESC`
 	rows, err := r.DB.Query(query, masjidID)
 	if err != nil {
+		println("GetByMasjidID Query Error:", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 
 	var transaksis []models.TransaksiZakat
+	rowCount := 0
 	for rows.Next() {
+		rowCount++
 		var transaksi models.TransaksiZakat
 		err := rows.Scan(&transaksi.ID, &transaksi.MasjidID, &transaksi.MuzakkiID, &transaksi.JenisZakat,
 			&transaksi.BentukZakat, &transaksi.JenisHarta, &transaksi.NominalHarta, &transaksi.PersentaseZakat,
@@ -85,10 +89,12 @@ func (r *TransaksiZakatRepository) GetByMasjidID(masjidID int) ([]models.Transak
 			&transaksi.Keterangan, &transaksi.Tahun, &transaksi.TanggalBayar, &transaksi.CreatedAt, &transaksi.UpdatedAt,
 			&transaksi.MuzakkiNama, &transaksi.MuzakkiAlamat, &transaksi.MuzakkiTelepon)
 		if err != nil {
+			println("Row Scan Error on row", rowCount, ":", err.Error())
 			continue
 		}
 		transaksis = append(transaksis, transaksi)
 	}
+	println("GetByMasjidID - MasjidID:", masjidID, "- Total Rows from DB:", rowCount, "- Successful Scans:", len(transaksis))
 	return transaksis, nil
 }
 

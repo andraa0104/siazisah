@@ -51,7 +51,9 @@ func (r *MustahiqRepository) GetByMasjidID(masjidID int) ([]models.Mustahiq, err
 	defer rows.Close()
 
 	var mustahiqs []models.Mustahiq
+	rowCount := 0
 	for rows.Next() {
+		rowCount++
 		var mustahiq models.Mustahiq
 		err := rows.Scan(&mustahiq.ID, &mustahiq.MasjidID, &mustahiq.Nama, &mustahiq.JenisPenerima,
 			&mustahiq.Alamat, &mustahiq.Lokasi, &mustahiq.RT, &mustahiq.Telepon,
@@ -61,6 +63,7 @@ func (r *MustahiqRepository) GetByMasjidID(masjidID int) ([]models.Mustahiq, err
 		}
 		mustahiqs = append(mustahiqs, mustahiq)
 	}
+	println("GetByMasjidID - MasjidID:", masjidID, "- Total Rows from DB:", rowCount, "- Successful Scans:", len(mustahiqs))
 	return mustahiqs, nil
 }
 

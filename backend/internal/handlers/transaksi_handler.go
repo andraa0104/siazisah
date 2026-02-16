@@ -58,6 +58,7 @@ func (h *TransaksiHandler) GetAll(c *gin.Context) {
 		return
 	}
 
+	fmt.Printf("GetAll Transaksi - MasjidID: %d, Count: %d\n", *masjidID.(*int), len(transaksis))
 	c.JSON(http.StatusOK, models.Response{Success: true, Data: transaksis})
 }
 
