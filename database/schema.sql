@@ -159,7 +159,6 @@ CREATE TABLE distribusi_zakat (
     id INT AUTO_INCREMENT PRIMARY KEY,
     masjid_id INT NOT NULL,
     mustahiq_id INT NOT NULL,
-    jenis_zakat ENUM('fitrah', 'mal', 'infaq') NOT NULL,
     nominal DECIMAL(15,2) NOT NULL,
     tanggal_distribusi DATE NOT NULL,
     keterangan TEXT,

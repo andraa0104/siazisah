@@ -25,14 +25,41 @@
 
       <main class="flex-1 overflow-y-auto p-4 md:p-6">
         <div class="max-w-4xl">
-          <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+          <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                @click="activeTab = 'zakat'"
+                :class="activeTab === 'zakat' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'"
+                class="px-4 py-2 rounded-lg text-sm font-medium"
+              >
+                Zakat
+              </button>
+              <button
+                type="button"
+                @click="activeTab = 'masjid'"
+                :class="activeTab === 'masjid' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'"
+                class="px-4 py-2 rounded-lg text-sm font-medium"
+              >
+                Data Masjid
+              </button>
+              <button
+                type="button"
+                @click="activeTab = 'pengurus'"
+                :class="activeTab === 'pengurus' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'"
+                class="px-4 py-2 rounded-lg text-sm font-medium"
+              >
+                Pengurus
+              </button>
+            </div>
+          </div>
+
+          <div v-show="activeTab === 'masjid'" class="bg-white rounded-xl shadow-md p-6 mb-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Data Masjid</h2>
             <form @submit.prevent="saveMasjid" class="space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Nama Masjid *</label
-                  >
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Nama Masjid *</label>
                   <input
                     v-model="masjidForm.nama"
                     required
@@ -40,9 +67,7 @@
                   />
                 </div>
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Alamat *</label
-                  >
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Alamat *</label>
                   <textarea
                     v-model="masjidForm.alamat"
                     required
@@ -51,173 +76,133 @@
                   ></textarea>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Telepon</label
-                  >
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Telepon</label>
                   <input
                     v-model="masjidForm.telepon"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                   />
                 </div>
               </div>
-              <button
-                type="submit"
-                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
-              >
+              <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
                 <i class="fas fa-save mr-2"></i>Simpan Data Masjid
               </button>
             </form>
           </div>
 
-          <!-- Pengurus Masjid -->
-          <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Pengurus Masjid/Langgar</h2>
-            <form @submit.prevent="savePengurusMasjid" class="space-y-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Ketua -->
-                <div class="md:col-span-2 border-b pb-3">
-                  <h3 class="font-semibold text-gray-700 mb-3">Ketua Pengurus</h3>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Nama Ketua *</label>
-                  <input v-model="pengurusMasjidForm.ketua.nama" required
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Telepon</label>
-                  <input v-model="pengurusMasjidForm.ketua.telepon"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
-                </div>
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
-                  <input v-model="pengurusMasjidForm.ketua.alamat"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
-                </div>
-
-                <!-- Sekretaris -->
-                <div class="md:col-span-2 border-b pb-3 pt-2">
-                  <h3 class="font-semibold text-gray-700 mb-3">Sekretaris Pengurus</h3>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sekretaris *</label>
-                  <input v-model="pengurusMasjidForm.sekretaris.nama" required
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Telepon</label>
-                  <input v-model="pengurusMasjidForm.sekretaris.telepon"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
-                </div>
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
-                  <input v-model="pengurusMasjidForm.sekretaris.alamat"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
-                </div>
-              </div>
-              <button type="submit"
-                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
-                <i class="fas fa-save mr-2"></i>Simpan Pengurus Masjid
-              </button>
-            </form>
-          </div>
-
-          <!-- Pengurus UPZ -->
-          <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Pengurus UPZ (Unit Pengumpul Zakat)</h2>
-            <form @submit.prevent="saveKetuaUPZ" class="space-y-4 mb-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="md:col-span-2 border-b pb-3">
-                  <h3 class="font-semibold text-gray-700 mb-3">Ketua UPZ</h3>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Nama Ketua UPZ *</label>
-                  <input v-model="pengurusUPZForm.ketua.nama" required
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Telepon</label>
-                  <input v-model="pengurusUPZForm.ketua.telepon"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
-                </div>
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
-                  <input v-model="pengurusUPZForm.ketua.alamat"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
-                </div>
-              </div>
-              <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
-                <i class="fas fa-save mr-2"></i>Simpan Ketua UPZ
-              </button>
-            </form>
-
-            <!-- Anggota UPZ -->
-            <div class="border-t pt-6">
-              <div class="flex justify-between items-center mb-4">
-                <h3 class="font-semibold text-gray-700">Anggota UPZ</h3>
-                <button @click="showAnggotaModal = true"
-                  class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">
-                  <i class="fas fa-plus mr-2"></i>Tambah Anggota
-                </button>
-              </div>
-              <div v-if="anggotaUPZList.length === 0" class="text-center text-gray-500 py-4">
-                Belum ada anggota UPZ
-              </div>
-              <div v-else class="space-y-2">
-                <div v-for="anggota in anggotaUPZList" :key="anggota.id"
-                  class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p class="font-medium">{{ anggota.nama }}</p>
-                    <p class="text-sm text-gray-600">{{ anggota.telepon || '-' }}</p>
+          <div v-show="activeTab === 'pengurus'" class="space-y-6">
+            <div class="bg-white rounded-xl shadow-md p-6">
+              <h2 class="text-xl font-bold text-gray-800 mb-4">Pengurus Masjid/Langgar</h2>
+              <form @submit.prevent="savePengurusMasjid" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="md:col-span-2 border-b pb-3">
+                    <h3 class="font-semibold text-gray-700 mb-3">Ketua Pengurus</h3>
                   </div>
-                  <button @click="deleteAnggotaUPZ(anggota.id)"
-                    class="text-red-600 hover:text-red-800">
-                    <i class="fas fa-trash"></i>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Ketua *</label>
+                    <input v-model="pengurusMasjidForm.ketua.nama" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Telepon</label>
+                    <input v-model="pengurusMasjidForm.ketua.telepon" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
+                    <input v-model="pengurusMasjidForm.ketua.alamat" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                  </div>
+
+                  <div class="md:col-span-2 border-b pb-3 pt-2">
+                    <h3 class="font-semibold text-gray-700 mb-3">Sekretaris Pengurus</h3>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sekretaris *</label>
+                    <input v-model="pengurusMasjidForm.sekretaris.nama" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Telepon</label>
+                    <input v-model="pengurusMasjidForm.sekretaris.telepon" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
+                    <input v-model="pengurusMasjidForm.sekretaris.alamat" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                  </div>
+                </div>
+                <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+                  <i class="fas fa-save mr-2"></i>Simpan Pengurus Masjid
+                </button>
+              </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6">
+              <h2 class="text-xl font-bold text-gray-800 mb-4">Pengurus UPZ (Unit Pengumpul Zakat)</h2>
+              <form @submit.prevent="saveKetuaUPZ" class="space-y-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="md:col-span-2 border-b pb-3">
+                    <h3 class="font-semibold text-gray-700 mb-3">Ketua UPZ</h3>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Ketua UPZ *</label>
+                    <input v-model="pengurusUPZForm.ketua.nama" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Telepon</label>
+                    <input v-model="pengurusUPZForm.ketua.telepon" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
+                    <input v-model="pengurusUPZForm.ketua.alamat" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                  </div>
+                </div>
+                <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+                  <i class="fas fa-save mr-2"></i>Simpan Ketua UPZ
+                </button>
+              </form>
+
+              <div class="border-t pt-6">
+                <div class="flex justify-between items-center mb-4">
+                  <h3 class="font-semibold text-gray-700">Anggota UPZ</h3>
+                  <button @click="showAnggotaModal = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">
+                    <i class="fas fa-plus mr-2"></i>Tambah Anggota
                   </button>
+                </div>
+                <div v-if="anggotaUPZList.length === 0" class="text-center text-gray-500 py-4">
+                  Belum ada anggota UPZ
+                </div>
+                <div v-else class="space-y-2">
+                  <div v-for="anggota in anggotaUPZList" :key="anggota.id" class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p class="font-medium">{{ anggota.nama }}</p>
+                      <p class="text-sm text-gray-600">{{ anggota.telepon || '-' }}</p>
+                    </div>
+                    <button @click="deleteAnggotaUPZ(anggota.id)" class="text-red-600 hover:text-red-800">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
-              Kadar Zakat Fitrah & Fidyah (Uang)
-            </h2>
+          <div v-show="activeTab === 'zakat'" class="bg-white rounded-xl shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Kadar Zakat Fitrah & Fidyah (Uang)</h2>
             <form @submit.prevent="saveZakat" class="space-y-4">
               <div>
                 <h3 class="text-md font-semibold text-gray-700 mb-3">Zakat Fitrah</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Kelas 1 (Rp) *</label
-                    >
-                    <input
-                      v-model.number="zakatForm.kelas1"
-                      type="number"
-                      required
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                    />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas 1 (Rp) *</label>
+                    <input v-model.number="zakatForm.kelas1" type="number" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Kelas 2 (Rp) *</label
-                    >
-                    <input
-                      v-model.number="zakatForm.kelas2"
-                      type="number"
-                      required
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                    />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas 2 (Rp) *</label>
+                    <input v-model.number="zakatForm.kelas2" type="number" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Kelas 3 (Rp) *</label
-                    >
-                    <input
-                      v-model.number="zakatForm.kelas3"
-                      type="number"
-                      required
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                    />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas 3 (Rp) *</label>
+                    <input v-model.number="zakatForm.kelas3" type="number" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kadar Beras per Jiwa (kg) *</label>
+                    <input v-model.number="zakatForm.fitrahBerasPerJiwa" type="number" step="0.1" min="0.1" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
                   </div>
                 </div>
               </div>
@@ -225,25 +210,44 @@
                 <h3 class="text-md font-semibold text-gray-700 mb-3">Fidyah</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Fidyah per Hari (Rp) *</label
-                    >
-                    <input
-                      v-model.number="zakatForm.fidyahPerHari"
-                      type="number"
-                      required
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                    />
-                    <p class="text-xs text-gray-500 mt-1">
-                      Kadar fidyah ditentukan oleh Kementerian Agama
-                    </p>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Fidyah per Hari (Rp) *</label>
+                    <input v-model.number="zakatForm.fidyahPerHari" type="number" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                    <p class="text-xs text-gray-500 mt-1">Kadar fidyah ditentukan oleh Kementerian Agama</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Fidyah Beras per Hari (kg) *</label>
+                    <input v-model.number="zakatForm.fidyahBerasPerHari" type="number" step="0.1" min="0.1" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                    <p class="text-xs text-gray-500 mt-1">Kadar fidyah beras per hari</p>
                   </div>
                 </div>
               </div>
-              <button
-                type="submit"
-                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
-              >
+              <div>
+                <h3 class="text-md font-semibold text-gray-700 mb-3">Zakat Mal (Persentase %)</h3>
+                <div class="space-y-3">
+                  <div v-if="zakatForm.malRates.length === 0" class="text-sm text-gray-500">
+                    Belum ada jenis zakat mal. Tambahkan manual sesuai kebutuhan masjid/langgar.
+                  </div>
+                  <div v-for="(item, index) in zakatForm.malRates" :key="`mal-${index}`" class="grid grid-cols-1 md:grid-cols-5 gap-2">
+                    <div class="md:col-span-3">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Nama Jenis Zakat Mal</label>
+                      <input v-model.trim="item.jenis" type="text" required placeholder="Contoh: Emas, Pertanian, Usaha" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                    </div>
+                    <div class="md:col-span-1">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Persen (%)</label>
+                      <input v-model.number="item.persen" type="number" step="0.1" min="0.1" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                    </div>
+                    <div class="md:col-span-1 flex items-end">
+                      <button type="button" @click="removeMalRate(index)" class="w-full px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100">
+                        <i class="fas fa-trash mr-1"></i>Hapus
+                      </button>
+                    </div>
+                  </div>
+                  <button type="button" @click="addMalRate" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100">
+                    <i class="fas fa-plus mr-1"></i>Tambah Jenis Zakat Mal
+                  </button>
+                </div>
+              </div>
+              <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
                 <i class="fas fa-save mr-2"></i>Simpan Kadar Zakat
               </button>
             </form>
@@ -312,13 +316,23 @@ const menuItems = [
     icon: "fas fa-hand-holding-heart",
   },
   { path: "/petugas/transaksi", label: "Transaksi", icon: "fas fa-receipt" },
+  { path: "/petugas/distribusi", label: "Distribusi", icon: "fas fa-box-open" },
 ];
 
 const showSidebar = ref(false);
 const isSaving = ref(false);
+const activeTab = ref("zakat");
 
 const masjidForm = ref({ nama: "", alamat: "", telepon: "" });
-const zakatForm = ref({ kelas1: 35000, kelas2: 45000, kelas3: 55000, fidyahPerHari: 30000 });
+const zakatForm = ref({
+  kelas1: 35000,
+  kelas2: 45000,
+  kelas3: 55000,
+  fitrahBerasPerJiwa: 2.5,
+  fidyahPerHari: 30000,
+  fidyahBerasPerHari: 0.6,
+  malRates: []
+});
 const pengurusMasjidForm = ref({
   ketua: { nama: "", telepon: "", alamat: "" },
   sekretaris: { nama: "", telepon: "", alamat: "" }
@@ -348,9 +362,40 @@ const saveMasjid = async () => {
   }
 };
 
-const saveZakat = () => {
-  localStorage.setItem("kadar_zakat", JSON.stringify(zakatForm.value));
-  toast.value = { message: "Kadar zakat berhasil disimpan", type: "success" };
+const saveZakat = async () => {
+  isSaving.value = true;
+  try {
+    const malRatesMap = {};
+    zakatForm.value.malRates.forEach((item) => {
+      const jenis = String(item.jenis || "").trim();
+      const persen = Number(item.persen || 0);
+      if (jenis && persen > 0) {
+        malRatesMap[jenis] = persen;
+      }
+    });
+
+    const payload = {
+      ...zakatForm.value,
+      malRates: malRatesMap,
+    };
+
+    const { data } = await api.updatePengaturanZakat(payload);
+    if (data.success) {
+      toast.value = { message: "Kadar zakat berhasil disimpan", type: "success" };
+    }
+  } catch (error) {
+    toast.value = { message: "Gagal menyimpan kadar zakat", type: "error" };
+  } finally {
+    isSaving.value = false;
+  }
+};
+
+const addMalRate = () => {
+  zakatForm.value.malRates.push({ jenis: "", persen: 2.5 });
+};
+
+const removeMalRate = (index) => {
+  zakatForm.value.malRates.splice(index, 1);
 };
 
 const savePengurusMasjid = async () => {
@@ -475,6 +520,8 @@ const loadPengurusZakat = async () => {
 };
 
 onMounted(async () => {
+  localStorage.removeItem("kadar_zakat");
+
   try {
     const { data } = await api.getMyMasjid();
     console.log("Masjid data:", data);
@@ -498,8 +545,32 @@ onMounted(async () => {
     }
   }
 
-  const saved = localStorage.getItem("kadar_zakat");
-  if (saved) zakatForm.value = JSON.parse(saved);
+  try {
+    const { data } = await api.getPengaturanZakat();
+    if (data.success && data.data) {
+      const malRatesEntries = Object.entries(data.data.malRates || {}).map(([jenis, persen]) => ({
+        jenis,
+        persen: Number(persen || 0),
+      }));
+      zakatForm.value = {
+        ...zakatForm.value,
+        ...data.data,
+        fitrahBerasPerJiwa: data.data.fitrahBerasPerJiwa ?? 2.5,
+        fidyahBerasPerHari: data.data.fidyahBerasPerHari ?? 0.6,
+        malRates: malRatesEntries
+      };
+
+      if (zakatForm.value.malRates.length === 0) {
+        addMalRate();
+      }
+    }
+  } catch (error) {
+    console.error("Error loading pengaturan zakat:", error);
+  }
+
+  if (zakatForm.value.malRates.length === 0) {
+    addMalRate();
+  }
 
   // Load pengurus data
   loadPengurusMasjid();

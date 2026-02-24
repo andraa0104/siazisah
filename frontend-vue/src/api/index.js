@@ -42,6 +42,8 @@ export default {
   // Petugas
   getMyMasjid: () => api.get('/petugas/masjid'),
   updateMyMasjid: (data) => api.put('/petugas/masjid', data),
+  getPengaturanZakat: () => api.get('/petugas/pengaturan-zakat'),
+  updatePengaturanZakat: (data) => api.put('/petugas/pengaturan-zakat', data),
   
   getPengurusMasjid: () => api.get('/petugas/pengurus-masjid'),
   savePengurusMasjid: (data) => api.post('/petugas/pengurus-masjid', data),
@@ -62,5 +64,11 @@ export default {
   getTransaksi: () => api.get('/petugas/transaksi'),
   createTransaksi: (data) => api.post('/petugas/transaksi', data),
   deleteTransaksi: (id) => api.delete(`/petugas/transaksi/${id}`),
-  printTransaksi: (id) => `http://localhost:8082/api/petugas/transaksi/${id}/print`
+  printTransaksi: (id) => `http://localhost:8082/api/petugas/transaksi/${id}/print`,
+
+  getDistribusiInsight: () => api.get('/petugas/distribusi/insight'),
+  getDistribusi: () => api.get('/petugas/distribusi'),
+  createDistribusi: (data) => api.post('/petugas/distribusi', data),
+  updateDistribusi: (id, data) => api.put(`/petugas/distribusi/${id}`, data),
+  deleteDistribusi: (id) => api.delete(`/petugas/distribusi/${id}`)
 }

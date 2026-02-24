@@ -167,7 +167,8 @@ const menuItems = [
   { path: '/petugas', label: 'Dashboard', icon: 'fas fa-home' },
   { path: '/petugas/pengaturan', label: 'Pengaturan', icon: 'fas fa-cog' },
   { path: '/petugas/mustahiq', label: 'Mustahiq', icon: 'fas fa-hand-holding-heart' },
-  { path: '/petugas/transaksi', label: 'Transaksi', icon: 'fas fa-receipt' }
+  { path: '/petugas/transaksi', label: 'Transaksi', icon: 'fas fa-receipt' },
+  { path: '/petugas/distribusi', label: 'Distribusi', icon: 'fas fa-box-open' }
 ]
 
 const showSidebar = ref(false)

@@ -130,18 +130,14 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Harta *</label>
           <select v-model="form.jenis_harta" required @change="setPersentase" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
             <option value="">Pilih Jenis Harta</option>
-            <option value="emas">Emas/Perak (2.5%)</option>
-            <option value="uang">Uang/Tabungan (2.5%)</option>
-            <option value="perdagangan">Perdagangan (2.5%)</option>
-            <option value="pertanian_irigasi">Pertanian dengan Irigasi (5%)</option>
-            <option value="pertanian_hujan">Pertanian Tadah Hujan (10%)</option>
-            <option value="peternakan">Peternakan (2.5%)</option>
+            <option v-for="item in malRateOptions" :key="item.key" :value="item.key">{{ item.key }} ({{ formatPercent(item.value) }}%)</option>
           </select>
+          <p v-if="malRateOptions.length === 0" class="text-xs text-red-500 mt-1">Jenis zakat mal belum diatur di halaman Pengaturan.</p>
         </div>
         <div v-if="form.jenis_harta">
           <label class="block text-sm font-medium text-gray-700 mb-2">Nominal Harta *</label>
           <input v-model.number="form.nominal_harta" type="number" required min="0" @input="calculateMal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Masukkan total harta">
-          <p class="text-xs text-gray-500 mt-1">Persentase zakat: {{ form.persentase_zakat }}%</p>
+          <p class="text-xs text-gray-500 mt-1">Persentase zakat: {{ formatPercent(form.persentase_zakat) }}%</p>
         </div>
         <div v-if="form.bentuk_zakat === 'uang' && form.jenis_zakat === 'fitrah'">
           <label class="block text-sm font-medium text-gray-700 mb-2">Kelas Zakat *</label>
@@ -160,12 +156,12 @@
         <div v-if="form.bentuk_zakat === 'beras' && form.jenis_zakat === 'fitrah'">
           <label class="block text-sm font-medium text-gray-700 mb-2">Standar Beras per Jiwa (kg) *</label>
           <input v-model.number="form.standar_beras_per_jiwa" type="number" step="0.1" min="0.1" required @input="calculateBerasTotal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Contoh: 2.5 atau 3">
-          <p class="text-xs text-gray-500 mt-1">Standar syariat: 1 sha' ≈ 2.5-3 kg beras per jiwa</p>
+          <p class="text-xs text-gray-500 mt-1">Default dari pengaturan: {{ kadarZakat.fitrahBerasPerJiwa }} kg per jiwa</p>
         </div>
         <div v-if="form.bentuk_zakat === 'beras' && form.jenis_zakat === 'fidyah'">
           <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Hari Fidyah *</label>
           <input v-model.number="form.jumlah_hari_fidyah" type="number" required min="1" @input="calculateFidyahBerasTotal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Masukkan jumlah hari">
-          <p class="text-xs text-gray-500 mt-1">Fidyah beras per hari ≈ 0.6 kg (3/4 dari 2.5 kg)</p>
+          <p class="text-xs text-gray-500 mt-1">Fidyah beras per hari: {{ kadarZakat.fidyahBerasPerHari }} kg</p>
         </div>
         <div v-if="form.jenis_zakat === 'fitrah'">
           <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Orang *</label>
@@ -182,10 +178,10 @@
           <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <p class="text-sm text-yellow-700 font-medium mb-1">Total Wajib Fidyah</p>
             <p class="text-2xl font-bold text-yellow-700">{{ fidyahBerasWajib }} kg</p>
-            <p class="text-xs text-yellow-600 mt-1">{{ form.jumlah_hari_fidyah }} hari × 0.6 kg</p>
+            <p class="text-xs text-yellow-600 mt-1">{{ form.jumlah_hari_fidyah }} hari × {{ kadarZakat.fidyahBerasPerHari }} kg</p>
           </div>
         </div>
-        <div v-if="form.bentuk_zakat === 'beras' && form.standar_beras_per_jiwa && form.jumlah_orang">
+        <div v-if="form.jenis_zakat === 'fitrah' && form.bentuk_zakat === 'beras' && form.standar_beras_per_jiwa && form.jumlah_orang">
           <div class="bg-green-50 border border-green-200 rounded-lg p-4">
             <p class="text-sm text-green-700 font-medium mb-1">Total Wajib Beras</p>
             <p class="text-2xl font-bold text-green-700">{{ totalBerasWajib }} kg</p>
@@ -316,11 +312,11 @@
             </div>
             <div v-if="selectedTransaction.bentuk_zakat === 'beras'" class="flex justify-between">
               <span class="text-gray-600">Standar per Jiwa:</span>
-              <span class="font-medium text-gray-900">{{ selectedTransaction.standar_beras_per_jiwa || 2.5 }} kg</span>
+              <span class="font-medium text-gray-900">{{ selectedTransaction.standar_beras_per_jiwa || kadarZakat.fitrahBerasPerJiwa || 2.5 }} kg</span>
             </div>
             <div v-if="selectedTransaction.bentuk_zakat === 'beras'" class="flex justify-between">
               <span class="text-gray-600">Total Beras Wajib:</span>
-              <span class="font-medium text-blue-700">{{ ((selectedTransaction.standar_beras_per_jiwa || 2.5) * selectedTransaction.jumlah_orang).toFixed(1) }} kg</span>
+              <span class="font-medium text-blue-700">{{ ((selectedTransaction.standar_beras_per_jiwa || kadarZakat.fitrahBerasPerJiwa || 2.5) * selectedTransaction.jumlah_orang).toFixed(1) }} kg</span>
             </div>
             <div v-if="selectedTransaction.bentuk_zakat === 'beras'" class="flex justify-between">
               <span class="text-gray-600">Kg Beras Dibayar:</span>
@@ -414,15 +410,15 @@
             </div>
             <div v-if="selectedTransaction.bentuk_zakat === 'uang'" class="flex justify-between">
               <span class="text-gray-600">Fidyah per Hari:</span>
-              <span class="font-medium text-gray-900">Rp 30,000</span>
+              <span class="font-medium text-gray-900">{{ formatCurrency(kadarZakat.fidyahPerHari) }}</span>
             </div>
             <div v-if="selectedTransaction.bentuk_zakat === 'beras'" class="flex justify-between">
               <span class="text-gray-600">Standar per Hari:</span>
-              <span class="font-medium text-gray-900">0.6 kg</span>
+              <span class="font-medium text-gray-900">{{ kadarZakat.fidyahBerasPerHari }} kg</span>
             </div>
             <div v-if="selectedTransaction.bentuk_zakat === 'beras'" class="flex justify-between">
               <span class="text-gray-600">Total Beras Wajib:</span>
-              <span class="font-medium text-yellow-700">{{ ((selectedTransaction.jumlah_hari_fidyah || 0) * 0.6).toFixed(1) }} kg</span>
+              <span class="font-medium text-yellow-700">{{ ((selectedTransaction.jumlah_hari_fidyah || 0) * kadarZakat.fidyahBerasPerHari).toFixed(1) }} kg</span>
             </div>
             <div v-if="selectedTransaction.bentuk_zakat === 'beras'" class="flex justify-between">
               <span class="text-gray-600">Kg Beras Dibayar:</span>
@@ -498,7 +494,8 @@ const menuItems = [
   { path: '/petugas', label: 'Dashboard', icon: 'fas fa-home' },
   { path: '/petugas/pengaturan', label: 'Pengaturan', icon: 'fas fa-cog' },
   { path: '/petugas/mustahiq', label: 'Mustahiq', icon: 'fas fa-hand-holding-heart' },
-  { path: '/petugas/transaksi', label: 'Transaksi', icon: 'fas fa-receipt' }
+  { path: '/petugas/transaksi', label: 'Transaksi', icon: 'fas fa-receipt' },
+  { path: '/petugas/distribusi', label: 'Distribusi', icon: 'fas fa-box-open' }
 ]
 
 const showSidebar = ref(false)
@@ -526,7 +523,20 @@ const form = ref({
   harga_beras_per_kg: 0
 })
 const toast = ref({ message: '', type: 'success' })
-const kadarZakat = ref({ kelas1: 35000, kelas2: 45000, kelas3: 55000, fidyahPerHari: 30000 })
+const kadarZakat = ref({
+  kelas1: 35000,
+  kelas2: 45000,
+  kelas3: 55000,
+  fitrahBerasPerJiwa: 2.5,
+  fidyahPerHari: 30000,
+  fidyahBerasPerHari: 0.6,
+  malRates: {}
+})
+
+const malRateOptions = computed(() => Object.entries(kadarZakat.value.malRates || {}).map(([key, value]) => ({
+  key,
+  value: Number(value || 0)
+})).filter(item => item.key && item.value > 0))
 
 const totalWajib = computed(() => {
   if (form.value.jenis_zakat === 'fitrah' && form.value.bentuk_zakat === 'uang' && form.value.kelas_zakat && form.value.jumlah_orang) {
@@ -544,7 +554,7 @@ const totalWajib = computed(() => {
 
 const fidyahBerasWajib = computed(() => {
   if (form.value.jenis_zakat === 'fidyah' && form.value.bentuk_zakat === 'beras' && form.value.jumlah_hari_fidyah) {
-    return form.value.jumlah_hari_fidyah * 0.6 // 0.6 kg per hari (3/4 dari 2.5kg)
+    return form.value.jumlah_hari_fidyah * kadarZakat.value.fidyahBerasPerHari
   }
   return 0
 })
@@ -557,7 +567,7 @@ const infaqTambahan = computed(() => {
 })
 
 const totalBerasWajib = computed(() => {
-  if (form.value.bentuk_zakat === 'beras' && form.value.standar_beras_per_jiwa && form.value.jumlah_orang) {
+  if (form.value.jenis_zakat === 'fitrah' && form.value.bentuk_zakat === 'beras' && form.value.standar_beras_per_jiwa && form.value.jumlah_orang) {
     return form.value.standar_beras_per_jiwa * form.value.jumlah_orang
   }
   return 0
@@ -571,14 +581,19 @@ const totalBerasRupiah = computed(() => {
 })
 
 const berasLebih = computed(() => {
-  if (totalBerasWajib.value > 0 && form.value.kg_beras_dibayar > totalBerasWajib.value) {
-    return form.value.kg_beras_dibayar - totalBerasWajib.value
+  const wajibBeras = form.value.jenis_zakat === 'fidyah'
+    ? fidyahBerasWajib.value
+    : totalBerasWajib.value
+
+  if (wajibBeras > 0 && form.value.kg_beras_dibayar > wajibBeras) {
+    return form.value.kg_beras_dibayar - wajibBeras
   }
   return 0
 })
 
 const formatCurrency = (amount) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount)
 const formatNumber = (num) => new Intl.NumberFormat('id-ID').format(num)
+const formatPercent = (num) => Number(num || 0).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 const formatDate = (date) => new Date(date).toLocaleDateString('id-ID')
 
 // Helper function to extract kg beras from keterangan (for backward compatibility with old data)
@@ -626,17 +641,13 @@ const resetForm = () => {
   form.value.jumlah_orang = 1
   form.value.jumlah_hari_fidyah = 1
   form.value.total_dibayar = 0
-  form.value.standar_beras_per_jiwa = 2.5
+  form.value.standar_beras_per_jiwa = kadarZakat.value.fitrahBerasPerJiwa
   form.value.kg_beras_dibayar = 0
   form.value.harga_beras_per_kg = 0
 }
 
 const setPersentase = () => {
-  const persentaseMap = {
-    emas: 2.5, uang: 2.5, perdagangan: 2.5, peternakan: 2.5,
-    pertanian_irigasi: 5, pertanian_hujan: 10
-  }
-  form.value.persentase_zakat = persentaseMap[form.value.jenis_harta] || 0
+  form.value.persentase_zakat = Number(kadarZakat.value.malRates?.[form.value.jenis_harta] || 0)
   calculateMal()
 }
 
@@ -656,7 +667,7 @@ const calculateFidyahTotal = () => {
 const calculateFidyahBerasTotal = () => {
   if (form.value.jumlah_hari_fidyah) {
     // Set kg_beras_dibayar to minimum required
-    form.value.kg_beras_dibayar = form.value.jumlah_hari_fidyah * 0.6
+    form.value.kg_beras_dibayar = form.value.jumlah_hari_fidyah * kadarZakat.value.fidyahBerasPerHari
   }
 }
 
@@ -801,7 +812,7 @@ const saveTransaksi = async () => {
           payload.keterangan += ` (Kelebihan Rp ${payload.infaq_tambahan} masuk infaq)`
         }
       } else if (form.value.bentuk_zakat === 'beras') {
-        const totalWajibBeras = form.value.jumlah_hari_fidyah * 0.6
+        const totalWajibBeras = form.value.jumlah_hari_fidyah * kadarZakat.value.fidyahBerasPerHari
         
         // Simpan data beras ke field database
         payload.kg_beras_dibayar = form.value.kg_beras_dibayar
@@ -854,15 +865,31 @@ const closeModal = () => {
     jumlah_hari_fidyah: 1,
     total_dibayar: 0, 
     tanggal_bayar: new Date().toISOString().split('T')[0],
-    standar_beras_per_jiwa: 2.5,
+    standar_beras_per_jiwa: kadarZakat.value.fitrahBerasPerJiwa,
     kg_beras_dibayar: 0,
     harga_beras_per_kg: 0
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  localStorage.removeItem('kadar_zakat')
+
+  try {
+    const { data } = await api.getPengaturanZakat()
+    if (data.success && data.data) {
+      kadarZakat.value = {
+        ...kadarZakat.value,
+        ...data.data,
+        fitrahBerasPerJiwa: data.data.fitrahBerasPerJiwa ?? 2.5,
+        fidyahBerasPerHari: data.data.fidyahBerasPerHari ?? 0.6,
+        malRates: data.data.malRates || {}
+      }
+    }
+  } catch (error) {
+    console.error('Error loading pengaturan zakat:', error)
+  }
+
+  form.value.standar_beras_per_jiwa = kadarZakat.value.fitrahBerasPerJiwa
   loadTransaksi()
-  const saved = localStorage.getItem('kadar_zakat')
-  if (saved) kadarZakat.value = JSON.parse(saved)
 })
 </script>

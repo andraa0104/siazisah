@@ -26,6 +26,8 @@ func main() {
 	muzakkiRepo := repository.NewMuzakkiRepository(db)
 	mustahiqRepo := repository.NewMustahiqRepository(db)
 	transaksiRepo := repository.NewTransaksiZakatRepository(db)
+	distribusiRepo := repository.NewDistribusiZakatRepository(db)
+	pengaturanRepo := repository.NewPengaturanRepository(db)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(userRepo)
@@ -35,6 +37,8 @@ func main() {
 	muzakkiHandler := handlers.NewMuzakkiHandler(muzakkiRepo)
 	mustahiqHandler := handlers.NewMustahiqHandler(mustahiqRepo)
 	transaksiHandler := handlers.NewTransaksiHandler(transaksiRepo, muzakkiRepo)
+	distribusiHandler := handlers.NewDistribusiHandler(distribusiRepo)
+	pengaturanHandler := handlers.NewPengaturanHandler(pengaturanRepo)
 	publicHandler := handlers.NewPublicHandler(db)
 
 	router := gin.Default()
@@ -86,6 +90,8 @@ func main() {
 		{
 			petugas.GET("/masjid", masjidHandler.GetMyMasjid)
 			petugas.PUT("/masjid", masjidHandler.UpdateMyMasjid)
+			petugas.GET("/pengaturan-zakat", pengaturanHandler.GetMyPengaturan)
+			petugas.PUT("/pengaturan-zakat", pengaturanHandler.SaveMyPengaturan)
 
 			petugas.GET("/pengurus-masjid", pengurusHandler.GetPengurusMasjid)
 			petugas.POST("/pengurus-masjid", pengurusHandler.SavePengurusMasjid)
@@ -114,6 +120,12 @@ func main() {
 			petugas.DELETE("/transaksi/:id", transaksiHandler.Delete)
 
 			petugas.GET("/dashboard", transaksiHandler.GetDashboard)
+
+			petugas.GET("/distribusi/insight", distribusiHandler.GetInsight)
+			petugas.GET("/distribusi", distribusiHandler.GetAll)
+			petugas.POST("/distribusi", distribusiHandler.Create)
+			petugas.PUT("/distribusi/:id", distribusiHandler.Update)
+			petugas.DELETE("/distribusi/:id", distribusiHandler.Delete)
 		}
 	}
 

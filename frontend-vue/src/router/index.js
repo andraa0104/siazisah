@@ -15,7 +15,8 @@ const routes = [
   { path: '/petugas', name: 'PetugasDashboard', component: () => import('../views/petugas/Dashboard.vue'), meta: { requiresAuth: true, role: 'petugas' } },
   { path: '/petugas/pengaturan', name: 'PetugasPengaturan', component: () => import('../views/petugas/Pengaturan.vue'), meta: { requiresAuth: true, role: 'petugas' } },
   { path: '/petugas/mustahiq', name: 'PetugasMustahiq', component: () => import('../views/petugas/Mustahiq.vue'), meta: { requiresAuth: true, role: 'petugas' } },
-  { path: '/petugas/transaksi', name: 'PetugasTransaksi', component: () => import('../views/petugas/Transaksi.vue'), meta: { requiresAuth: true, role: 'petugas' } }
+  { path: '/petugas/transaksi', name: 'PetugasTransaksi', component: () => import('../views/petugas/Transaksi.vue'), meta: { requiresAuth: true, role: 'petugas' } },
+  { path: '/petugas/distribusi', name: 'PetugasDistribusi', component: () => import('../views/petugas/Distribusi.vue'), meta: { requiresAuth: true, role: 'petugas' } }
 ]
 
 const router = createRouter({

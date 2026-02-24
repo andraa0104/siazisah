@@ -58,6 +58,17 @@ type KadarZakat struct {
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
+type PengaturanZakat struct {
+	MasjidID            int     `json:"masjid_id"`
+	Kelas1              float64 `json:"kelas1"`
+	Kelas2              float64 `json:"kelas2"`
+	Kelas3              float64 `json:"kelas3"`
+	FitrahBerasPerJiwa  float64 `json:"fitrahBerasPerJiwa"`
+	FidyahPerHari       float64 `json:"fidyahPerHari"`
+	FidyahBerasPerHari  float64 `json:"fidyahBerasPerHari"`
+	MalRates            map[string]float64 `json:"malRates"`
+}
+
 type JenisZakatTersedia struct {
 	ID         int       `json:"id"`
 	MasjidID   int       `json:"masjid_id"`
@@ -125,12 +136,33 @@ type DistribusiZakat struct {
 	ID                int       `json:"id"`
 	MasjidID          int       `json:"masjid_id"`
 	MustahiqID        int       `json:"mustahiq_id"`
-	JenisZakat        string    `json:"jenis_zakat"`
+	MustahiqNama      string    `json:"mustahiq_nama,omitempty"`
+	JenisPenerima     string    `json:"jenis_penerima,omitempty"`
 	Nominal           float64   `json:"nominal"`
+	BerasKg           float64   `json:"beras_kg"`
+	Mode              string    `json:"mode,omitempty"`
 	TanggalDistribusi string    `json:"tanggal_distribusi"`
+	WaktuInput        string    `json:"waktu_input,omitempty"`
 	Keterangan        string    `json:"keterangan"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
+}
+
+type DistribusiInsight struct {
+	TotalMustahiqAktif      int     `json:"total_mustahiq_aktif"`
+	TotalFitrahBerasKg      float64 `json:"total_fitrah_beras_kg"`
+	TotalFidyahBerasKg      float64 `json:"total_fidyah_beras_kg"`
+	TotalFitrahUang         float64 `json:"total_fitrah_uang"`
+	TotalFidyahUang         float64 `json:"total_fidyah_uang"`
+	TotalZakatMalUang       float64 `json:"total_zakat_mal_uang"`
+	TotalPoolBerasKg        float64 `json:"total_pool_beras_kg"`
+	TotalPoolUang           float64 `json:"total_pool_uang"`
+	TotalDistribusiBerasKg  float64 `json:"total_distribusi_beras_kg"`
+	TotalDistribusiUang     float64 `json:"total_distribusi_uang"`
+	SisaBerasKg             float64 `json:"sisa_beras_kg"`
+	SisaUang                float64 `json:"sisa_uang"`
+	RekomendasiBerasPerOrang float64 `json:"rekomendasi_beras_per_orang"`
+	RekomendasiUangPerOrang  float64 `json:"rekomendasi_uang_per_orang"`
 }
 
 type LoginRequest struct {

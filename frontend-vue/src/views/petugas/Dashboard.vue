@@ -77,6 +77,17 @@
             <h3 class="text-lg font-bold text-gray-800 mb-2">Input Transaksi</h3>
             <p class="text-sm text-gray-600">Catat pembayaran zakat</p>
           </router-link>
+
+          <router-link to="/petugas/distribusi" class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition group">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center group-hover:bg-amber-200 transition">
+                <i class="fas fa-box-open text-amber-600 text-xl"></i>
+              </div>
+              <i class="fas fa-arrow-right text-gray-400 group-hover:text-amber-600 transition"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Distribusi Zakat</h3>
+            <p class="text-sm text-gray-600">Rencana & penyaluran ke mustahiq</p>
+          </router-link>
         </div>
       </main>
     </div>
@@ -96,7 +107,8 @@ const menuItems = [
   { path: '/petugas', label: 'Dashboard', icon: 'fas fa-home' },
   { path: '/petugas/pengaturan', label: 'Pengaturan', icon: 'fas fa-cog' },
   { path: '/petugas/mustahiq', label: 'Mustahiq', icon: 'fas fa-hand-holding-heart' },
-  { path: '/petugas/transaksi', label: 'Transaksi', icon: 'fas fa-receipt' }
+  { path: '/petugas/transaksi', label: 'Transaksi', icon: 'fas fa-receipt' },
+  { path: '/petugas/distribusi', label: 'Distribusi', icon: 'fas fa-box-open' }
 ]
 
 const masjidName = ref('Loading...')

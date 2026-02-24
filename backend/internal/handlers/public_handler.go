@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yourusername/siazisah/internal/models"
@@ -20,6 +21,8 @@ func NewPublicHandler(db *sql.DB) *PublicHandler {
 }
 
 var berasKgRegex = regexp.MustCompile(`(?i)(?:Beras|Fidyah Beras):\s*([\d.]+)\s*kg`)
+var distribusiBerasRegex = regexp.MustCompile(`(?i)\[BERAS_KG=([\d.]+)\]`)
+var distribusiMetaStripRegex = regexp.MustCompile(`(?i)\[(?:BERAS_KG|MODE)=[^\]]+\]\s*`)
 
 func parseKgFromKeterangan(keterangan string) float64 {
 	matches := berasKgRegex.FindStringSubmatch(keterangan)
@@ -31,6 +34,21 @@ func parseKgFromKeterangan(keterangan string) float64 {
 		return 0
 	}
 	return kg
+}
+
+func parseDistribusiKg(keterangan string) float64 {
+	if matches := distribusiBerasRegex.FindStringSubmatch(keterangan); len(matches) > 1 {
+		kg, err := strconv.ParseFloat(matches[1], 64)
+		if err == nil {
+			return kg
+		}
+	}
+	return parseKgFromKeterangan(keterangan)
+}
+
+func cleanDistribusiKeterangan(keterangan string) string {
+	clean := distribusiMetaStripRegex.ReplaceAllString(keterangan, "")
+	return strings.TrimSpace(clean)
 }
 
 func (h *PublicHandler) GetPublicDashboard(c *gin.Context) {
@@ -150,6 +168,7 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 		LastUpdate               string                   `json:"last_update"`
 		Transaksi                []map[string]interface{} `json:"transaksi"`
 		Mustahiq                 []map[string]interface{} `json:"mustahiq"`
+		Distribusi               []map[string]interface{} `json:"distribusi"`
 	}
 
 	// Get masjid info
@@ -276,6 +295,38 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 			count++
 		}
 		log.Printf("Masjid ID %d: Found %d mustahiq", id, count)
+	}
+
+	// Get distribusi list
+	stats.Distribusi = []map[string]interface{}{}
+	dRows, err := h.DB.Query(`
+		SELECT d.id, COALESCE(m.nama, 'Unknown'), d.nominal, d.tanggal_distribusi, COALESCE(d.keterangan, '')
+		FROM distribusi_zakat d
+		LEFT JOIN mustahiq m ON d.mustahiq_id = m.id
+		WHERE d.masjid_id = ?
+		ORDER BY d.tanggal_distribusi DESC, d.created_at DESC
+	`, id)
+	if err != nil {
+		log.Printf("Error query distribusi: %v", err)
+	} else if dRows != nil {
+		defer dRows.Close()
+		for dRows.Next() {
+			var did int
+			var nama, tanggal, keterangan string
+			var nominal float64
+			if err := dRows.Scan(&did, &nama, &nominal, &tanggal, &keterangan); err != nil {
+				log.Printf("Error scan distribusi: %v", err)
+				continue
+			}
+			stats.Distribusi = append(stats.Distribusi, map[string]interface{}{
+				"id":                did,
+				"mustahiq_nama":     nama,
+				"nominal":           nominal,
+				"tanggal_distribusi": tanggal,
+				"beras_kg":           parseDistribusiKg(keterangan),
+				"keterangan":         cleanDistribusiKeterangan(keterangan),
+			})
+		}
 	}
 
 	// Last update (tanggal transaksi terakhir untuk masjid ini)

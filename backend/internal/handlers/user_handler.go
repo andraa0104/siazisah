@@ -19,10 +19,26 @@ func NewUserHandler(userRepo *repository.UserRepository) *UserHandler {
 }
 
 func (h *UserHandler) Create(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var payload struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+		FullName string `json:"full_name"`
+		Role     string `json:"role"`
+		MasjidID *int   `json:"masjid_id"`
+		IsActive bool   `json:"is_active"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, models.Response{Success: false, Message: "Invalid request"})
 		return
+	}
+
+	user := models.User{
+		Username: payload.Username,
+		Password: payload.Password,
+		FullName: payload.FullName,
+		Role:     payload.Role,
+		MasjidID: payload.MasjidID,
+		IsActive: payload.IsActive,
 	}
 
 	hashedPassword, err := utils.HashPassword(user.Password)
@@ -64,13 +80,28 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 
 func (h *UserHandler) Update(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var payload struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+		FullName string `json:"full_name"`
+		Role     string `json:"role"`
+		MasjidID *int   `json:"masjid_id"`
+		IsActive bool   `json:"is_active"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, models.Response{Success: false, Message: "Invalid request"})
 		return
 	}
 
-	user.ID = id
+	user := models.User{
+		ID:       id,
+		Username: payload.Username,
+		Password: payload.Password,
+		FullName: payload.FullName,
+		Role:     payload.Role,
+		MasjidID: payload.MasjidID,
+		IsActive: payload.IsActive,
+	}
 
 	// Update user data
 	if err := h.userRepo.Update(&user); err != nil {

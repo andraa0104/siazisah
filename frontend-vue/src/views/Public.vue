@@ -230,6 +230,17 @@
             >
               <i class="fas fa-users mr-2"></i>Pengurus
             </button>
+            <button
+              @click="activeTab = 'distribusi'"
+              :class="[
+                'px-6 py-3 font-medium transition-colors',
+                activeTab === 'distribusi'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-800'
+              ]"
+            >
+              <i class="fas fa-hand-holding-usd mr-2"></i>Distribusi
+            </button>
           </div>
 
           <!-- Tab Content: Data Zakat -->
@@ -496,6 +507,64 @@
                 <p v-else class="text-gray-500 text-sm text-center py-3">Belum ada data pengurus UPZ</p>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Tab Content: Distribusi -->
+        <div v-show="activeTab === 'distribusi'" class="mb-6">
+          <h3 class="text-lg font-bold text-gray-800 mb-3">
+            <i class="fas fa-hand-holding-usd mr-2 text-blue-600"></i>Data Distribusi Zakat
+          </h3>
+          <div v-if="modalData?.distribusi?.length > 0">
+            <div class="hidden md:block overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Mustahiq</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Beras</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Uang</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="d in modalData?.distribusi" :key="d.id" class="hover:bg-gray-50">
+                    <td class="px-4 py-2 text-sm text-gray-900">{{ d.mustahiq_nama }}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700">{{ (d.beras_kg || 0).toFixed(1) }} kg</td>
+                    <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ formatCurrency(d.nominal || 0) }}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700">{{ d.keterangan || '-' }}</td>
+                    <td class="px-4 py-2 text-sm text-gray-600">{{ formatDate(d.tanggal_distribusi) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="md:hidden space-y-3">
+              <div v-for="d in modalData?.distribusi" :key="d.id" class="bg-gray-50 rounded-lg p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <p class="font-medium text-gray-900">{{ d.mustahiq_nama }}</p>
+                    <p class="text-xs text-gray-500">{{ formatDate(d.tanggal_distribusi) }}</p>
+                  </div>
+                </div>
+                <div class="space-y-1 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Beras:</span>
+                    <span class="font-medium">{{ (d.beras_kg || 0).toFixed(1) }} kg</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Uang:</span>
+                    <span class="font-medium">{{ formatCurrency(d.nominal || 0) }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Keterangan:</span>
+                    <span class="font-medium">{{ d.keterangan || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center text-gray-500 py-6">
+            Belum ada data distribusi.
           </div>
         </div>
       </div>
