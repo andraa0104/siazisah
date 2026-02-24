@@ -371,6 +371,34 @@
                   </div>
                 </div>
               </div>
+              <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600">
+                <div>
+                  Menampilkan {{ modalData.transaksi.length }} dari {{ transaksiPagination.total }} data
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="text-xs text-gray-500">Per halaman</label>
+                  <select v-model="transaksiPagination.pageSize" @change="onTransaksiPageSizeChange" class="px-2 py-1 border border-gray-300 rounded-lg text-sm">
+                    <option v-for="size in pageSizeOptions" :key="size" :value="size">
+                      {{ size === 'all' ? 'Semua' : size }}
+                    </option>
+                  </select>
+                  <button
+                    class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
+                    :disabled="transaksiPagination.isAll || transaksiPagination.page <= 1"
+                    @click="setTransaksiPage(transaksiPagination.page - 1)"
+                  >
+                    Prev
+                  </button>
+                  <span class="text-xs text-gray-500">{{ transaksiPagination.page }} / {{ transaksiPagination.totalPages }}</span>
+                  <button
+                    class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
+                    :disabled="transaksiPagination.isAll || transaksiPagination.page >= transaksiPagination.totalPages"
+                    @click="setTransaksiPage(transaksiPagination.page + 1)"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
             <p v-else class="text-gray-500 text-center py-4">
               Belum ada transaksi
@@ -465,6 +493,34 @@
                   </div>
                 </div>
               </div>
+              <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600">
+                <div>
+                  Menampilkan {{ modalData.mustahiq.length }} dari {{ mustahiqPagination.total }} data
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="text-xs text-gray-500">Per halaman</label>
+                  <select v-model="mustahiqPagination.pageSize" @change="onMustahiqPageSizeChange" class="px-2 py-1 border border-gray-300 rounded-lg text-sm">
+                    <option v-for="size in pageSizeOptions" :key="size" :value="size">
+                      {{ size === 'all' ? 'Semua' : size }}
+                    </option>
+                  </select>
+                  <button
+                    class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
+                    :disabled="mustahiqPagination.isAll || mustahiqPagination.page <= 1"
+                    @click="setMustahiqPage(mustahiqPagination.page - 1)"
+                  >
+                    Prev
+                  </button>
+                  <span class="text-xs text-gray-500">{{ mustahiqPagination.page }} / {{ mustahiqPagination.totalPages }}</span>
+                  <button
+                    class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
+                    :disabled="mustahiqPagination.isAll || mustahiqPagination.page >= mustahiqPagination.totalPages"
+                    @click="setMustahiqPage(mustahiqPagination.page + 1)"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
             <p v-else class="text-gray-500 text-center py-4">
               Belum ada data mustahiq
@@ -512,10 +568,10 @@
 
         <!-- Tab Content: Distribusi -->
         <div v-show="activeTab === 'distribusi'" class="mb-6">
-          <h3 class="text-lg font-bold text-gray-800 mb-3">
+          <h3 class="text-lg font-bold text-gray-800 mb-3 pl-2 md:pl-4">
             <i class="fas fa-hand-holding-usd mr-2 text-blue-600"></i>Data Distribusi Zakat
           </h3>
-          <div v-if="modalData?.distribusi?.length > 0">
+          <div v-if="modalData?.distribusi?.length > 0" class="px-2 md:px-4">
             <div class="hidden md:block overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -560,6 +616,34 @@
                     <span class="font-medium">{{ d.keterangan || '-' }}</span>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600">
+              <div>
+                Menampilkan {{ modalData.distribusi.length }} dari {{ distribusiPagination.total }} data
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <label class="text-xs text-gray-500">Per halaman</label>
+                <select v-model="distribusiPagination.pageSize" @change="onDistribusiPageSizeChange" class="px-2 py-1 border border-gray-300 rounded-lg text-sm">
+                  <option v-for="size in pageSizeOptions" :key="size" :value="size">
+                    {{ size === 'all' ? 'Semua' : size }}
+                  </option>
+                </select>
+                <button
+                  class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
+                  :disabled="distribusiPagination.isAll || distribusiPagination.page <= 1"
+                  @click="setDistribusiPage(distribusiPagination.page - 1)"
+                >
+                  Prev
+                </button>
+                <span class="text-xs text-gray-500">{{ distribusiPagination.page }} / {{ distribusiPagination.totalPages }}</span>
+                <button
+                  class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
+                  :disabled="distribusiPagination.isAll || distribusiPagination.page >= distribusiPagination.totalPages"
+                  @click="setDistribusiPage(distribusiPagination.page + 1)"
+                >
+                  Next
+                </button>
               </div>
             </div>
           </div>
@@ -650,6 +734,209 @@ const pengurusZakatData = ref([]);
 const isLoadingStats = ref(true);
 const isLoadingMasjid = ref(true);
 const isLoadingModal = ref(false);
+const pageSizeOptions = [5, 10, 25, 50, 'all'];
+const transaksiPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false });
+const mustahiqPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false });
+const distribusiPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false });
+const localLists = ref({ transaksi: [], mustahiq: [], distribusi: [] });
+const useLocalLists = ref({ transaksi: false, mustahiq: false, distribusi: false });
+
+const syncPagination = (target, payload, itemCount) => {
+  if (payload && payload.pagination) {
+    const meta = payload.pagination;
+    target.value = {
+      page: meta.page || 1,
+      pageSize: meta.is_all ? 'all' : (meta.page_size || target.value.pageSize),
+      total: meta.total ?? itemCount,
+      totalPages: meta.total_pages || 1,
+      isAll: !!meta.is_all,
+    };
+    return;
+  }
+  target.value.total = itemCount;
+  target.value.totalPages = 1;
+  target.value.isAll = target.value.pageSize === 'all';
+};
+
+const applyLocalPagination = (items, target) => {
+  const total = items.length;
+  if (target.value.pageSize === 'all') {
+    target.value.total = total;
+    target.value.totalPages = 1;
+    target.value.isAll = true;
+    return items;
+  }
+
+  const pageSize = Number(target.value.pageSize) || 5;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const page = Math.min(target.value.page, totalPages);
+  const start = (page - 1) * pageSize;
+  const sliced = items.slice(start, start + pageSize);
+
+  target.value.total = total;
+  target.value.totalPages = totalPages;
+  target.value.page = page;
+  target.value.isAll = false;
+
+  return sliced;
+};
+
+const fetchTransaksiPage = async (id) => {
+  try {
+    const params = transaksiPagination.value.pageSize === 'all'
+      ? { page_size: 'all' }
+      : { page: transaksiPagination.value.page, page_size: transaksiPagination.value.pageSize };
+    const response = await api.getPublicMasjidTransaksi(id, params);
+    if (response.data.success) {
+      const payload = response.data.data || {};
+      if (Array.isArray(payload.items)) {
+        modalData.value.transaksi = payload.items;
+        syncPagination(transaksiPagination, payload, payload.items.length);
+        useLocalLists.value.transaksi = false;
+      } else if (Array.isArray(payload)) {
+        modalData.value.transaksi = applyLocalPagination(payload, transaksiPagination);
+      } else {
+        modalData.value.transaksi = [];
+        syncPagination(transaksiPagination, payload, 0);
+      }
+    }
+    return true;
+  } catch (error) {
+    console.error('Error loading transaksi:', error);
+    if (useLocalLists.value.transaksi) {
+      modalData.value.transaksi = applyLocalPagination(localLists.value.transaksi, transaksiPagination);
+      return true;
+    }
+    return false;
+  }
+};
+
+const fetchMustahiqPage = async (id) => {
+  try {
+    const params = mustahiqPagination.value.pageSize === 'all'
+      ? { page_size: 'all' }
+      : { page: mustahiqPagination.value.page, page_size: mustahiqPagination.value.pageSize };
+    const response = await api.getPublicMasjidMustahiq(id, params);
+    if (response.data.success) {
+      const payload = response.data.data || {};
+      if (Array.isArray(payload.items)) {
+        modalData.value.mustahiq = payload.items;
+        syncPagination(mustahiqPagination, payload, payload.items.length);
+        useLocalLists.value.mustahiq = false;
+      } else if (Array.isArray(payload)) {
+        modalData.value.mustahiq = applyLocalPagination(payload, mustahiqPagination);
+      } else {
+        modalData.value.mustahiq = [];
+        syncPagination(mustahiqPagination, payload, 0);
+      }
+    }
+    return true;
+  } catch (error) {
+    console.error('Error loading mustahiq:', error);
+    if (useLocalLists.value.mustahiq) {
+      modalData.value.mustahiq = applyLocalPagination(localLists.value.mustahiq, mustahiqPagination);
+      return true;
+    }
+    return false;
+  }
+};
+
+const fetchDistribusiPage = async (id) => {
+  try {
+    const params = distribusiPagination.value.pageSize === 'all'
+      ? { page_size: 'all' }
+      : { page: distribusiPagination.value.page, page_size: distribusiPagination.value.pageSize };
+    const response = await api.getPublicMasjidDistribusi(id, params);
+    if (response.data.success) {
+      const payload = response.data.data || {};
+      if (Array.isArray(payload.items)) {
+        modalData.value.distribusi = payload.items;
+        syncPagination(distribusiPagination, payload, payload.items.length);
+        useLocalLists.value.distribusi = false;
+      } else if (Array.isArray(payload)) {
+        modalData.value.distribusi = applyLocalPagination(payload, distribusiPagination);
+      } else {
+        modalData.value.distribusi = [];
+        syncPagination(distribusiPagination, payload, 0);
+      }
+    }
+    return true;
+  } catch (error) {
+    console.error('Error loading distribusi:', error);
+    if (useLocalLists.value.distribusi) {
+      modalData.value.distribusi = applyLocalPagination(localLists.value.distribusi, distribusiPagination);
+      return true;
+    }
+    return false;
+  }
+};
+
+const hydrateListsFromStats = (data) => {
+  const transaksi = Array.isArray(data.transaksi) ? data.transaksi : [];
+  const mustahiq = Array.isArray(data.mustahiq) ? data.mustahiq : [];
+  const distribusi = Array.isArray(data.distribusi) ? data.distribusi : [];
+
+  localLists.value = { transaksi, mustahiq, distribusi };
+  useLocalLists.value = { transaksi: true, mustahiq: true, distribusi: true };
+
+  modalData.value.transaksi = applyLocalPagination(transaksi, transaksiPagination);
+  modalData.value.mustahiq = applyLocalPagination(mustahiq, mustahiqPagination);
+  modalData.value.distribusi = applyLocalPagination(distribusi, distribusiPagination);
+};
+
+const setTransaksiPage = async (page) => {
+  transaksiPagination.value.page = page;
+  if (useLocalLists.value.transaksi) {
+    modalData.value.transaksi = applyLocalPagination(localLists.value.transaksi, transaksiPagination);
+    return;
+  }
+  if (modalData.value?.masjid?.id) await fetchTransaksiPage(modalData.value.masjid.id);
+};
+
+const onTransaksiPageSizeChange = async () => {
+  transaksiPagination.value.page = 1;
+  if (useLocalLists.value.transaksi) {
+    modalData.value.transaksi = applyLocalPagination(localLists.value.transaksi, transaksiPagination);
+    return;
+  }
+  if (modalData.value?.masjid?.id) await fetchTransaksiPage(modalData.value.masjid.id);
+};
+
+const setMustahiqPage = async (page) => {
+  mustahiqPagination.value.page = page;
+  if (useLocalLists.value.mustahiq) {
+    modalData.value.mustahiq = applyLocalPagination(localLists.value.mustahiq, mustahiqPagination);
+    return;
+  }
+  if (modalData.value?.masjid?.id) await fetchMustahiqPage(modalData.value.masjid.id);
+};
+
+const onMustahiqPageSizeChange = async () => {
+  mustahiqPagination.value.page = 1;
+  if (useLocalLists.value.mustahiq) {
+    modalData.value.mustahiq = applyLocalPagination(localLists.value.mustahiq, mustahiqPagination);
+    return;
+  }
+  if (modalData.value?.masjid?.id) await fetchMustahiqPage(modalData.value.masjid.id);
+};
+
+const setDistribusiPage = async (page) => {
+  distribusiPagination.value.page = page;
+  if (useLocalLists.value.distribusi) {
+    modalData.value.distribusi = applyLocalPagination(localLists.value.distribusi, distribusiPagination);
+    return;
+  }
+  if (modalData.value?.masjid?.id) await fetchDistribusiPage(modalData.value.masjid.id);
+};
+
+const onDistribusiPageSizeChange = async () => {
+  distribusiPagination.value.page = 1;
+  if (useLocalLists.value.distribusi) {
+    modalData.value.distribusi = applyLocalPagination(localLists.value.distribusi, distribusiPagination);
+    return;
+  }
+  if (modalData.value?.masjid?.id) await fetchDistribusiPage(modalData.value.masjid.id);
+};
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("id-ID", {
@@ -719,7 +1006,12 @@ const viewMasjidStats = async (id) => {
     ]);
     
     if (statsData.data.success) {
-      modalData.value = statsData.data.data;
+      modalData.value = {
+        ...statsData.data.data,
+        transaksi: [],
+        mustahiq: [],
+        distribusi: []
+      };
       showModal.value = true;
     }
     
@@ -729,6 +1021,23 @@ const viewMasjidStats = async (id) => {
     
     if (pengurusZakat.data.success) {
       pengurusZakatData.value = pengurusZakat.data.data || [];
+    }
+    if (modalData.value?.masjid?.id) {
+      transaksiPagination.value.page = 1;
+      mustahiqPagination.value.page = 1;
+      distribusiPagination.value.page = 1;
+      const results = await Promise.all([
+        fetchTransaksiPage(modalData.value.masjid.id),
+        fetchMustahiqPage(modalData.value.masjid.id),
+        fetchDistribusiPage(modalData.value.masjid.id)
+      ]);
+      const hasFailure = results.some(result => !result);
+      if (hasFailure) {
+        const fallback = await api.getPublicMasjidStats(modalData.value.masjid.id, { include_lists: true });
+        if (fallback.data.success) {
+          hydrateListsFromStats(fallback.data.data || {});
+        }
+      }
     }
   } catch (error) {
     console.error("Error:", error);

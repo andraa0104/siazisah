@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yourusername/siazisah/internal/models"
@@ -58,13 +59,46 @@ func (h *UserHandler) Create(c *gin.Context) {
 }
 
 func (h *UserHandler) GetAll(c *gin.Context) {
-	users, err := h.userRepo.GetAll()
+	role := strings.TrimSpace(c.Query("role"))
+	page, pageSize, isAll := parsePagination(c)
+
+	if isAll {
+		users, err := h.userRepo.GetAll()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get users"})
+			return
+		}
+		if role != "" {
+			filtered := make([]models.User, 0, len(users))
+			for _, user := range users {
+				if user.Role == role {
+					filtered = append(filtered, user)
+				}
+			}
+			pagination := buildPagination(len(filtered), page, pageSize, true)
+			c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": filtered, "pagination": pagination}})
+			return
+		}
+		pagination := buildPagination(len(users), page, pageSize, true)
+		c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": users, "pagination": pagination}})
+		return
+	}
+
+	total, err := h.userRepo.CountAll(role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get users"})
 		return
 	}
 
-	c.JSON(http.StatusOK, models.Response{Success: true, Data: users})
+	offset := (page - 1) * pageSize
+	users, err := h.userRepo.GetAllPaginated(role, pageSize, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get users"})
+		return
+	}
+
+	pagination := buildPagination(total, page, pageSize, false)
+	c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": users, "pagination": pagination}})
 }
 
 func (h *UserHandler) GetByID(c *gin.Context) {

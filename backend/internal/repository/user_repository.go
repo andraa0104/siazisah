@@ -74,6 +74,49 @@ func (r *UserRepository) GetAll() ([]models.User, error) {
 	return users, nil
 }
 
+func (r *UserRepository) GetAllPaginated(role string, limit, offset int) ([]models.User, error) {
+	baseQuery := `SELECT id, username, full_name, role, masjid_id, is_active, created_at, updated_at 
+			  FROM users`
+	args := []interface{}{}
+	if role != "" {
+		baseQuery += " WHERE role = ?"
+		args = append(args, role)
+	}
+	baseQuery += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
+
+	rows, err := r.DB.Query(baseQuery, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.Role, &user.MasjidID, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			continue
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}
+
+func (r *UserRepository) CountAll(role string) (int, error) {
+	var total int
+	query := `SELECT COUNT(*) FROM users`
+	args := []interface{}{}
+	if role != "" {
+		query += " WHERE role = ?"
+		args = append(args, role)
+	}
+	if err := r.DB.QueryRow(query, args...).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
 func (r *UserRepository) GetByMasjidID(masjidID int) ([]models.User, error) {
 	query := `SELECT id, username, full_name, role, masjid_id, is_active, created_at, updated_at 
 			  FROM users WHERE masjid_id = ? ORDER BY created_at DESC`

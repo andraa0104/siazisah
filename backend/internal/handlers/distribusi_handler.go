@@ -32,13 +32,34 @@ func (h *DistribusiHandler) GetInsight(c *gin.Context) {
 
 func (h *DistribusiHandler) GetAll(c *gin.Context) {
 	masjidID, _ := c.Get("masjid_id")
-	data, err := h.distribusiRepo.GetByMasjidID(*masjidID.(*int))
+	page, pageSize, isAll := parsePagination(c)
+
+	if isAll {
+		data, err := h.distribusiRepo.GetByMasjidID(*masjidID.(*int))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get distribusi"})
+			return
+		}
+		pagination := buildPagination(len(data), page, pageSize, true)
+		c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": data, "pagination": pagination}})
+		return
+	}
+
+	total, err := h.distribusiRepo.CountByMasjidID(*masjidID.(*int))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get distribusi"})
 		return
 	}
 
-	c.JSON(http.StatusOK, models.Response{Success: true, Data: data})
+	offset := (page - 1) * pageSize
+	data, err := h.distribusiRepo.GetByMasjidIDPaginated(*masjidID.(*int), pageSize, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get distribusi"})
+		return
+	}
+
+	pagination := buildPagination(total, page, pageSize, false)
+	c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": data, "pagination": pagination}})
 }
 
 func (h *DistribusiHandler) Create(c *gin.Context) {

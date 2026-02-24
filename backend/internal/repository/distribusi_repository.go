@@ -152,6 +152,62 @@ func (r *DistribusiZakatRepository) GetByMasjidID(masjidID int) ([]models.Distri
 	return result, nil
 }
 
+func (r *DistribusiZakatRepository) GetByMasjidIDPaginated(masjidID, limit, offset int) ([]models.DistribusiZakat, error) {
+	query := `SELECT d.id, d.masjid_id, d.mustahiq_id, d.nominal,
+			  DATE_FORMAT(d.tanggal_distribusi, '%Y-%m-%d') AS tanggal_distribusi,
+			  DATE_FORMAT(d.created_at, '%H:%i:%s') AS waktu_input,
+			  COALESCE(d.keterangan, ''), d.created_at, d.updated_at,
+			  COALESCE(m.nama, 'Unknown'), COALESCE(m.jenis_penerima, '')
+			  FROM distribusi_zakat d
+			  LEFT JOIN mustahiq m ON d.mustahiq_id = m.id
+			  WHERE d.masjid_id = ?
+			  ORDER BY d.tanggal_distribusi DESC, d.created_at DESC
+			  LIMIT ? OFFSET ?`
+
+	rows, err := r.DB.Query(query, masjidID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []models.DistribusiZakat
+	for rows.Next() {
+		var item models.DistribusiZakat
+		var rawKeterangan string
+		err := rows.Scan(
+			&item.ID,
+			&item.MasjidID,
+			&item.MustahiqID,
+			&item.Nominal,
+			&item.TanggalDistribusi,
+			&item.WaktuInput,
+			&rawKeterangan,
+			&item.CreatedAt,
+			&item.UpdatedAt,
+			&item.MustahiqNama,
+			&item.JenisPenerima,
+		)
+		if err != nil {
+			continue
+		}
+
+		item.BerasKg, item.Mode = extractBerasKgAndMode(rawKeterangan)
+		item.Keterangan = cleanKeterangan(rawKeterangan)
+		result = append(result, item)
+	}
+
+	return result, nil
+}
+
+func (r *DistribusiZakatRepository) CountByMasjidID(masjidID int) (int, error) {
+	var total int
+	query := `SELECT COUNT(*) FROM distribusi_zakat WHERE masjid_id = ?`
+	if err := r.DB.QueryRow(query, masjidID).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
 func (r *DistribusiZakatRepository) sumBerasFromTransaksi(masjidID int, jenisZakat string) (float64, error) {
 	query := `SELECT kg_beras_dibayar, COALESCE(keterangan, '')
 			  FROM transaksi_zakat

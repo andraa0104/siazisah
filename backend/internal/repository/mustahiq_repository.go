@@ -67,6 +67,38 @@ func (r *MustahiqRepository) GetByMasjidID(masjidID int) ([]models.Mustahiq, err
 	return mustahiqs, nil
 }
 
+func (r *MustahiqRepository) GetByMasjidIDPaginated(masjidID, limit, offset int) ([]models.Mustahiq, error) {
+	query := `SELECT id, masjid_id, nama, jenis_penerima, alamat, lokasi, rt, telepon, keterangan, is_active, created_at, updated_at
+			  FROM mustahiq WHERE masjid_id = ? ORDER BY nama ASC LIMIT ? OFFSET ?`
+	rows, err := r.DB.Query(query, masjidID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var mustahiqs []models.Mustahiq
+	for rows.Next() {
+		var mustahiq models.Mustahiq
+		err := rows.Scan(&mustahiq.ID, &mustahiq.MasjidID, &mustahiq.Nama, &mustahiq.JenisPenerima,
+			&mustahiq.Alamat, &mustahiq.Lokasi, &mustahiq.RT, &mustahiq.Telepon,
+			&mustahiq.Keterangan, &mustahiq.IsActive, &mustahiq.CreatedAt, &mustahiq.UpdatedAt)
+		if err != nil {
+			continue
+		}
+		mustahiqs = append(mustahiqs, mustahiq)
+	}
+	return mustahiqs, nil
+}
+
+func (r *MustahiqRepository) CountByMasjidID(masjidID int) (int, error) {
+	var total int
+	query := `SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ?`
+	if err := r.DB.QueryRow(query, masjidID).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
 func (r *MustahiqRepository) Update(mustahiq *models.Mustahiq) error {
 	query := `UPDATE mustahiq SET nama=?, jenis_penerima=?, alamat=?, lokasi=?, rt=?, telepon=?, keterangan=?, is_active=? WHERE id=?`
 	_, err := r.DB.Exec(query, mustahiq.Nama, mustahiq.JenisPenerima, mustahiq.Alamat, 

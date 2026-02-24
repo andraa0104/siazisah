@@ -70,6 +70,35 @@
             </div>
           </div>
         </div>
+
+        <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600">
+          <div>
+            Menampilkan {{ petugasList.length }} dari {{ pagination.total }} data
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="text-xs text-gray-500">Per halaman</label>
+            <select v-model="pagination.pageSize" @change="onPageSizeChange" class="px-2 py-1 border border-gray-300 rounded-lg text-sm">
+              <option v-for="size in pageSizeOptions" :key="size" :value="size">
+                {{ size === 'all' ? 'Semua' : size }}
+              </option>
+            </select>
+            <button
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
+              :disabled="pagination.isAll || pagination.page <= 1"
+              @click="setPage(pagination.page - 1)"
+            >
+              Prev
+            </button>
+            <span class="text-xs text-gray-500">{{ pagination.page }} / {{ pagination.totalPages }}</span>
+            <button
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
+              :disabled="pagination.isAll || pagination.page >= pagination.totalPages"
+              @click="setPage(pagination.page + 1)"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </main>
     </div>
 
@@ -133,8 +162,60 @@ const showModal = ref(false)
 const editingId = ref(null)
 const isLoading = ref(true)
 const isSaving = ref(false)
+const pageSizeOptions = [5, 10, 25, 50, 'all']
+const pagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false })
 const form = ref({ username: '', full_name: '', password: '', masjid_id: '' })
 const toast = ref({ message: '', type: 'success' })
+
+const setPage = (page) => {
+  pagination.value.page = page
+  loadData()
+}
+
+const onPageSizeChange = () => {
+  pagination.value.page = 1
+  loadData()
+}
+
+const syncPagination = (payload, itemCount) => {
+  if (payload && payload.pagination) {
+    const meta = payload.pagination
+    pagination.value = {
+      page: meta.page || 1,
+      pageSize: meta.is_all ? 'all' : (meta.page_size || pagination.value.pageSize),
+      total: meta.total ?? itemCount,
+      totalPages: meta.total_pages || 1,
+      isAll: !!meta.is_all
+    }
+    return
+  }
+  pagination.value.total = itemCount
+  pagination.value.totalPages = 1
+  pagination.value.isAll = pagination.value.pageSize === 'all'
+}
+
+const applyLocalPagination = (items) => {
+  const total = items.length
+  if (pagination.value.pageSize === 'all') {
+    pagination.value.total = total
+    pagination.value.totalPages = 1
+    pagination.value.isAll = true
+    return items
+  }
+
+  const pageSize = Number(pagination.value.pageSize) || 5
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const page = Math.min(pagination.value.page, totalPages)
+  const start = (page - 1) * pageSize
+  const sliced = items.slice(start, start + pageSize)
+
+  pagination.value.total = total
+  pagination.value.totalPages = totalPages
+  pagination.value.page = page
+  pagination.value.isAll = false
+
+  return sliced
+}
 
 const petugasList = computed(() => usersList.value.filter(u => u.role === 'petugas'))
 
@@ -146,14 +227,33 @@ const getMasjidName = (id) => {
 const loadData = async () => {
   isLoading.value = true
   try {
+    const userParams = pagination.value.pageSize === 'all'
+      ? { role: 'petugas', page_size: 'all' }
+      : { role: 'petugas', page: pagination.value.page, page_size: pagination.value.pageSize }
     const [usersData, masjidData] = await Promise.all([
-      api.getUsers(),
-      api.getMasjid()
+      api.getUsers(userParams),
+      api.getMasjid({ page_size: 'all' })
     ])
     console.log('Users Response:', usersData.data)
     console.log('Masjid Response:', masjidData.data)
-    if (usersData.data.success) usersList.value = usersData.data.data || []
-    if (masjidData.data.success) masjidList.value = masjidData.data.data || []
+    if (usersData.data.success) {
+      const payload = usersData.data.data || {}
+      if (Array.isArray(payload.items)) {
+        usersList.value = payload.items
+        syncPagination(payload, payload.items.length)
+      } else if (Array.isArray(payload)) {
+        usersList.value = applyLocalPagination(payload)
+      } else {
+        usersList.value = []
+        syncPagination(payload, 0)
+      }
+    }
+    if (masjidData.data.success) {
+      const masjidPayload = masjidData.data.data || {}
+      masjidList.value = Array.isArray(masjidPayload.items)
+        ? masjidPayload.items
+        : (Array.isArray(masjidPayload) ? masjidPayload : [])
+    }
     console.log('Masjid List:', masjidList.value)
   } catch (error) {
     console.error('Error loading data:', error)

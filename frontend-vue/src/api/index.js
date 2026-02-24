@@ -24,17 +24,20 @@ export default {
   // Public
   getPublicDashboard: () => api.get('/public/dashboard'),
   getPublicMasjid: () => api.get('/public/masjid'),
-  getPublicMasjidStats: (id) => api.get(`/public/masjid/${id}/stats`),
+  getPublicMasjidStats: (id, params) => api.get(`/public/masjid/${id}/stats`, { params }),
+  getPublicMasjidTransaksi: (id, params) => api.get(`/public/masjid/${id}/transaksi`, { params }),
+  getPublicMasjidMustahiq: (id, params) => api.get(`/public/masjid/${id}/mustahiq`, { params }),
+  getPublicMasjidDistribusi: (id, params) => api.get(`/public/masjid/${id}/distribusi`, { params }),
   getPublicPengurusMasjid: (id) => api.get(`/public/masjid/${id}/pengurus-masjid`),
   getPublicPengurusZakat: (id) => api.get(`/public/masjid/${id}/pengurus-zakat`),
   
   // Superadmin
-  getMasjid: () => api.get('/superadmin/masjid'),
+  getMasjid: (params) => api.get('/superadmin/masjid', { params }),
   createMasjid: (data) => api.post('/superadmin/masjid', data),
   updateMasjid: (id, data) => api.put(`/superadmin/masjid/${id}`, data),
   deleteMasjid: (id) => api.delete(`/superadmin/masjid/${id}`),
   
-  getUsers: () => api.get('/superadmin/users'),
+  getUsers: (params) => api.get('/superadmin/users', { params }),
   createUser: (data) => api.post('/superadmin/users', data),
   updateUser: (id, data) => api.put(`/superadmin/users/${id}`, data),
   deleteUser: (id) => api.delete(`/superadmin/users/${id}`),
@@ -56,18 +59,18 @@ export default {
   createMuzakki: (data) => api.post('/petugas/muzakki', data),
   
   checkMustahiqDuplicate: (data) => api.post('/petugas/mustahiq/check', data),
-  getMustahiq: () => api.get('/petugas/mustahiq'),
+  getMustahiq: (params) => api.get('/petugas/mustahiq', { params }),
   createMustahiq: (data) => api.post('/petugas/mustahiq', data),
   updateMustahiq: (id, data) => api.put(`/petugas/mustahiq/${id}`, data),
   deleteMustahiq: (id) => api.delete(`/petugas/mustahiq/${id}`),
   
-  getTransaksi: () => api.get('/petugas/transaksi'),
+  getTransaksi: (params) => api.get('/petugas/transaksi', { params }),
   createTransaksi: (data) => api.post('/petugas/transaksi', data),
   deleteTransaksi: (id) => api.delete(`/petugas/transaksi/${id}`),
   printTransaksi: (id) => `http://localhost:8082/api/petugas/transaksi/${id}/print`,
 
   getDistribusiInsight: () => api.get('/petugas/distribusi/insight'),
-  getDistribusi: () => api.get('/petugas/distribusi'),
+  getDistribusi: (params) => api.get('/petugas/distribusi', { params }),
   createDistribusi: (data) => api.post('/petugas/distribusi', data),
   updateDistribusi: (id, data) => api.put(`/petugas/distribusi/${id}`, data),
   deleteDistribusi: (id) => api.delete(`/petugas/distribusi/${id}`)

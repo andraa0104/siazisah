@@ -150,6 +150,7 @@ func (h *PublicHandler) GetAllMasjid(c *gin.Context) {
 
 func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
+	includeLists := strings.EqualFold(c.Query("include_lists"), "1") || strings.EqualFold(c.Query("include_lists"), "true")
 
 	var stats struct {
 		Masjid                   models.Masjid            `json:"masjid"`
@@ -224,108 +225,110 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 	
 	h.DB.QueryRow("SELECT COALESCE(SUM(infaq_tambahan), 0) + COALESCE(SUM(CASE WHEN jenis_zakat = 'infaq' THEN total_dibayar ELSE 0 END), 0) FROM transaksi_zakat WHERE masjid_id = ?", id).Scan(&stats.TotalInfaq)
 
-	// Get transaksi list
 	stats.Transaksi = []map[string]interface{}{}
-	tRows, err := h.DB.Query(`
-		SELECT t.id, m.nama as muzakki_nama, t.jenis_zakat, COALESCE(t.bentuk_zakat, ''), COALESCE(t.jumlah_orang, 0), COALESCE(t.jumlah_hari_fidyah, 0), t.total_dibayar, COALESCE(t.infaq_tambahan, 0), t.tanggal_bayar, COALESCE(t.keterangan, '')
-		FROM transaksi_zakat t
-		JOIN muzakki m ON t.muzakki_id = m.id
-		WHERE t.masjid_id = ?
-		ORDER BY t.tanggal_bayar DESC
-	`, id)
-	if err != nil {
-		log.Printf("Error query transaksi: %v", err)
-	} else if tRows != nil {
-		defer tRows.Close()
-		for tRows.Next() {
-			var tid int
-			var nama, jenis, bentuk, tanggal, keterangan string
-			var jumlah int
-			var jumlahHari int
-			var total, infaq float64
-			err := tRows.Scan(&tid, &nama, &jenis, &bentuk, &jumlah, &jumlahHari, &total, &infaq, &tanggal, &keterangan)
-			if err != nil {
-				log.Printf("Error scan transaksi: %v", err)
-				continue
-			}
-			stats.Transaksi = append(stats.Transaksi, map[string]interface{}{
-				"id":             tid,
-				"muzakki_nama":   nama,
-				"jenis_zakat":    jenis,
-				"bentuk_zakat":   bentuk,
-				"jumlah_orang":   jumlah,
-				"jumlah_hari_fidyah": jumlahHari,
-				"total_dibayar":       total,
-				"infaq_tambahan": infaq,
-				"tanggal_bayar":  tanggal,
-				"keterangan":     keterangan,
-			})
-		}
-	}
-
-	// Get mustahiq list
 	stats.Mustahiq = []map[string]interface{}{}
-	mRows, err := h.DB.Query(`
-		SELECT id, nama, alamat, jenis_penerima, rt, COALESCE(keterangan, '')
-		FROM mustahiq
-		WHERE masjid_id = ?
-		ORDER BY nama ASC
-	`, id)
-	if err != nil {
-		log.Printf("Error query mustahiq: %v", err)
-	} else if mRows != nil {
-		defer mRows.Close()
-		count := 0
-		for mRows.Next() {
-			var mid int
-			var nama, alamat, kategori, rt, keterangan string
-			err := mRows.Scan(&mid, &nama, &alamat, &kategori, &rt, &keterangan)
-			if err != nil {
-				log.Printf("Error scan mustahiq: %v", err)
-				continue
-			}
-			stats.Mustahiq = append(stats.Mustahiq, map[string]interface{}{
-				"id":         mid,
-				"nama":       nama,
-				"alamat":     alamat,
-				"kategori":   kategori,
-				"rt":         rt,
-				"keterangan": keterangan,
-			})
-			count++
-		}
-		log.Printf("Masjid ID %d: Found %d mustahiq", id, count)
-	}
-
-	// Get distribusi list
 	stats.Distribusi = []map[string]interface{}{}
-	dRows, err := h.DB.Query(`
-		SELECT d.id, COALESCE(m.nama, 'Unknown'), d.nominal, d.tanggal_distribusi, COALESCE(d.keterangan, '')
-		FROM distribusi_zakat d
-		LEFT JOIN mustahiq m ON d.mustahiq_id = m.id
-		WHERE d.masjid_id = ?
-		ORDER BY d.tanggal_distribusi DESC, d.created_at DESC
-	`, id)
-	if err != nil {
-		log.Printf("Error query distribusi: %v", err)
-	} else if dRows != nil {
-		defer dRows.Close()
-		for dRows.Next() {
-			var did int
-			var nama, tanggal, keterangan string
-			var nominal float64
-			if err := dRows.Scan(&did, &nama, &nominal, &tanggal, &keterangan); err != nil {
-				log.Printf("Error scan distribusi: %v", err)
-				continue
+	if includeLists {
+		// Get transaksi list
+		tRows, err := h.DB.Query(`
+			SELECT t.id, COALESCE(m.nama, 'Unknown') as muzakki_nama, t.jenis_zakat, COALESCE(t.bentuk_zakat, ''), COALESCE(t.jumlah_orang, 0), COALESCE(t.jumlah_hari_fidyah, 0), t.total_dibayar, COALESCE(t.infaq_tambahan, 0), t.tanggal_bayar, COALESCE(t.keterangan, '')
+			FROM transaksi_zakat t
+			LEFT JOIN muzakki m ON t.muzakki_id = m.id
+			WHERE t.masjid_id = ?
+			ORDER BY t.tanggal_bayar DESC
+		`, id)
+		if err != nil {
+			log.Printf("Error query transaksi: %v", err)
+		} else if tRows != nil {
+			defer tRows.Close()
+			for tRows.Next() {
+				var tid int
+				var nama, jenis, bentuk, tanggal, keterangan string
+				var jumlah int
+				var jumlahHari int
+				var total, infaq float64
+				err := tRows.Scan(&tid, &nama, &jenis, &bentuk, &jumlah, &jumlahHari, &total, &infaq, &tanggal, &keterangan)
+				if err != nil {
+					log.Printf("Error scan transaksi: %v", err)
+					continue
+				}
+				stats.Transaksi = append(stats.Transaksi, map[string]interface{}{
+					"id":                 tid,
+					"muzakki_nama":       nama,
+					"jenis_zakat":        jenis,
+					"bentuk_zakat":       bentuk,
+					"jumlah_orang":       jumlah,
+					"jumlah_hari_fidyah": jumlahHari,
+					"total_dibayar":      total,
+					"infaq_tambahan":     infaq,
+					"tanggal_bayar":      tanggal,
+					"keterangan":         keterangan,
+				})
 			}
-			stats.Distribusi = append(stats.Distribusi, map[string]interface{}{
-				"id":                did,
-				"mustahiq_nama":     nama,
-				"nominal":           nominal,
-				"tanggal_distribusi": tanggal,
-				"beras_kg":           parseDistribusiKg(keterangan),
-				"keterangan":         cleanDistribusiKeterangan(keterangan),
-			})
+		}
+
+		// Get mustahiq list
+		mRows, err := h.DB.Query(`
+			SELECT id, nama, alamat, jenis_penerima, rt, COALESCE(keterangan, '')
+			FROM mustahiq
+			WHERE masjid_id = ?
+			ORDER BY nama ASC
+		`, id)
+		if err != nil {
+			log.Printf("Error query mustahiq: %v", err)
+		} else if mRows != nil {
+			defer mRows.Close()
+			count := 0
+			for mRows.Next() {
+				var mid int
+				var nama, alamat, kategori, rt, keterangan string
+				err := mRows.Scan(&mid, &nama, &alamat, &kategori, &rt, &keterangan)
+				if err != nil {
+					log.Printf("Error scan mustahiq: %v", err)
+					continue
+				}
+				stats.Mustahiq = append(stats.Mustahiq, map[string]interface{}{
+					"id":         mid,
+					"nama":       nama,
+					"alamat":     alamat,
+					"kategori":   kategori,
+					"rt":         rt,
+					"keterangan": keterangan,
+				})
+				count++
+			}
+			log.Printf("Masjid ID %d: Found %d mustahiq", id, count)
+		}
+
+		// Get distribusi list
+		dRows, err := h.DB.Query(`
+			SELECT d.id, COALESCE(m.nama, 'Unknown'), d.nominal, d.tanggal_distribusi, COALESCE(d.keterangan, '')
+			FROM distribusi_zakat d
+			LEFT JOIN mustahiq m ON d.mustahiq_id = m.id
+			WHERE d.masjid_id = ?
+			ORDER BY d.tanggal_distribusi DESC, d.created_at DESC
+		`, id)
+		if err != nil {
+			log.Printf("Error query distribusi: %v", err)
+		} else if dRows != nil {
+			defer dRows.Close()
+			for dRows.Next() {
+				var did int
+				var nama, tanggal, keterangan string
+				var nominal float64
+				if err := dRows.Scan(&did, &nama, &nominal, &tanggal, &keterangan); err != nil {
+					log.Printf("Error scan distribusi: %v", err)
+					continue
+				}
+				stats.Distribusi = append(stats.Distribusi, map[string]interface{}{
+					"id":                 did,
+					"mustahiq_nama":      nama,
+					"nominal":            nominal,
+					"tanggal_distribusi": tanggal,
+					"beras_kg":            parseDistribusiKg(keterangan),
+					"keterangan":         cleanDistribusiKeterangan(keterangan),
+				})
+			}
 		}
 	}
 
@@ -339,6 +342,178 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, models.Response{Success: true, Data: stats})
+}
+
+func (h *PublicHandler) GetMasjidTransaksi(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	page, pageSize, isAll := parsePagination(c)
+
+	if isAll {
+		page = 1
+	}
+
+	var total int
+	if err := h.DB.QueryRow("SELECT COUNT(*) FROM transaksi_zakat WHERE masjid_id = ?", id).Scan(&total); err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get transaksi"})
+		return
+	}
+
+	query := `
+		SELECT t.id, COALESCE(m.nama, 'Unknown') as muzakki_nama, t.jenis_zakat, COALESCE(t.bentuk_zakat, ''),
+			COALESCE(t.jumlah_orang, 0), COALESCE(t.jumlah_hari_fidyah, 0), t.total_dibayar,
+			COALESCE(t.infaq_tambahan, 0), t.tanggal_bayar, COALESCE(t.keterangan, '')
+		FROM transaksi_zakat t
+		LEFT JOIN muzakki m ON t.muzakki_id = m.id
+		WHERE t.masjid_id = ?
+		ORDER BY t.tanggal_bayar DESC
+	`
+
+	args := []interface{}{id}
+	if !isAll {
+		query += " LIMIT ? OFFSET ?"
+		offset := (page - 1) * pageSize
+		args = append(args, pageSize, offset)
+	}
+
+	rows, err := h.DB.Query(query, args...)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get transaksi"})
+		return
+	}
+	defer rows.Close()
+
+	items := []map[string]interface{}{}
+	for rows.Next() {
+		var tid int
+		var nama, jenis, bentuk, tanggal, keterangan string
+		var jumlah int
+		var jumlahHari int
+		var totalDibayar, infaq float64
+		if err := rows.Scan(&tid, &nama, &jenis, &bentuk, &jumlah, &jumlahHari, &totalDibayar, &infaq, &tanggal, &keterangan); err != nil {
+			continue
+		}
+		items = append(items, map[string]interface{}{
+			"id":                 tid,
+			"muzakki_nama":       nama,
+			"jenis_zakat":        jenis,
+			"bentuk_zakat":       bentuk,
+			"jumlah_orang":       jumlah,
+			"jumlah_hari_fidyah": jumlahHari,
+			"total_dibayar":      totalDibayar,
+			"infaq_tambahan":     infaq,
+			"tanggal_bayar":      tanggal,
+			"keterangan":         keterangan,
+		})
+	}
+
+	pagination := buildPagination(total, page, pageSize, isAll)
+	c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": items, "pagination": pagination}})
+}
+
+func (h *PublicHandler) GetMasjidMustahiq(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	page, pageSize, isAll := parsePagination(c)
+
+	var total int
+	if err := h.DB.QueryRow("SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ?", id).Scan(&total); err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiq"})
+		return
+	}
+
+	query := `
+		SELECT id, nama, alamat, jenis_penerima, rt, COALESCE(keterangan, '')
+		FROM mustahiq
+		WHERE masjid_id = ?
+		ORDER BY nama ASC
+	`
+
+	args := []interface{}{id}
+	if !isAll {
+		query += " LIMIT ? OFFSET ?"
+		offset := (page - 1) * pageSize
+		args = append(args, pageSize, offset)
+	}
+
+	rows, err := h.DB.Query(query, args...)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiq"})
+		return
+	}
+	defer rows.Close()
+
+	items := []map[string]interface{}{}
+	for rows.Next() {
+		var mid int
+		var nama, alamat, kategori, rt, keterangan string
+		if err := rows.Scan(&mid, &nama, &alamat, &kategori, &rt, &keterangan); err != nil {
+			continue
+		}
+		items = append(items, map[string]interface{}{
+			"id":         mid,
+			"nama":       nama,
+			"alamat":     alamat,
+			"kategori":   kategori,
+			"rt":         rt,
+			"keterangan": keterangan,
+		})
+	}
+
+	pagination := buildPagination(total, page, pageSize, isAll)
+	c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": items, "pagination": pagination}})
+}
+
+func (h *PublicHandler) GetMasjidDistribusi(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	page, pageSize, isAll := parsePagination(c)
+
+	var total int
+	if err := h.DB.QueryRow("SELECT COUNT(*) FROM distribusi_zakat WHERE masjid_id = ?", id).Scan(&total); err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get distribusi"})
+		return
+	}
+
+	query := `
+		SELECT d.id, COALESCE(m.nama, 'Unknown'), d.nominal, d.tanggal_distribusi, COALESCE(d.keterangan, '')
+		FROM distribusi_zakat d
+		LEFT JOIN mustahiq m ON d.mustahiq_id = m.id
+		WHERE d.masjid_id = ?
+		ORDER BY d.tanggal_distribusi DESC, d.created_at DESC
+	`
+
+	args := []interface{}{id}
+	if !isAll {
+		query += " LIMIT ? OFFSET ?"
+		offset := (page - 1) * pageSize
+		args = append(args, pageSize, offset)
+	}
+
+	rows, err := h.DB.Query(query, args...)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get distribusi"})
+		return
+	}
+	defer rows.Close()
+
+	items := []map[string]interface{}{}
+	for rows.Next() {
+		var did int
+		var nama, tanggal, keterangan string
+		var nominal float64
+		if err := rows.Scan(&did, &nama, &nominal, &tanggal, &keterangan); err != nil {
+			continue
+		}
+		items = append(items, map[string]interface{}{
+			"id":                 did,
+			"mustahiq_nama":      nama,
+			"nominal":            nominal,
+			"tanggal_distribusi": tanggal,
+			"beras_kg":            parseDistribusiKg(keterangan),
+			"keterangan":         cleanDistribusiKeterangan(keterangan),
+		})
+	}
+
+	pagination := buildPagination(total, page, pageSize, isAll)
+	c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": items, "pagination": pagination}})
 }
 
 // GetZakatFitrahStats - Get stats for Zakat Fitrah

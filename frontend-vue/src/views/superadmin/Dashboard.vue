@@ -98,7 +98,7 @@ onMounted(async () => {
   try {
     const [publicData, usersData] = await Promise.all([
       api.getPublicDashboard(),
-      api.getUsers()
+      api.getUsers({ role: 'petugas', page: 1, page_size: 5 })
     ])
     
     if (publicData.data.success) {
@@ -108,7 +108,13 @@ onMounted(async () => {
     }
     
     if (usersData.data.success) {
-      stats.value[1].value = usersData.data.data.filter(u => u.role === 'petugas').length
+      const payload = usersData.data.data || {}
+      if (payload.pagination && typeof payload.pagination.total === 'number') {
+        stats.value[1].value = payload.pagination.total
+      } else {
+        const items = Array.isArray(payload.items) ? payload.items : (Array.isArray(payload) ? payload : [])
+        stats.value[1].value = items.filter(u => u.role === 'petugas').length
+      }
     }
   } catch (error) {
     console.error(error)

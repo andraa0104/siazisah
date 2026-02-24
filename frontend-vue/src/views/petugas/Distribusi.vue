@@ -222,6 +222,35 @@
                 </div>
               </div>
             </div>
+
+            <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600">
+              <div>
+                Menampilkan {{ distribusiList.length }} dari {{ distribusiPagination.total }} data
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <label class="text-xs text-gray-500">Per halaman</label>
+                <select v-model="distribusiPagination.pageSize" @change="onDistribusiPageSizeChange" class="px-2 py-1 border border-gray-300 rounded-lg text-sm">
+                  <option v-for="size in pageSizeOptions" :key="size" :value="size">
+                    {{ size === 'all' ? 'Semua' : size }}
+                  </option>
+                </select>
+                <button
+                  class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
+                  :disabled="distribusiPagination.isAll || distribusiPagination.page <= 1"
+                  @click="setDistribusiPage(distribusiPagination.page - 1)"
+                >
+                  Prev
+                </button>
+                <span class="text-xs text-gray-500">{{ distribusiPagination.page }} / {{ distribusiPagination.totalPages }}</span>
+                <button
+                  class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
+                  :disabled="distribusiPagination.isAll || distribusiPagination.page >= distribusiPagination.totalPages"
+                  @click="setDistribusiPage(distribusiPagination.page + 1)"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
         </template>
       </main>
@@ -281,6 +310,8 @@ const showSidebar = ref(false)
 const isLoading = ref(true)
 const isSaving = ref(false)
 const toast = ref({ message: '', type: 'success' })
+const pageSizeOptions = [5, 10, 25, 50, 'all']
+const distribusiPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false })
 
 const insight = ref({
   total_mustahiq_aktif: 0,
@@ -373,6 +404,56 @@ const modeButtonClass = (modeName) => {
     : 'px-4 py-2 rounded-lg bg-white text-gray-700 hover:bg-gray-100 text-sm border border-gray-200'
 }
 
+const setDistribusiPage = (page) => {
+  distribusiPagination.value.page = page
+  loadData()
+}
+
+const onDistribusiPageSizeChange = () => {
+  distribusiPagination.value.page = 1
+  loadData()
+}
+
+const syncDistribusiPagination = (payload, itemCount) => {
+  if (payload && payload.pagination) {
+    const meta = payload.pagination
+    distribusiPagination.value = {
+      page: meta.page || 1,
+      pageSize: meta.is_all ? 'all' : (meta.page_size || distribusiPagination.value.pageSize),
+      total: meta.total ?? itemCount,
+      totalPages: meta.total_pages || 1,
+      isAll: !!meta.is_all
+    }
+    return
+  }
+  distribusiPagination.value.total = itemCount
+  distribusiPagination.value.totalPages = 1
+  distribusiPagination.value.isAll = distribusiPagination.value.pageSize === 'all'
+}
+
+const applyDistribusiLocalPagination = (items) => {
+  const total = items.length
+  if (distribusiPagination.value.pageSize === 'all') {
+    distribusiPagination.value.total = total
+    distribusiPagination.value.totalPages = 1
+    distribusiPagination.value.isAll = true
+    return items
+  }
+
+  const pageSize = Number(distribusiPagination.value.pageSize) || 5
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const page = Math.min(distribusiPagination.value.page, totalPages)
+  const start = (page - 1) * pageSize
+  const sliced = items.slice(start, start + pageSize)
+
+  distribusiPagination.value.total = total
+  distribusiPagination.value.totalPages = totalPages
+  distribusiPagination.value.page = page
+  distribusiPagination.value.isAll = false
+
+  return sliced
+}
+
 const totalRencanaBeras = computed(() => allocations.value.reduce((sum, item) => sum + Number(item.beras_kg || 0), 0))
 const totalRencanaUang = computed(() => allocations.value.reduce((sum, item) => sum + Number(item.nominal || 0), 0))
 
@@ -424,18 +505,34 @@ const resetAllocations = () => {
 const loadData = async () => {
   isLoading.value = true
   try {
+    const distribusiParams = distribusiPagination.value.pageSize === 'all'
+      ? { page_size: 'all' }
+      : { page: distribusiPagination.value.page, page_size: distribusiPagination.value.pageSize }
     const [insightRes, mustahiqRes, distribusiRes] = await Promise.all([
       api.getDistribusiInsight(),
-      api.getMustahiq(),
-      api.getDistribusi()
+      api.getMustahiq({ page_size: 'all' }),
+      api.getDistribusi(distribusiParams)
     ])
 
     if (insightRes.data.success) insight.value = insightRes.data.data
     if (mustahiqRes.data.success) {
-      mustahiqList.value = dataOrEmpty(mustahiqRes.data.data)
+      const payload = mustahiqRes.data.data || {}
+      const items = Array.isArray(payload.items) ? payload.items : dataOrEmpty(payload)
+      mustahiqList.value = items
       mapMustahiqToAllocations()
     }
-    if (distribusiRes.data.success) distribusiList.value = dataOrEmpty(distribusiRes.data.data)
+    if (distribusiRes.data.success) {
+      const payload = distribusiRes.data.data || {}
+      if (Array.isArray(payload.items)) {
+        distribusiList.value = payload.items
+        syncDistribusiPagination(payload, payload.items.length)
+      } else if (Array.isArray(payload)) {
+        distribusiList.value = applyDistribusiLocalPagination(payload)
+      } else {
+        distribusiList.value = []
+        syncDistribusiPagination(payload, 0)
+      }
+    }
   } catch (error) {
     toast.value = { message: 'Gagal memuat data distribusi', type: 'error' }
   } finally {

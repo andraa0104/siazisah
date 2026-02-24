@@ -36,13 +36,34 @@ func (h *MasjidHandler) Create(c *gin.Context) {
 }
 
 func (h *MasjidHandler) GetAll(c *gin.Context) {
-	masjids, err := h.masjidRepo.GetAll()
+	page, pageSize, isAll := parsePagination(c)
+
+	if isAll {
+		masjids, err := h.masjidRepo.GetAll()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get masjids"})
+			return
+		}
+		pagination := buildPagination(len(masjids), page, pageSize, true)
+		c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": masjids, "pagination": pagination}})
+		return
+	}
+
+	total, err := h.masjidRepo.CountAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get masjids"})
 		return
 	}
 
-	c.JSON(http.StatusOK, models.Response{Success: true, Data: masjids})
+	offset := (page - 1) * pageSize
+	masjids, err := h.masjidRepo.GetAllPaginated(pageSize, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get masjids"})
+		return
+	}
+
+	pagination := buildPagination(total, page, pageSize, false)
+	c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": masjids, "pagination": pagination}})
 }
 
 func (h *MasjidHandler) GetByID(c *gin.Context) {

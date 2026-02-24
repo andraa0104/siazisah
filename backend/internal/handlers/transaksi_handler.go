@@ -52,14 +52,35 @@ func (h *TransaksiHandler) Create(c *gin.Context) {
 
 func (h *TransaksiHandler) GetAll(c *gin.Context) {
 	masjidID, _ := c.Get("masjid_id")
-	transaksis, err := h.transaksiRepo.GetByMasjidID(*masjidID.(*int))
+	page, pageSize, isAll := parsePagination(c)
+
+	if isAll {
+		transaksis, err := h.transaksiRepo.GetByMasjidID(*masjidID.(*int))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get transaksis"})
+			return
+		}
+		pagination := buildPagination(len(transaksis), page, pageSize, true)
+		c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": transaksis, "pagination": pagination}})
+		return
+	}
+
+	total, err := h.transaksiRepo.CountByMasjidID(*masjidID.(*int))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get transaksis"})
+		return
+	}
+
+	offset := (page - 1) * pageSize
+	transaksis, err := h.transaksiRepo.GetByMasjidIDPaginated(*masjidID.(*int), pageSize, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get transaksis"})
 		return
 	}
 
 	fmt.Printf("GetAll Transaksi - MasjidID: %d, Count: %d\n", *masjidID.(*int), len(transaksis))
-	c.JSON(http.StatusOK, models.Response{Success: true, Data: transaksis})
+	pagination := buildPagination(total, page, pageSize, false)
+	c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": transaksis, "pagination": pagination}})
 }
 
 func (h *TransaksiHandler) GetByID(c *gin.Context) {

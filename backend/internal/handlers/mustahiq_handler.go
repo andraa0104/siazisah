@@ -38,14 +38,35 @@ func (h *MustahiqHandler) Create(c *gin.Context) {
 
 func (h *MustahiqHandler) GetAll(c *gin.Context) {
 	masjidID, _ := c.Get("masjid_id")
-	mustahiqs, err := h.mustahiqRepo.GetByMasjidID(*masjidID.(*int))
+	page, pageSize, isAll := parsePagination(c)
+
+	if isAll {
+		mustahiqs, err := h.mustahiqRepo.GetByMasjidID(*masjidID.(*int))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiqs"})
+			return
+		}
+		pagination := buildPagination(len(mustahiqs), page, pageSize, true)
+		c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": mustahiqs, "pagination": pagination}})
+		return
+	}
+
+	total, err := h.mustahiqRepo.CountByMasjidID(*masjidID.(*int))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiqs"})
+		return
+	}
+
+	offset := (page - 1) * pageSize
+	mustahiqs, err := h.mustahiqRepo.GetByMasjidIDPaginated(*masjidID.(*int), pageSize, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiqs"})
 		return
 	}
 
 	fmt.Printf("GetAll Mustahiq - MasjidID: %d, Count: %d\n", *masjidID.(*int), len(mustahiqs))
-	c.JSON(http.StatusOK, models.Response{Success: true, Data: mustahiqs})
+	pagination := buildPagination(total, page, pageSize, false)
+	c.JSON(http.StatusOK, models.Response{Success: true, Data: gin.H{"items": mustahiqs, "pagination": pagination}})
 }
 
 func (h *MustahiqHandler) GetByID(c *gin.Context) {

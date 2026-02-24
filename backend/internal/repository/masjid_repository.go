@@ -63,6 +63,37 @@ func (r *MasjidRepository) GetAll() ([]models.Masjid, error) {
 	return masjids, nil
 }
 
+func (r *MasjidRepository) GetAllPaginated(limit, offset int) ([]models.Masjid, error) {
+	query := `SELECT id, nama, alamat, telepon, is_active, created_at, updated_at
+			  FROM masjid ORDER BY nama ASC LIMIT ? OFFSET ?`
+	rows, err := r.DB.Query(query, limit, offset)
+	if err != nil {
+		return []models.Masjid{}, nil
+	}
+	defer rows.Close()
+
+	var masjids []models.Masjid
+	for rows.Next() {
+		var masjid models.Masjid
+		err := rows.Scan(&masjid.ID, &masjid.Nama, &masjid.Alamat, &masjid.Telepon,
+			&masjid.IsActive, &masjid.CreatedAt, &masjid.UpdatedAt)
+		if err != nil {
+			continue
+		}
+		masjids = append(masjids, masjid)
+	}
+	return masjids, nil
+}
+
+func (r *MasjidRepository) CountAll() (int, error) {
+	var total int
+	query := `SELECT COUNT(*) FROM masjid`
+	if err := r.DB.QueryRow(query).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
 func (r *MasjidRepository) Update(masjid *models.Masjid) error {
 	query := `UPDATE masjid SET nama=?, alamat=?, telepon=?, is_active=? WHERE id=?`
 	_, err := r.DB.Exec(query, masjid.Nama, masjid.Alamat, masjid.Telepon, masjid.IsActive, masjid.ID)
