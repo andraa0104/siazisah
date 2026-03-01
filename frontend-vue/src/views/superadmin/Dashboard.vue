@@ -19,6 +19,13 @@
               <i class="fas fa-print mr-2"></i>
               Cetak Laporan Data Zakat
             </button>
+            <button
+              @click="openPrintMustahiqModal"
+              class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium"
+            >
+              <i class="fas fa-print mr-2"></i>
+              Cetak Data Mustahiq Global
+            </button>
             <div class="text-right mr-4 hidden sm:block">
               <p class="text-sm font-medium text-gray-800">{{ authStore.user?.full_name }}</p>
               <p class="text-xs text-gray-500">Administrator</p>
@@ -106,6 +113,39 @@
         </div>
       </div>
     </Modal>
+
+    <Modal
+      :show="showPrintMustahiqModal"
+      title="Cetak Data Mustahiq Global"
+      @close="showPrintMustahiqModal = false"
+    >
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Laporan</label>
+          <input
+            v-model="printMustahiqSignDate"
+            type="date"
+            class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div class="flex justify-end gap-2">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-50"
+            @click="showPrintMustahiqModal = false"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
+            @click="printMustahiqGlobalData"
+          >
+            Cetak
+          </button>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -122,6 +162,8 @@ const showSidebar = ref(false)
 const isLoading = ref(true)
 const showPrintModal = ref(false)
 const printSignDate = ref('')
+const showPrintMustahiqModal = ref(false)
+const printMustahiqSignDate = ref('')
 
 const menuItems = [
   { path: '/superadmin', label: 'Dashboard', icon: 'fas fa-home' },
@@ -149,6 +191,11 @@ const openPrintModal = () => {
   showPrintModal.value = true
 }
 
+const openPrintMustahiqModal = () => {
+  printMustahiqSignDate.value = todayDate()
+  showPrintMustahiqModal.value = true
+}
+
 const printZakatData = async () => {
   try {
     const selectedDate = printSignDate.value || todayDate()
@@ -165,6 +212,25 @@ const printZakatData = async () => {
   } catch (error) {
     console.error(error)
     alert('Gagal menyiapkan cetak laporan data zakat')
+  }
+}
+
+const printMustahiqGlobalData = async () => {
+  try {
+    const selectedDate = printMustahiqSignDate.value || todayDate()
+    const response = await api.getPrintSuperadminMustahiqGlobalData(selectedDate)
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      alert('Popup diblokir browser. Izinkan popup untuk mencetak laporan.')
+      return
+    }
+    printWindow.document.open()
+    printWindow.document.write(response.data)
+    printWindow.document.close()
+    showPrintMustahiqModal.value = false
+  } catch (error) {
+    console.error(error)
+    alert('Gagal menyiapkan cetak data mustahiq global')
   }
 }
 

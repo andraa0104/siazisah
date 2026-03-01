@@ -32,7 +32,7 @@ func main() {
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(userRepo)
 	userHandler := handlers.NewUserHandler(userRepo)
-	masjidHandler := handlers.NewMasjidHandler(masjidRepo)
+	masjidHandler := handlers.NewMasjidHandler(masjidRepo, pengaturanRepo)
 	pengurusHandler := handlers.NewPengurusHandler(pengurusRepo)
 	muzakkiHandler := handlers.NewMuzakkiHandler(muzakkiRepo)
 	mustahiqHandler := handlers.NewMustahiqHandler(mustahiqRepo)
@@ -81,6 +81,7 @@ func main() {
 			superadmin.PUT("/masjid/:id", masjidHandler.Update)
 			superadmin.DELETE("/masjid/:id", masjidHandler.Delete)
 			superadmin.GET("/reports/print-zakat", masjidHandler.PrintZakatSummary)
+			superadmin.GET("/reports/print-mustahiq-global", masjidHandler.PrintMustahiqGlobalSummary)
 
 			superadmin.GET("/users", userHandler.GetAll)
 			superadmin.POST("/users", userHandler.Create)

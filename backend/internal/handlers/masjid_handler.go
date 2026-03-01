@@ -16,11 +16,12 @@ import (
 )
 
 type MasjidHandler struct {
-	masjidRepo *repository.MasjidRepository
+	masjidRepo     *repository.MasjidRepository
+	pengaturanRepo *repository.PengaturanRepository
 }
 
-func NewMasjidHandler(masjidRepo *repository.MasjidRepository) *MasjidHandler {
-	return &MasjidHandler{masjidRepo: masjidRepo}
+func NewMasjidHandler(masjidRepo *repository.MasjidRepository, pengaturanRepo *repository.PengaturanRepository) *MasjidHandler {
+	return &MasjidHandler{masjidRepo: masjidRepo, pengaturanRepo: pengaturanRepo}
 }
 
 func (h *MasjidHandler) Create(c *gin.Context) {
@@ -34,6 +35,29 @@ func (h *MasjidHandler) Create(c *gin.Context) {
 	if err := h.masjidRepo.Create(&masjid); err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to create masjid"})
 		return
+	}
+
+	defaultPengaturan := models.PengaturanZakat{
+		MasjidID:           masjid.ID,
+		Kelas1:             68000,
+		Kelas2:             49000,
+		Kelas3:             38000,
+		FitrahBerasPerJiwa: 2.7,
+		FidyahPerHari:      30000,
+		FidyahBerasPerHari: 0.6,
+		MalRates: map[string]float64{
+			"Emas":                2.5,
+			"Perak":               2.5,
+			"Perdagangan":         2.5,
+			"Simpanan":            2.5,
+			"Penghasilan/Profesi": 2.5,
+		},
+	}
+	if h.pengaturanRepo != nil {
+		if err := h.pengaturanRepo.Upsert(&defaultPengaturan); err != nil {
+			c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Masjid created but failed to set default pengaturan zakat"})
+			return
+		}
 	}
 
 	c.JSON(http.StatusCreated, models.Response{Success: true, Message: "Masjid created successfully", Data: masjid})
@@ -617,6 +641,382 @@ func (h *MasjidHandler) PrintZakatSummary(c *gin.Context) {
 				return formatIDNumber(leftInt)
 			}
 			return fmt.Sprintf("%s,%s", formatIDNumber(leftInt), right)
+		},
+	}).Parse(htmlTemplate)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to build print template"})
+		return
+	}
+
+	c.Header("Content-Type", "text/html; charset=utf-8")
+	c.Header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+	c.Header("Pragma", "no-cache")
+	c.Header("Expires", "0")
+	c.Status(http.StatusOK)
+	_ = tmpl.Execute(c.Writer, data)
+}
+
+func normalizeMustahiqGlobalJenis(jenis string) string {
+	clean := strings.ToLower(strings.TrimSpace(jenis))
+	clean = strings.ReplaceAll(clean, "-", " ")
+	clean = strings.Join(strings.Fields(clean), " ")
+
+	switch clean {
+	case "fakir":
+		return "fakir"
+	case "miskin":
+		return "miskin"
+	case "amil":
+		return "amil"
+	case "mualaf":
+		return "mualaf"
+	case "riqab":
+		return "riqab"
+	case "gharim", "gharimin":
+		return "gharimin"
+	case "fisabilillah", "fi sabilillah", "fisabil lah":
+		return "fisabilillah"
+	case "ibnu sabil", "ibnusabil":
+		return "ibnu sabil"
+	default:
+		return ""
+	}
+}
+
+func (h *MasjidHandler) PrintMustahiqGlobalSummary(c *gin.Context) {
+	signDateRaw := strings.TrimSpace(c.Query("sign_date"))
+	signDate := time.Now()
+	if signDateRaw != "" {
+		parsed, err := time.Parse("2006-01-02", signDateRaw)
+		if err == nil {
+			signDate = parsed
+		}
+	}
+
+	tahun := signDate.Year()
+
+	masjids, err := h.masjidRepo.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get masjid"})
+		return
+	}
+
+	type rowData struct {
+		No           int
+		MasjidID     int
+		NamaMasjid   string
+		Fakir        int
+		Miskin       int
+		Amil         int
+		Mualaf       int
+		Riqab        int
+		Gharimin     int
+		Fisabilillah int
+		IbnuSabil    int
+		Total        int
+	}
+
+	rows := make([]*rowData, 0, len(masjids))
+	rowByMasjidID := map[int]*rowData{}
+	for idx, m := range masjids {
+		row := &rowData{
+			No:         idx + 1,
+			MasjidID:   m.ID,
+			NamaMasjid: strings.TrimSpace(m.Nama),
+		}
+		rows = append(rows, row)
+		rowByMasjidID[m.ID] = row
+	}
+
+	query := `SELECT masjid_id, COALESCE(jenis_penerima, ''), COUNT(*)
+		FROM mustahiq
+		WHERE is_active = 1
+		GROUP BY masjid_id, COALESCE(jenis_penerima, '')`
+
+	resultRows, err := h.masjidRepo.DB.Query(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiq summary"})
+		return
+	}
+	defer resultRows.Close()
+
+	for resultRows.Next() {
+		var masjidID int
+		var jenis string
+		var jumlah int
+		if err := resultRows.Scan(&masjidID, &jenis, &jumlah); err != nil {
+			continue
+		}
+
+		row, ok := rowByMasjidID[masjidID]
+		if !ok {
+			continue
+		}
+
+		switch normalizeMustahiqGlobalJenis(jenis) {
+		case "fakir":
+			row.Fakir += jumlah
+		case "miskin":
+			row.Miskin += jumlah
+		case "amil":
+			row.Amil += jumlah
+		case "mualaf":
+			row.Mualaf += jumlah
+		case "riqab":
+			row.Riqab += jumlah
+		case "gharimin":
+			row.Gharimin += jumlah
+		case "fisabilillah":
+			row.Fisabilillah += jumlah
+		case "ibnu sabil":
+			row.IbnuSabil += jumlah
+		}
+	}
+
+	type finalRow struct {
+		No           int
+		NamaMasjid   string
+		Fakir        int
+		Miskin       int
+		Amil         int
+		Mualaf       int
+		Riqab        int
+		Gharimin     int
+		Fisabilillah int
+		IbnuSabil    int
+		Total        int
+	}
+
+	finalRows := make([]finalRow, 0, len(rows))
+	grand := finalRow{}
+	for _, row := range rows {
+		row.Total = row.Fakir + row.Miskin + row.Amil + row.Mualaf + row.Riqab + row.Gharimin + row.Fisabilillah + row.IbnuSabil
+
+		finalRows = append(finalRows, finalRow{
+			No:           row.No,
+			NamaMasjid:   row.NamaMasjid,
+			Fakir:        row.Fakir,
+			Miskin:       row.Miskin,
+			Amil:         row.Amil,
+			Mualaf:       row.Mualaf,
+			Riqab:        row.Riqab,
+			Gharimin:     row.Gharimin,
+			Fisabilillah: row.Fisabilillah,
+			IbnuSabil:    row.IbnuSabil,
+			Total:        row.Total,
+		})
+
+		grand.Fakir += row.Fakir
+		grand.Miskin += row.Miskin
+		grand.Amil += row.Amil
+		grand.Mualaf += row.Mualaf
+		grand.Riqab += row.Riqab
+		grand.Gharimin += row.Gharimin
+		grand.Fisabilillah += row.Fisabilillah
+		grand.IbnuSabil += row.IbnuSabil
+		grand.Total += row.Total
+	}
+
+	type templateData struct {
+		Tahun                  int
+		TanggalTtd             string
+		Rows                   []finalRow
+		Grand                  finalRow
+		MainTitleFontSize      string
+		MainTitleFontWeight    int
+		AreaTitleFontSize      string
+		AreaTitleFontWeight    int
+		AddressFontSize        string
+		AddressFontWeight      int
+		ReportTitleFontSize    string
+		ReportTitleFontWeight  int
+		YearTitleFontSize      string
+		YearTitleFontWeight    int
+		TableFontSize          string
+		ColNoWidth             string
+		ColMasjidWidth         string
+		ColFakirWidth          string
+		ColMiskinWidth         string
+		ColAmilWidth           string
+		ColMualafWidth         string
+		ColRiqabWidth          string
+		ColGhariminWidth       string
+		ColFisabilillahWidth   string
+		ColIbnuSabilWidth      string
+		ColTotalWidth          string
+		SignatureFontSize      string
+		SignatureRowMarginTop  string
+		SignatureNameMarginTop string
+		SignatureColWidth      string
+	}
+
+	data := templateData{
+		Tahun:                  tahun,
+		TanggalTtd:             formatSignedDateID(signDate),
+		Rows:                   finalRows,
+		Grand:                  grand,
+		MainTitleFontSize:      "25px",
+		MainTitleFontWeight:    800,
+		AreaTitleFontSize:      "18px",
+		AreaTitleFontWeight:    700,
+		AddressFontSize:        "11px",
+		AddressFontWeight:      300,
+		ReportTitleFontSize:    "15px",
+		ReportTitleFontWeight:  700,
+		YearTitleFontSize:      "13px",
+		YearTitleFontWeight:    700,
+		TableFontSize:          "11px",
+		ColNoWidth:             "36px",
+		ColMasjidWidth:         "190px",
+		ColFakirWidth:          "64px",
+		ColMiskinWidth:         "72px",
+		ColAmilWidth:           "64px",
+		ColMualafWidth:         "72px",
+		ColRiqabWidth:          "64px",
+		ColGhariminWidth:       "86px",
+		ColFisabilillahWidth:   "92px",
+		ColIbnuSabilWidth:      "88px",
+		ColTotalWidth:          "86px",
+		SignatureFontSize:      "14px",
+		SignatureRowMarginTop:  "35px",
+		SignatureNameMarginTop: "90px",
+		SignatureColWidth:      "46%",
+	}
+
+	htmlTemplate := `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laporan Data Mustahiq Global</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #000; margin: 0; padding: 24px 28px; }
+    .wrapper { max-width: 1380px; margin: 0 auto; }
+    .text-center { text-align: center; }
+			.title-main { font-size: {{ .MainTitleFontSize }}; font-weight: {{ .MainTitleFontWeight }}; margin: 2px 0; text-transform: uppercase; }
+			.title-area { font-size: {{ .AreaTitleFontSize }}; font-weight: {{ .AreaTitleFontWeight }}; margin: 2px 0; text-transform: uppercase; }
+			.title-address { font-size: {{ .AddressFontSize }}; font-weight: {{ .AddressFontWeight }}; margin: 2px 0 8px; }
+    .divider { border-top: 5px solid #000; margin: 8px 0 18px; }
+			.report-title { font-size: {{ .ReportTitleFontSize }}; font-weight: {{ .ReportTitleFontWeight }}; margin: 0; text-transform: uppercase; }
+			.report-year { font-size: {{ .YearTitleFontSize }}; font-weight: {{ .YearTitleFontWeight }}; margin: 4px 0 16px; text-transform: uppercase; }
+			table { width: 100%; border-collapse: collapse; font-size: {{ .TableFontSize }}; }
+    th, td { border: 1px solid #000; padding: 4px 4px; }
+    th { background: #f5f5f5; font-weight: 700; text-align: center; }
+    .right { text-align: right; }
+    .center { text-align: center; }
+    .left { text-align: left; }
+    .total-row td { font-weight: 700; }
+	.signature-row { margin-top: {{ .SignatureRowMarginTop }}; display: flex; justify-content: space-between; gap: 24px; font-size: {{ .SignatureFontSize }}; }
+	.signature-col { width: {{ .SignatureColWidth }}; }
+    .signature-head { min-height: 42px; display: flex; flex-direction: column; justify-content: flex-start; }
+    .signature-line { margin: 0; line-height: 1.3; }
+	.signature-name { margin-top: {{ .SignatureNameMarginTop }}; font-weight: 700; text-transform: uppercase; text-decoration: underline; }
+    @media print {
+      body { padding: 0; }
+      .wrapper { max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="text-center">
+      <p class="title-main">PENGURUS PERINGATAN HARI BESAR ISLAM</p>
+      <p class="title-area">DESA PURWAJAYA KECAMATAN LOA JANAN</p>
+      <p class="title-address">Alamat: Jalan Pembangunan RT. 03 Desa Purwajaya</p>
+    </div>
+    <div class="divider"></div>
+    <div class="text-center">
+      <p class="report-title">LAPORAN DATA MUSTAHIQ</p>
+      <p class="report-year">TAHUN {{ .Tahun }}</p>
+    </div>
+
+		<table>
+			<colgroup>
+				<col style="width: {{ .ColNoWidth }};" />
+				<col style="width: {{ .ColMasjidWidth }};" />
+				<col style="width: {{ .ColFakirWidth }};" />
+				<col style="width: {{ .ColMiskinWidth }};" />
+				<col style="width: {{ .ColAmilWidth }};" />
+				<col style="width: {{ .ColMualafWidth }};" />
+				<col style="width: {{ .ColRiqabWidth }};" />
+				<col style="width: {{ .ColGhariminWidth }};" />
+				<col style="width: {{ .ColFisabilillahWidth }};" />
+				<col style="width: {{ .ColIbnuSabilWidth }};" />
+				<col style="width: {{ .ColTotalWidth }};" />
+			</colgroup>
+      <thead>
+        <tr>
+					<th rowspan="2">No</th>
+					<th rowspan="2">Nama Masjid/Langgar</th>
+          <th colspan="8">Jenis Mustahiq</th>
+					<th rowspan="2">Total Mustahiq</th>
+        </tr>
+        <tr>
+					<th>Fakir</th>
+					<th>Miskin</th>
+					<th>Amil</th>
+					<th>Mualaf</th>
+					<th>Riqab</th>
+					<th>Gharimin</th>
+					<th>Fisabilillah</th>
+					<th>Ibnu Sabil</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range .Rows }}
+        <tr>
+          <td class="center">{{ .No }}</td>
+          <td class="left">{{ .NamaMasjid }}</td>
+          <td class="right">{{ formatInt .Fakir }}</td>
+          <td class="right">{{ formatInt .Miskin }}</td>
+          <td class="right">{{ formatInt .Amil }}</td>
+          <td class="right">{{ formatInt .Mualaf }}</td>
+          <td class="right">{{ formatInt .Riqab }}</td>
+          <td class="right">{{ formatInt .Gharimin }}</td>
+          <td class="right">{{ formatInt .Fisabilillah }}</td>
+          <td class="right">{{ formatInt .IbnuSabil }}</td>
+          <td class="right">{{ formatInt .Total }}</td>
+        </tr>
+        {{ end }}
+        <tr class="total-row">
+          <td colspan="2" class="center">TOTAL</td>
+          <td class="right">{{ formatInt .Grand.Fakir }}</td>
+          <td class="right">{{ formatInt .Grand.Miskin }}</td>
+          <td class="right">{{ formatInt .Grand.Amil }}</td>
+          <td class="right">{{ formatInt .Grand.Mualaf }}</td>
+          <td class="right">{{ formatInt .Grand.Riqab }}</td>
+          <td class="right">{{ formatInt .Grand.Gharimin }}</td>
+          <td class="right">{{ formatInt .Grand.Fisabilillah }}</td>
+          <td class="right">{{ formatInt .Grand.IbnuSabil }}</td>
+          <td class="right">{{ formatInt .Grand.Total }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="signature-row">
+      <div class="signature-col">
+        <div class="signature-head">
+          <p class="signature-line">Mengetahui,</p>
+          <p class="signature-line">Kepala Desa Purwajaya</p>
+        </div>
+        <p class="signature-name">ADI SUCIPTO</p>
+      </div>
+      <div class="signature-col">
+        <div class="signature-head">
+          <p class="signature-line">Purwajaya, {{ .TanggalTtd }}</p>
+          <p class="signature-line">Ketua Pengurus PHBI</p>
+        </div>
+        <p class="signature-name">SLAMET JUDIONO S,Pd</p>
+      </div>
+    </div>
+  </div>
+  <script>window.onload = function(){ window.print(); };</script>
+</body>
+</html>`
+
+	tmpl, err := template.New("print-superadmin-mustahiq-global").Funcs(template.FuncMap{
+		"formatInt": func(v int) string {
+			return formatIDNumber(int64(v))
 		},
 	}).Parse(htmlTemplate)
 	if err != nil {

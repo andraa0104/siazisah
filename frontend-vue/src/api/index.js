@@ -40,6 +40,10 @@ export default {
     params: { sign_date: signDate, _ts: Date.now() },
     responseType: 'text'
   }),
+  getPrintSuperadminMustahiqGlobalData: (signDate) => api.get('/superadmin/reports/print-mustahiq-global', {
+    params: { sign_date: signDate, _ts: Date.now() },
+    responseType: 'text'
+  }),
   
   getUsers: (params) => api.get('/superadmin/users', { params }),
   createUser: (data) => api.post('/superadmin/users', data),

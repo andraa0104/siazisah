@@ -21,10 +21,10 @@ func (r *PengaturanRepository) ensureTable() {
 	query := `CREATE TABLE IF NOT EXISTS pengaturan_zakat (
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		masjid_id INT NOT NULL UNIQUE,
-		kelas1 DECIMAL(15,2) NOT NULL DEFAULT 35000,
-		kelas2 DECIMAL(15,2) NOT NULL DEFAULT 45000,
-		kelas3 DECIMAL(15,2) NOT NULL DEFAULT 55000,
-		fitrah_beras_per_jiwa DECIMAL(6,2) NOT NULL DEFAULT 2.5,
+		kelas1 DECIMAL(15,2) NOT NULL DEFAULT 68000,
+		kelas2 DECIMAL(15,2) NOT NULL DEFAULT 49000,
+		kelas3 DECIMAL(15,2) NOT NULL DEFAULT 38000,
+		fitrah_beras_per_jiwa DECIMAL(6,2) NOT NULL DEFAULT 2.7,
 		fidyah_per_hari DECIMAL(15,2) NOT NULL DEFAULT 30000,
 		fidyah_beras_per_hari DECIMAL(6,2) NOT NULL DEFAULT 0.6,
 		mal_rates_json TEXT NULL,
@@ -38,16 +38,22 @@ func (r *PengaturanRepository) ensureTable() {
 }
 
 func defaultMalRates() map[string]float64 {
-	return map[string]float64{}
+	return map[string]float64{
+		"Emas":                2.5,
+		"Perak":               2.5,
+		"Perdagangan":         2.5,
+		"Simpanan":            2.5,
+		"Penghasilan/Profesi": 2.5,
+	}
 }
 
 func defaultPengaturan(masjidID int) *models.PengaturanZakat {
 	return &models.PengaturanZakat{
 		MasjidID:           masjidID,
-		Kelas1:             35000,
-		Kelas2:             45000,
-		Kelas3:             55000,
-		FitrahBerasPerJiwa: 2.5,
+		Kelas1:             68000,
+		Kelas2:             49000,
+		Kelas3:             38000,
+		FitrahBerasPerJiwa: 2.7,
 		FidyahPerHari:      30000,
 		FidyahBerasPerHari: 0.6,
 		MalRates:           defaultMalRates(),
