@@ -347,28 +347,56 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 func (h *PublicHandler) GetMasjidTransaksi(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	page, pageSize, isAll := parsePagination(c)
+	jenisFilter := strings.TrimSpace(strings.ToLower(c.Query("jenis_zakat")))
+	bentukFilter := strings.TrimSpace(strings.ToLower(c.Query("bentuk_zakat")))
+	qFilter := strings.TrimSpace(strings.ToLower(c.Query("q")))
+
+	if jenisFilter != "fitrah" && jenisFilter != "fidyah" {
+		bentukFilter = ""
+	}
 
 	if isAll {
 		page = 1
 	}
 
+	whereClauses := []string{"t.masjid_id = ?"}
+	whereArgs := []interface{}{id}
+
+	if jenisFilter != "" {
+		whereClauses = append(whereClauses, "t.jenis_zakat = ?")
+		whereArgs = append(whereArgs, jenisFilter)
+	}
+
+	if bentukFilter != "" {
+		whereClauses = append(whereClauses, "t.bentuk_zakat = ?")
+		whereArgs = append(whereArgs, bentukFilter)
+	}
+
+	if qFilter != "" {
+		whereClauses = append(whereClauses, "LOWER(COALESCE(m.nama, '')) LIKE ?")
+		whereArgs = append(whereArgs, "%"+qFilter+"%")
+	}
+
+	whereSQL := strings.Join(whereClauses, " AND ")
+
 	var total int
-	if err := h.DB.QueryRow("SELECT COUNT(*) FROM transaksi_zakat WHERE masjid_id = ?", id).Scan(&total); err != nil {
+	countQuery := "SELECT COUNT(*) FROM transaksi_zakat t LEFT JOIN muzakki m ON t.muzakki_id = m.id WHERE " + whereSQL
+	if err := h.DB.QueryRow(countQuery, whereArgs...).Scan(&total); err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get transaksi"})
 		return
 	}
 
 	query := `
 		SELECT t.id, COALESCE(m.nama, 'Unknown') as muzakki_nama, t.jenis_zakat, COALESCE(t.bentuk_zakat, ''),
-			COALESCE(t.jumlah_orang, 0), COALESCE(t.jumlah_hari_fidyah, 0), t.total_dibayar,
+			COALESCE(t.jumlah_orang, 0), COALESCE(t.jumlah_hari_fidyah, 0), COALESCE(t.kg_beras_dibayar, 0), t.total_dibayar,
 			COALESCE(t.infaq_tambahan, 0), t.tanggal_bayar, COALESCE(t.keterangan, '')
 		FROM transaksi_zakat t
 		LEFT JOIN muzakki m ON t.muzakki_id = m.id
-		WHERE t.masjid_id = ?
+		WHERE ` + whereSQL + `
 		ORDER BY t.tanggal_bayar DESC
 	`
 
-	args := []interface{}{id}
+	args := append([]interface{}{}, whereArgs...)
 	if !isAll {
 		query += " LIMIT ? OFFSET ?"
 		offset := (page - 1) * pageSize
@@ -388,8 +416,9 @@ func (h *PublicHandler) GetMasjidTransaksi(c *gin.Context) {
 		var nama, jenis, bentuk, tanggal, keterangan string
 		var jumlah int
 		var jumlahHari int
+		var kgBeras float64
 		var totalDibayar, infaq float64
-		if err := rows.Scan(&tid, &nama, &jenis, &bentuk, &jumlah, &jumlahHari, &totalDibayar, &infaq, &tanggal, &keterangan); err != nil {
+		if err := rows.Scan(&tid, &nama, &jenis, &bentuk, &jumlah, &jumlahHari, &kgBeras, &totalDibayar, &infaq, &tanggal, &keterangan); err != nil {
 			continue
 		}
 		items = append(items, map[string]interface{}{
@@ -399,6 +428,7 @@ func (h *PublicHandler) GetMasjidTransaksi(c *gin.Context) {
 			"bentuk_zakat":       bentuk,
 			"jumlah_orang":       jumlah,
 			"jumlah_hari_fidyah": jumlahHari,
+			"kg_beras_dibayar":   kgBeras,
 			"total_dibayar":      totalDibayar,
 			"infaq_tambahan":     infaq,
 			"tanggal_bayar":      tanggal,
@@ -413,9 +443,27 @@ func (h *PublicHandler) GetMasjidTransaksi(c *gin.Context) {
 func (h *PublicHandler) GetMasjidMustahiq(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	page, pageSize, isAll := parsePagination(c)
+	jenisFilter := strings.TrimSpace(strings.ToLower(c.Query("jenis_penerima")))
+	qFilter := strings.TrimSpace(strings.ToLower(c.Query("q")))
+
+	whereClauses := []string{"masjid_id = ?"}
+	whereArgs := []interface{}{id}
+
+	if jenisFilter != "" {
+		whereClauses = append(whereClauses, "LOWER(jenis_penerima) = ?")
+		whereArgs = append(whereArgs, jenisFilter)
+	}
+
+	if qFilter != "" {
+		whereClauses = append(whereClauses, "LOWER(nama) LIKE ?")
+		whereArgs = append(whereArgs, "%"+qFilter+"%")
+	}
+
+	whereSQL := strings.Join(whereClauses, " AND ")
 
 	var total int
-	if err := h.DB.QueryRow("SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ?", id).Scan(&total); err != nil {
+	countQuery := "SELECT COUNT(*) FROM mustahiq WHERE " + whereSQL
+	if err := h.DB.QueryRow(countQuery, whereArgs...).Scan(&total); err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiq"})
 		return
 	}
@@ -423,11 +471,11 @@ func (h *PublicHandler) GetMasjidMustahiq(c *gin.Context) {
 	query := `
 		SELECT id, nama, alamat, jenis_penerima, rt, COALESCE(keterangan, '')
 		FROM mustahiq
-		WHERE masjid_id = ?
+		WHERE ` + whereSQL + `
 		ORDER BY nama ASC
 	`
 
-	args := []interface{}{id}
+	args := append([]interface{}{}, whereArgs...)
 	if !isAll {
 		query += " LIMIT ? OFFSET ?"
 		offset := (page - 1) * pageSize
@@ -453,6 +501,7 @@ func (h *PublicHandler) GetMasjidMustahiq(c *gin.Context) {
 			"nama":       nama,
 			"alamat":     alamat,
 			"kategori":   kategori,
+			"jenis_penerima": kategori,
 			"rt":         rt,
 			"keterangan": keterangan,
 		})
@@ -652,6 +701,47 @@ func (h *PublicHandler) GetFidyahStats(c *gin.Context) {
 		WHERE is_active = 1
 	`).Scan(&totalMustahiq)
 	stats["total_mustahiq"] = totalMustahiq
+
+	c.JSON(http.StatusOK, models.Response{Success: true, Data: stats})
+}
+
+// GetMustahiqStats - Get global mustahiq stats
+func (h *PublicHandler) GetMustahiqStats(c *gin.Context) {
+	stats := map[string]interface{}{}
+
+	var totalMustahiq int
+	h.DB.QueryRow(`
+		SELECT COUNT(*)
+		FROM mustahiq
+	`).Scan(&totalMustahiq)
+
+	rows, err := h.DB.Query(`
+		SELECT LOWER(COALESCE(jenis_penerima, 'lainnya')) AS jenis_penerima, COUNT(*) AS total
+		FROM mustahiq
+		GROUP BY LOWER(COALESCE(jenis_penerima, 'lainnya'))
+		ORDER BY jenis_penerima ASC
+	`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiq stats"})
+		return
+	}
+	defer rows.Close()
+
+	perJenis := []map[string]interface{}{}
+	for rows.Next() {
+		var jenis string
+		var total int
+		if err := rows.Scan(&jenis, &total); err != nil {
+			continue
+		}
+		perJenis = append(perJenis, map[string]interface{}{
+			"jenis_penerima": jenis,
+			"total":          total,
+		})
+	}
+
+	stats["total_mustahiq"] = totalMustahiq
+	stats["per_jenis"] = perJenis
 
 	c.JSON(http.StatusOK, models.Response{Success: true, Data: stats})
 }

@@ -11,7 +11,14 @@
             </button>
             <h1 class="text-xl md:text-2xl font-bold text-gray-800">Dashboard Superadmin</h1>
           </div>
-          <div class="flex items-center">
+          <div class="flex items-center gap-3">
+            <button
+              @click="openPrintModal"
+              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+            >
+              <i class="fas fa-print mr-2"></i>
+              Cetak Laporan Data Zakat
+            </button>
             <div class="text-right mr-4 hidden sm:block">
               <p class="text-sm font-medium text-gray-800">{{ authStore.user?.full_name }}</p>
               <p class="text-xs text-gray-500">Administrator</p>
@@ -66,6 +73,39 @@
         </div>
       </main>
     </div>
+
+    <Modal
+      :show="showPrintModal"
+      title="Cetak Laporan Data Zakat"
+      @close="showPrintModal = false"
+    >
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Laporan</label>
+          <input
+            v-model="printSignDate"
+            type="date"
+            class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div class="flex justify-end gap-2">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-50"
+            @click="showPrintModal = false"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+            @click="printZakatData"
+          >
+            Cetak
+          </button>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -74,11 +114,14 @@ import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import Sidebar from '../../components/Sidebar.vue'
 import SkeletonCard from '../../components/SkeletonCard.vue'
+import Modal from '../../components/Modal.vue'
 import api from '../../api'
 
 const authStore = useAuthStore()
 const showSidebar = ref(false)
 const isLoading = ref(true)
+const showPrintModal = ref(false)
+const printSignDate = ref('')
 
 const menuItems = [
   { path: '/superadmin', label: 'Dashboard', icon: 'fas fa-home' },
@@ -92,6 +135,38 @@ const stats = ref([
   { label: 'Total Muzakki', value: 0, icon: 'fas fa-hand-holding-heart', bgColor: 'bg-purple-100', textColor: 'text-purple-600' },
   { label: 'Total Mustahiq', value: 0, icon: 'fas fa-users', bgColor: 'bg-yellow-100', textColor: 'text-yellow-600' }
 ])
+
+const todayDate = () => {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const openPrintModal = () => {
+  printSignDate.value = todayDate()
+  showPrintModal.value = true
+}
+
+const printZakatData = async () => {
+  try {
+    const selectedDate = printSignDate.value || todayDate()
+    const response = await api.getPrintSuperadminZakatData(selectedDate)
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      alert('Popup diblokir browser. Izinkan popup untuk mencetak laporan.')
+      return
+    }
+    printWindow.document.open()
+    printWindow.document.write(response.data)
+    printWindow.document.close()
+    showPrintModal.value = false
+  } catch (error) {
+    console.error(error)
+    alert('Gagal menyiapkan cetak laporan data zakat')
+  }
+}
 
 onMounted(async () => {
   isLoading.value = true

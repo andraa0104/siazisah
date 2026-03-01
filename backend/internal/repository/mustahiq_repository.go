@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"strings"
 	"github.com/yourusername/siazisah/internal/models"
 )
 
@@ -94,6 +95,87 @@ func (r *MustahiqRepository) CountByMasjidID(masjidID int) (int, error) {
 	var total int
 	query := `SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ?`
 	if err := r.DB.QueryRow(query, masjidID).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
+func (r *MustahiqRepository) buildFilterClause(masjidID int, jenisPenerima, q string) (string, []interface{}) {
+	whereClause := " WHERE masjid_id = ?"
+	args := []interface{}{masjidID}
+
+	if strings.TrimSpace(jenisPenerima) != "" {
+		whereClause += " AND jenis_penerima = ?"
+		args = append(args, strings.TrimSpace(jenisPenerima))
+	}
+
+	if strings.TrimSpace(q) != "" {
+		whereClause += " AND LOWER(COALESCE(nama, '')) LIKE ?"
+		args = append(args, "%"+strings.ToLower(strings.TrimSpace(q))+"%")
+	}
+
+	return whereClause, args
+}
+
+func (r *MustahiqRepository) GetByMasjidIDFiltered(masjidID int, jenisPenerima, q string) ([]models.Mustahiq, error) {
+	baseQuery := `SELECT id, masjid_id, nama, jenis_penerima, alamat, lokasi, rt, telepon, keterangan, is_active, created_at, updated_at
+			  FROM mustahiq`
+	whereClause, args := r.buildFilterClause(masjidID, jenisPenerima, q)
+	query := baseQuery + whereClause + " ORDER BY nama ASC"
+
+	rows, err := r.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var mustahiqs []models.Mustahiq
+	for rows.Next() {
+		var mustahiq models.Mustahiq
+		err := rows.Scan(&mustahiq.ID, &mustahiq.MasjidID, &mustahiq.Nama, &mustahiq.JenisPenerima,
+			&mustahiq.Alamat, &mustahiq.Lokasi, &mustahiq.RT, &mustahiq.Telepon,
+			&mustahiq.Keterangan, &mustahiq.IsActive, &mustahiq.CreatedAt, &mustahiq.UpdatedAt)
+		if err != nil {
+			continue
+		}
+		mustahiqs = append(mustahiqs, mustahiq)
+	}
+	return mustahiqs, nil
+}
+
+func (r *MustahiqRepository) GetByMasjidIDPaginatedFiltered(masjidID int, jenisPenerima, q string, limit, offset int) ([]models.Mustahiq, error) {
+	baseQuery := `SELECT id, masjid_id, nama, jenis_penerima, alamat, lokasi, rt, telepon, keterangan, is_active, created_at, updated_at
+			  FROM mustahiq`
+	whereClause, args := r.buildFilterClause(masjidID, jenisPenerima, q)
+	query := baseQuery + whereClause + " ORDER BY nama ASC LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
+
+	rows, err := r.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var mustahiqs []models.Mustahiq
+	for rows.Next() {
+		var mustahiq models.Mustahiq
+		err := rows.Scan(&mustahiq.ID, &mustahiq.MasjidID, &mustahiq.Nama, &mustahiq.JenisPenerima,
+			&mustahiq.Alamat, &mustahiq.Lokasi, &mustahiq.RT, &mustahiq.Telepon,
+			&mustahiq.Keterangan, &mustahiq.IsActive, &mustahiq.CreatedAt, &mustahiq.UpdatedAt)
+		if err != nil {
+			continue
+		}
+		mustahiqs = append(mustahiqs, mustahiq)
+	}
+	return mustahiqs, nil
+}
+
+func (r *MustahiqRepository) CountByMasjidIDFiltered(masjidID int, jenisPenerima, q string) (int, error) {
+	var total int
+	baseQuery := `SELECT COUNT(*) FROM mustahiq`
+	whereClause, args := r.buildFilterClause(masjidID, jenisPenerima, q)
+	query := baseQuery + whereClause
+	if err := r.DB.QueryRow(query, args...).Scan(&total); err != nil {
 		return 0, err
 	}
 	return total, nil

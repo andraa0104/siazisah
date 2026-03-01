@@ -11,13 +11,60 @@
             </button>
             <h1 class="text-xl md:text-2xl font-bold text-gray-800">Transaksi Zakat</h1>
           </div>
-          <button @click="showModal = true" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-            <i class="fas fa-plus mr-2"></i>Input Transaksi
-          </button>
+          <div class="flex items-center gap-2">
+            <button @click="showPrintDataModal = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+              <i class="fas fa-print mr-2"></i>Print Data
+            </button>
+            <button @click="showModal = true" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+              <i class="fas fa-plus mr-2"></i>Input Transaksi
+            </button>
+          </div>
         </div>
       </header>
 
       <main class="flex-1 overflow-y-auto p-4 md:p-6">
+        <div class="bg-white rounded-xl shadow-md p-4 mb-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Filter Jenis Zakat</label>
+              <select v-model="filters.jenis_zakat" @change="onJenisFilterChange" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                <option value="">Semua Jenis</option>
+                <option value="fitrah">Zakat Fitrah</option>
+                <option value="mal">Zakat Mal</option>
+                <option value="fidyah">Fidyah</option>
+                <option value="infaq">Infaq</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Bentuk (Fitrah/Fidyah)</label>
+              <select v-model="filters.bentuk_zakat" :disabled="!showBentukFilter" @change="applyFilters" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm disabled:bg-gray-100 disabled:text-gray-400">
+                <option value="">Semua Bentuk</option>
+                <option value="uang">Uang</option>
+                <option value="beras">Beras</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-xs text-gray-500 mb-1">Cari Muzakki</label>
+              <div class="flex gap-2">
+                <input
+                  v-model="filters.q"
+                  @keyup.enter="applyFilters"
+                  placeholder="Ketik nama muzakki..."
+                  class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                <button @click="applyFilters" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
+                  Cari
+                </button>
+                <button @click="resetFilters" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Desktop Table -->
         <div class="hidden md:block bg-white rounded-xl shadow-md overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
@@ -27,7 +74,8 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Muzakki</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jenis</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Detail</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Uang</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Beras</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
               </tr>
             </thead>
@@ -51,6 +99,7 @@
                   <div class="font-bold text-gray-900">{{ formatCurrency(t.total_dibayar) }}</div>
                   <div v-if="t.infaq_tambahan > 0" class="text-xs text-blue-600">+Infaq {{ formatCurrency(t.infaq_tambahan) }}</div>
                 </td>
+                <td class="px-6 py-4 text-sm text-gray-900">{{ getTotalBerasKg(t) > 0 ? `${formatKg(getTotalBerasKg(t))} kg` : '-' }}</td>
                 <td class="px-6 py-4 text-sm">
                   <button @click="viewDetail(t)" class="text-blue-600 hover:text-blue-900 mr-3" title="Lihat Detail">
                     <i class="fas fa-eye"></i>
@@ -83,7 +132,8 @@
             </div>
             <div class="space-y-1 text-sm mb-3">
               <div class="text-gray-600">{{ getDetail(t) }}</div>
-              <div class="font-bold text-gray-900">{{ formatCurrency(t.total_dibayar) }}</div>
+              <div class="font-bold text-gray-900">Total Uang: {{ formatCurrency(t.total_dibayar) }}</div>
+              <div class="text-gray-700">Total Beras: {{ getTotalBerasKg(t) > 0 ? `${formatKg(getTotalBerasKg(t))} kg` : '-' }}</div>
               <div v-if="t.infaq_tambahan > 0" class="text-xs text-blue-600">+Infaq {{ formatCurrency(t.infaq_tambahan) }}</div>
             </div>
             <div class="flex gap-2">
@@ -159,7 +209,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Harta *</label>
           <select v-model="form.jenis_harta" required @change="setPersentase" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
             <option value="">Pilih Jenis Harta</option>
-            <option v-for="item in malRateOptions" :key="item.key" :value="item.key">{{ item.key }} ({{ formatPercent(item.value) }}%)</option>
+            <option v-for="item in malRateOptions" :key="item.key" :value="item.key">{{ item.label }} ({{ formatPercent(item.value) }}%)</option>
           </select>
           <p v-if="malRateOptions.length === 0" class="text-xs text-red-500 mt-1">Jenis zakat mal belum diatur di halaman Pengaturan.</p>
         </div>
@@ -273,6 +323,28 @@
       </form>
     </Modal>
 
+    <Modal :show="showPrintDataModal" title="Print Laporan Data" @close="showPrintDataModal = false">
+      <form @submit.prevent="printRekapData" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Tanda Tangan</label>
+          <input
+            v-model="printSignDate"
+            type="date"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium">
+            <i class="fas fa-print mr-2"></i>Buka Tab Print
+          </button>
+          <button type="button" @click="showPrintDataModal = false" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-medium">
+            Batal
+          </button>
+        </div>
+      </form>
+    </Modal>
+
     <!-- Modal Detail Transaksi -->
     <Modal :show="showDetailModal" title="Detail Transaksi" @close="showDetailModal = false">
       <div v-if="selectedTransaction" class="space-y-4">
@@ -369,7 +441,7 @@
             <div class="bg-white rounded-lg p-3">
               <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-600">Jenis Harta:</span>
-                <span class="font-semibold text-gray-900 text-lg">{{ selectedTransaction.jenis_harta }}</span>
+                <span class="font-semibold text-gray-900 text-lg">{{ getMalJenisLabel(selectedTransaction.jenis_harta) }}</span>
               </div>
             </div>
 
@@ -399,14 +471,14 @@
               <div class="flex items-start">
                 <i class="fas fa-info-circle text-blue-600 mt-1 mr-2"></i>
                 <div class="text-xs text-blue-800">
-                  <p class="font-medium mb-1">Ketentuan Zakat {{ selectedTransaction.jenis_harta }}:</p>
-                  <p v-if="selectedTransaction.jenis_harta.toLowerCase().includes('emas') || selectedTransaction.jenis_harta.toLowerCase().includes('perak')">
+                  <p class="font-medium mb-1">Ketentuan Zakat {{ getMalJenisLabel(selectedTransaction.jenis_harta) }}:</p>
+                  <p v-if="getMalJenisLabel(selectedTransaction.jenis_harta).toLowerCase().includes('emas') || getMalJenisLabel(selectedTransaction.jenis_harta).toLowerCase().includes('perak')">
                     Nisab emas 85 gram, perak 595 gram. Kadar zakat 2.5%
                   </p>
-                  <p v-else-if="selectedTransaction.jenis_harta.toLowerCase().includes('perdagangan') || selectedTransaction.jenis_harta.toLowerCase().includes('simpanan')">
+                  <p v-else-if="getMalJenisLabel(selectedTransaction.jenis_harta).toLowerCase().includes('perdagangan') || getMalJenisLabel(selectedTransaction.jenis_harta).toLowerCase().includes('simpanan')">
                     Nisab setara 85 gram emas. Haul 1 tahun. Kadar zakat 2.5%
                   </p>
-                  <p v-else-if="selectedTransaction.jenis_harta.toLowerCase().includes('pertanian')">
+                  <p v-else-if="getMalJenisLabel(selectedTransaction.jenis_harta).toLowerCase().includes('pertanian')">
                     Kadar zakat: 5% (dengan irigasi) atau 10% (tadah hujan)
                   </p>
                   <p v-else>
@@ -531,12 +603,15 @@ const showSidebar = ref(false)
 
 const transaksiList = ref([])
 const showModal = ref(false)
+const showPrintDataModal = ref(false)
 const showDetailModal = ref(false)
 const selectedTransaction = ref(null)
 const isLoading = ref(true)
 const isSaving = ref(false)
+const printSignDate = ref(new Date().toISOString().split('T')[0])
 const pageSizeOptions = [5, 10, 25, 50, 'all']
 const pagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false })
+const filters = ref({ jenis_zakat: '', bentuk_zakat: '', q: '' })
 const form = ref({ 
   nama_muzakki: '', 
   jenis_zakat: '', 
@@ -564,8 +639,19 @@ const kadarZakat = ref({
   malRates: {}
 })
 
+const MAL_KEY_SEPARATOR = '|||'
+
+const getMalJenisLabel = (rawKey) => {
+  const key = String(rawKey || '')
+  if (key.includes(MAL_KEY_SEPARATOR)) {
+    return key.split(MAL_KEY_SEPARATOR)[0].trim()
+  }
+  return key.trim()
+}
+
 const malRateOptions = computed(() => Object.entries(kadarZakat.value.malRates || {}).map(([key, value]) => ({
   key,
+  label: getMalJenisLabel(key),
   value: Number(value || 0)
 })).filter(item => item.key && item.value > 0))
 
@@ -626,6 +712,50 @@ const formatCurrency = (amount) => new Intl.NumberFormat('id-ID', { style: 'curr
 const formatNumber = (num) => new Intl.NumberFormat('id-ID').format(num)
 const formatPercent = (num) => Number(num || 0).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 const formatDate = (date) => new Date(date).toLocaleDateString('id-ID')
+const formatKg = (value) => Number(value || 0).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+const showBentukFilter = computed(() => filters.value.jenis_zakat === 'fitrah' || filters.value.jenis_zakat === 'fidyah')
+
+const onJenisFilterChange = () => {
+  if (!showBentukFilter.value) {
+    filters.value.bentuk_zakat = ''
+  }
+  applyFilters()
+}
+
+const applyFilters = () => {
+  pagination.value.page = 1
+  loadTransaksi()
+}
+
+const resetFilters = () => {
+  filters.value = { jenis_zakat: '', bentuk_zakat: '', q: '' }
+  pagination.value.page = 1
+  loadTransaksi()
+}
+
+const filterLocalTransaksi = (items) => {
+  const query = String(filters.value.q || '').trim().toLowerCase()
+  return items.filter((item) => {
+    if (filters.value.jenis_zakat && item.jenis_zakat !== filters.value.jenis_zakat) {
+      return false
+    }
+
+    if (showBentukFilter.value && filters.value.bentuk_zakat) {
+      if ((item.bentuk_zakat || '') !== filters.value.bentuk_zakat) {
+        return false
+      }
+    }
+
+    if (query) {
+      const nama = String(item.muzakki_nama || '').toLowerCase()
+      if (!nama.includes(query)) {
+        return false
+      }
+    }
+
+    return true
+  })
+}
 
 const setPage = (page) => {
   pagination.value.page = page
@@ -685,6 +815,12 @@ const extractKgBerasFromKeterangan = (keterangan) => {
   return match ? parseFloat(match[1]) : 0
 }
 
+const getTotalBerasKg = (t) => {
+  const fromField = Number(t?.kg_beras_dibayar || 0)
+  if (fromField > 0) return fromField
+  return extractKgBerasFromKeterangan(t?.keterangan)
+}
+
 const getZakatBadge = (jenis) => {
   const badges = { 
     fitrah: 'bg-green-100 text-green-800', 
@@ -703,7 +839,7 @@ const getDetail = (t) => {
     }
     return `${t.bentuk_zakat} - Kelas ${t.kelas_zakat} - ${t.jumlah_orang} orang`
   }
-  if (t.jenis_zakat === 'mal') return `${t.jenis_harta} - ${formatCurrency(t.nominal_harta)} (${t.persentase_zakat}%)`
+  if (t.jenis_zakat === 'mal') return `${getMalJenisLabel(t.jenis_harta)} - ${formatCurrency(t.nominal_harta)} (${t.persentase_zakat}%)`
   if (t.jenis_zakat === 'fidyah') {
     if (t.bentuk_zakat === 'beras') {
       return t.keterangan || `Fidyah Beras`
@@ -786,15 +922,28 @@ const loadTransaksi = async () => {
     const params = pagination.value.pageSize === 'all'
       ? { page_size: 'all' }
       : { page: pagination.value.page, page_size: pagination.value.pageSize }
+
+    if (filters.value.jenis_zakat) {
+      params.jenis_zakat = filters.value.jenis_zakat
+    }
+    if (showBentukFilter.value && filters.value.bentuk_zakat) {
+      params.bentuk_zakat = filters.value.bentuk_zakat
+    }
+    if (filters.value.q && filters.value.q.trim()) {
+      params.q = filters.value.q.trim()
+    }
+
     const { data } = await api.getTransaksi(params)
     console.log('Transaksi Response:', data)
     if (data.success) {
       const payload = data.data || {}
       if (Array.isArray(payload.items)) {
-        transaksiList.value = payload.items
-        syncPagination(payload, payload.items.length)
+        const filteredItems = filterLocalTransaksi(payload.items)
+        transaksiList.value = filteredItems
+        syncPagination(payload, filteredItems.length)
       } else if (Array.isArray(payload)) {
-        transaksiList.value = applyLocalPagination(payload)
+        const filteredItems = filterLocalTransaksi(payload)
+        transaksiList.value = applyLocalPagination(filteredItems)
       } else {
         transaksiList.value = []
         syncPagination(payload, 0)
@@ -838,6 +987,30 @@ const printReceipt = async (id) => {
     printWindow.document.close()
   } catch (error) {
     toast.value = { message: 'Gagal mencetak bukti', type: 'error' }
+  }
+}
+
+const printRekapData = async () => {
+  try {
+    const signDate = String(printSignDate.value || '').trim()
+    const response = await api.getPrintTransaksiData(signDate)
+    const html = response?.data || ''
+
+    if (!html || typeof html !== 'string') {
+      throw new Error('Data print tidak valid')
+    }
+
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      throw new Error('Popup diblokir browser')
+    }
+    printWindow.document.write(html)
+    printWindow.document.close()
+    showPrintDataModal.value = false
+  } catch (error) {
+    const status = error?.response?.status
+    const detail = error?.response?.data?.message || error?.message || 'Unknown error'
+    toast.value = { message: `Gagal membuka print data${status ? ` (${status})` : ''}: ${detail}`, type: 'error' }
   }
 }
 

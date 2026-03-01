@@ -36,8 +36,8 @@ func main() {
 	pengurusHandler := handlers.NewPengurusHandler(pengurusRepo)
 	muzakkiHandler := handlers.NewMuzakkiHandler(muzakkiRepo)
 	mustahiqHandler := handlers.NewMustahiqHandler(mustahiqRepo)
-	transaksiHandler := handlers.NewTransaksiHandler(transaksiRepo, muzakkiRepo)
-	distribusiHandler := handlers.NewDistribusiHandler(distribusiRepo)
+	transaksiHandler := handlers.NewTransaksiHandler(transaksiRepo, muzakkiRepo, masjidRepo, pengurusRepo)
+	distribusiHandler := handlers.NewDistribusiHandler(distribusiRepo, masjidRepo, pengurusRepo, mustahiqRepo)
 	pengaturanHandler := handlers.NewPengaturanHandler(pengaturanRepo)
 	publicHandler := handlers.NewPublicHandler(db)
 
@@ -58,6 +58,7 @@ func main() {
 		public.GET("/stats/fitrah", publicHandler.GetZakatFitrahStats)
 		public.GET("/stats/mal", publicHandler.GetZakatMalStats)
 		public.GET("/stats/fidyah", publicHandler.GetFidyahStats)
+		public.GET("/stats/mustahiq", publicHandler.GetMustahiqStats)
 	}
 
 	// Auth routes
@@ -79,6 +80,7 @@ func main() {
 			superadmin.GET("/masjid/:id", masjidHandler.GetByID)
 			superadmin.PUT("/masjid/:id", masjidHandler.Update)
 			superadmin.DELETE("/masjid/:id", masjidHandler.Delete)
+			superadmin.GET("/reports/print-zakat", masjidHandler.PrintZakatSummary)
 
 			superadmin.GET("/users", userHandler.GetAll)
 			superadmin.POST("/users", userHandler.Create)
@@ -98,7 +100,7 @@ func main() {
 
 			petugas.GET("/pengurus-masjid", pengurusHandler.GetPengurusMasjid)
 			petugas.POST("/pengurus-masjid", pengurusHandler.SavePengurusMasjid)
-			
+
 			petugas.GET("/pengurus-zakat", pengurusHandler.GetPengurusZakat)
 			petugas.POST("/pengurus-zakat", pengurusHandler.SavePengurusZakat)
 			petugas.DELETE("/pengurus-zakat/:id", pengurusHandler.DeletePengurusZakat)
@@ -118,6 +120,7 @@ func main() {
 
 			petugas.GET("/transaksi", transaksiHandler.GetAll)
 			petugas.POST("/transaksi", transaksiHandler.Create)
+			petugas.GET("/transaksi/print-data", transaksiHandler.PrintSummary)
 			petugas.GET("/transaksi/:id", transaksiHandler.GetByID)
 			petugas.GET("/transaksi/:id/print", transaksiHandler.PrintReceipt)
 			petugas.DELETE("/transaksi/:id", transaksiHandler.Delete)
@@ -126,6 +129,7 @@ func main() {
 
 			petugas.GET("/distribusi/insight", distribusiHandler.GetInsight)
 			petugas.GET("/distribusi", distribusiHandler.GetAll)
+			petugas.GET("/distribusi/print-data", distribusiHandler.PrintSummary)
 			petugas.POST("/distribusi", distribusiHandler.Create)
 			petugas.PUT("/distribusi/:id", distribusiHandler.Update)
 			petugas.DELETE("/distribusi/:id", distribusiHandler.Delete)

@@ -14,9 +14,14 @@
               <p class="text-sm text-gray-600">Fokus pembagian beras & uang dari fitrah, fidyah, dan zakat mal</p>
             </div>
           </div>
-          <button @click="loadData" class="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 text-sm">
-            <i class="fas fa-sync-alt mr-2"></i>Refresh
-          </button>
+          <div class="flex items-center gap-2">
+            <button @click="showPrintDataModal = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">
+              <i class="fas fa-print mr-2"></i>Print Data
+            </button>
+            <button @click="loadData" class="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 text-sm">
+              <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+          </div>
         </div>
       </header>
 
@@ -101,7 +106,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Distribusi</label>
                 <input v-model="tanggalDistribusi" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               </div>
-              <div class="md:col-span-2">
+              <div v-if="mode !== 'berbeda'" class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Catatan Distribusi</label>
                 <input v-model="catatanDistribusi" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Contoh: Prioritas fakir lansia" />
               </div>
@@ -168,6 +173,14 @@
                     <label class="block text-xs text-gray-600 mb-1">Uang (Rp)</label>
                     <input v-model.number="item.nominal" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
                   </div>
+                </div>
+                <div v-if="mode === 'berbeda'" class="mt-2">
+                  <label class="block text-xs text-gray-600 mb-1">Catatan Distribusi</label>
+                  <input
+                    v-model="item.keterangan"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    placeholder="Catatan khusus mustahiq ini"
+                  />
                 </div>
               </div>
             </div>
@@ -283,6 +296,28 @@
       </form>
     </Modal>
 
+    <Modal :show="showPrintDataModal" title="Print Laporan Data" @close="showPrintDataModal = false">
+      <form @submit.prevent="printRekapData" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Tanda Tangan</label>
+          <input
+            v-model="printSignDate"
+            type="date"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium">
+            <i class="fas fa-print mr-2"></i>Buka Tab Print
+          </button>
+          <button type="button" @click="showPrintDataModal = false" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-medium">
+            Batal
+          </button>
+        </div>
+      </form>
+    </Modal>
+
     <Toast :message="toast.message" :type="toast.type" />
     <LoadingOverlay :show="isSaving" message="Menyimpan distribusi..." />
   </div>
@@ -309,7 +344,9 @@ const menuItems = [
 const showSidebar = ref(false)
 const isLoading = ref(true)
 const isSaving = ref(false)
+const showPrintDataModal = ref(false)
 const toast = ref({ message: '', type: 'success' })
+const printSignDate = ref(new Date().toISOString().split('T')[0])
 const pageSizeOptions = [5, 10, 25, 50, 'all']
 const distribusiPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false })
 
@@ -478,7 +515,8 @@ const mapMustahiqToAllocations = () => {
     nama: m.nama,
     jenis_penerima: m.jenis_penerima,
     beras_kg: 0,
-    nominal: 0
+    nominal: 0,
+    keterangan: ''
   }))
 }
 
@@ -499,7 +537,7 @@ const applyManualRata = () => {
 }
 
 const resetAllocations = () => {
-  allocations.value = allocations.value.map(item => ({ ...item, beras_kg: 0, nominal: 0 }))
+  allocations.value = allocations.value.map(item => ({ ...item, beras_kg: 0, nominal: 0, keterangan: '' }))
 }
 
 const loadData = async () => {
@@ -552,13 +590,17 @@ const saveRencanaDistribusi = async () => {
   isSaving.value = true
   try {
     for (const row of rows) {
+      const catatanPerBaris = String(row.keterangan || '').trim()
+      const catatanUmum = String(catatanDistribusi.value || '').trim()
       await api.createDistribusi({
         mustahiq_id: row.mustahiq_id,
         nominal: Number(row.nominal || 0),
         beras_kg: Number(row.beras_kg || 0),
         tanggal_distribusi: tanggalDistribusi.value,
         mode: mode.value,
-        keterangan: catatanDistribusi.value
+        keterangan: mode.value === 'berbeda'
+          ? catatanPerBaris
+          : catatanUmum
       })
     }
 
@@ -623,6 +665,30 @@ const deleteDistribusi = async (id) => {
     await loadData()
   } catch (error) {
     toast.value = { message: 'Gagal menghapus distribusi', type: 'error' }
+  }
+}
+
+const printRekapData = async () => {
+  try {
+    const signDate = String(printSignDate.value || '').trim()
+    const response = await api.getPrintDistribusiData(signDate)
+    const html = response?.data || ''
+
+    if (!html || typeof html !== 'string') {
+      throw new Error('Data print tidak valid')
+    }
+
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      throw new Error('Popup diblokir browser')
+    }
+    printWindow.document.write(html)
+    printWindow.document.close()
+    showPrintDataModal.value = false
+  } catch (error) {
+    const status = error?.response?.status
+    const detail = error?.response?.data?.message || error?.message || 'Unknown error'
+    toast.value = { message: `Gagal membuka print data${status ? ` (${status})` : ''}: ${detail}`, type: 'error' }
   }
 }
 

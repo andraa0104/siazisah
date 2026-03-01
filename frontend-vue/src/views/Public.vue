@@ -249,6 +249,45 @@
               <i class="fas fa-receipt mr-2 text-blue-600"></i>Data Transaksi
               Zakat
             </h3>
+            <div class="bg-white border border-gray-200 rounded-lg p-3 mb-4">
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">Filter Jenis Zakat</label>
+                  <select v-model="transaksiFilters.jenis_zakat" @change="onPublicJenisFilterChange" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="">Semua Jenis</option>
+                    <option value="fitrah">Zakat Fitrah</option>
+                    <option value="mal">Zakat Mal</option>
+                    <option value="fidyah">Fidyah</option>
+                    <option value="infaq">Infaq</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">Bentuk (Fitrah/Fidyah)</label>
+                  <select v-model="transaksiFilters.bentuk_zakat" :disabled="!showPublicBentukFilter" @change="applyPublicTransaksiFilters" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm disabled:bg-gray-100 disabled:text-gray-400">
+                    <option value="">Semua Bentuk</option>
+                    <option value="uang">Uang</option>
+                    <option value="beras">Beras</option>
+                  </select>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-xs text-gray-500 mb-1">Cari Muzakki</label>
+                  <div class="flex gap-2">
+                    <input
+                      v-model="transaksiFilters.q"
+                      @keyup.enter="applyPublicTransaksiFilters"
+                      placeholder="Ketik nama muzakki..."
+                      class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                    <button @click="applyPublicTransaksiFilters" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
+                      Cari
+                    </button>
+                    <button @click="resetPublicTransaksiFilters" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div v-if="modalData?.transaksi?.length > 0">
               <!-- Desktop Table -->
               <div class="hidden md:block overflow-x-auto">
@@ -273,7 +312,12 @@
                       <th
                         class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
                       >
-                        Total
+                        Total Uang
+                      </th>
+                      <th
+                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                      >
+                        Total Beras (kg)
                       </th>
                       <th
                         class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
@@ -309,7 +353,10 @@
                         {{ formatJumlah(t) }}
                       </td>
                       <td class="px-4 py-2 text-sm font-medium text-gray-900">
-                        {{ formatTotal(t) }}
+                        {{ formatTotalUang(t) }}
+                      </td>
+                      <td class="px-4 py-2 text-sm text-gray-900">
+                        {{ formatTotalBerasKg(t) }}
                       </td>
                       <td class="px-4 py-2 text-sm text-green-600 font-medium">
                         {{
@@ -352,8 +399,12 @@
                       ><span class="font-medium">{{ formatJumlah(t) }}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-gray-600">Total:</span
-                      ><span class="font-medium">{{ formatTotal(t) }}</span>
+                      <span class="text-gray-600">Total Uang:</span
+                      ><span class="font-medium">{{ formatTotalUang(t) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">Total Beras:</span
+                      ><span class="font-medium">{{ formatTotalBerasKg(t) }}</span>
                     </div>
                     <div
                       v-if="t.infaq_tambahan > 0"
@@ -411,6 +462,41 @@
               <i class="fas fa-hand-holding-heart mr-2 text-purple-600"></i>Data
               Mustahiq
             </h3>
+            <div class="bg-white border border-gray-200 rounded-lg p-3 mb-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">Filter Jenis Penerima</label>
+                  <select v-model="mustahiqFilters.jenis_penerima" @change="applyPublicMustahiqFilters" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="">Semua Jenis</option>
+                    <option value="fakir">Fakir</option>
+                    <option value="miskin">Miskin</option>
+                    <option value="amil">Amil</option>
+                    <option value="mualaf">Mualaf</option>
+                    <option value="riqab">Riqab</option>
+                    <option value="gharim">Gharim</option>
+                    <option value="fisabilillah">Fisabilillah</option>
+                    <option value="ibnu sabil">Ibnu Sabil</option>
+                  </select>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-xs text-gray-500 mb-1">Cari Mustahiq</label>
+                  <div class="flex gap-2">
+                    <input
+                      v-model="mustahiqFilters.q"
+                      @keyup.enter="applyPublicMustahiqFilters"
+                      placeholder="Ketik nama mustahiq..."
+                      class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                    <button @click="applyPublicMustahiqFilters" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
+                      Cari
+                    </button>
+                    <button @click="resetPublicMustahiqFilters" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div v-if="modalData?.mustahiq?.length > 0">
               <!-- Desktop Table -->
               <div class="hidden md:block overflow-x-auto">
@@ -738,8 +824,12 @@ const pageSizeOptions = [5, 10, 25, 50, 'all'];
 const transaksiPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false });
 const mustahiqPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false });
 const distribusiPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false });
+const transaksiFilters = ref({ jenis_zakat: '', bentuk_zakat: '', q: '' });
+const mustahiqFilters = ref({ jenis_penerima: '', q: '' });
 const localLists = ref({ transaksi: [], mustahiq: [], distribusi: [] });
 const useLocalLists = ref({ transaksi: false, mustahiq: false, distribusi: false });
+
+const showPublicBentukFilter = ref(false);
 
 const syncPagination = (target, payload, itemCount) => {
   if (payload && payload.pagination) {
@@ -783,9 +873,19 @@ const applyLocalPagination = (items, target) => {
 
 const fetchTransaksiPage = async (id) => {
   try {
+    const normalizedJenis = String(transaksiFilters.value.jenis_zakat || '').trim().toLowerCase();
+    const normalizedBentuk = showPublicBentukFilter.value
+      ? String(transaksiFilters.value.bentuk_zakat || '').trim().toLowerCase()
+      : '';
+    const normalizedQ = String(transaksiFilters.value.q || '').trim();
+
     const params = transaksiPagination.value.pageSize === 'all'
       ? { page_size: 'all' }
       : { page: transaksiPagination.value.page, page_size: transaksiPagination.value.pageSize };
+    if (normalizedJenis) params.jenis_zakat = normalizedJenis;
+    if (normalizedBentuk) params.bentuk_zakat = normalizedBentuk;
+    if (normalizedQ) params.q = normalizedQ;
+
     const response = await api.getPublicMasjidTransaksi(id, params);
     if (response.data.success) {
       const payload = response.data.data || {};
@@ -804,7 +904,7 @@ const fetchTransaksiPage = async (id) => {
   } catch (error) {
     console.error('Error loading transaksi:', error);
     if (useLocalLists.value.transaksi) {
-      modalData.value.transaksi = applyLocalPagination(localLists.value.transaksi, transaksiPagination);
+      modalData.value.transaksi = applyLocalPagination(filterLocalTransaksi(localLists.value.transaksi), transaksiPagination);
       return true;
     }
     return false;
@@ -813,9 +913,15 @@ const fetchTransaksiPage = async (id) => {
 
 const fetchMustahiqPage = async (id) => {
   try {
+    const normalizedJenis = String(mustahiqFilters.value.jenis_penerima || '').trim().toLowerCase();
+    const normalizedQ = String(mustahiqFilters.value.q || '').trim();
+
     const params = mustahiqPagination.value.pageSize === 'all'
       ? { page_size: 'all' }
       : { page: mustahiqPagination.value.page, page_size: mustahiqPagination.value.pageSize };
+    if (normalizedJenis) params.jenis_penerima = normalizedJenis;
+    if (normalizedQ) params.q = normalizedQ;
+
     const response = await api.getPublicMasjidMustahiq(id, params);
     if (response.data.success) {
       const payload = response.data.data || {};
@@ -834,7 +940,7 @@ const fetchMustahiqPage = async (id) => {
   } catch (error) {
     console.error('Error loading mustahiq:', error);
     if (useLocalLists.value.mustahiq) {
-      modalData.value.mustahiq = applyLocalPagination(localLists.value.mustahiq, mustahiqPagination);
+      modalData.value.mustahiq = applyLocalPagination(filterLocalMustahiq(localLists.value.mustahiq), mustahiqPagination);
       return true;
     }
     return false;
@@ -879,15 +985,46 @@ const hydrateListsFromStats = (data) => {
   localLists.value = { transaksi, mustahiq, distribusi };
   useLocalLists.value = { transaksi: true, mustahiq: true, distribusi: true };
 
-  modalData.value.transaksi = applyLocalPagination(transaksi, transaksiPagination);
-  modalData.value.mustahiq = applyLocalPagination(mustahiq, mustahiqPagination);
+  modalData.value.transaksi = applyLocalPagination(filterLocalTransaksi(transaksi), transaksiPagination);
+  modalData.value.mustahiq = applyLocalPagination(filterLocalMustahiq(mustahiq), mustahiqPagination);
   modalData.value.distribusi = applyLocalPagination(distribusi, distribusiPagination);
+};
+
+const filterLocalTransaksi = (items) => {
+  const jenis = String(transaksiFilters.value.jenis_zakat || '').trim().toLowerCase();
+  const bentuk = showPublicBentukFilter.value ? String(transaksiFilters.value.bentuk_zakat || '').trim().toLowerCase() : '';
+  const keyword = String(transaksiFilters.value.q || '').trim().toLowerCase();
+
+  return (Array.isArray(items) ? items : []).filter(item => {
+    const itemJenis = String(item.jenis_zakat || '').trim().toLowerCase();
+    const itemBentuk = String(item.bentuk_zakat || '').trim().toLowerCase();
+    const itemNama = String(item.muzakki_nama || '').trim().toLowerCase();
+
+    if (jenis && itemJenis !== jenis) return false;
+    if (bentuk && itemBentuk !== bentuk) return false;
+    if (keyword && !itemNama.includes(keyword)) return false;
+    return true;
+  });
+};
+
+const filterLocalMustahiq = (items) => {
+  const jenis = String(mustahiqFilters.value.jenis_penerima || '').trim().toLowerCase();
+  const keyword = String(mustahiqFilters.value.q || '').trim().toLowerCase();
+
+  return (Array.isArray(items) ? items : []).filter(item => {
+    const itemJenis = String(item.jenis_penerima || item.kategori || '').trim().toLowerCase();
+    const itemNama = String(item.nama || '').trim().toLowerCase();
+
+    if (jenis && itemJenis !== jenis) return false;
+    if (keyword && !itemNama.includes(keyword)) return false;
+    return true;
+  });
 };
 
 const setTransaksiPage = async (page) => {
   transaksiPagination.value.page = page;
   if (useLocalLists.value.transaksi) {
-    modalData.value.transaksi = applyLocalPagination(localLists.value.transaksi, transaksiPagination);
+    modalData.value.transaksi = applyLocalPagination(filterLocalTransaksi(localLists.value.transaksi), transaksiPagination);
     return;
   }
   if (modalData.value?.masjid?.id) await fetchTransaksiPage(modalData.value.masjid.id);
@@ -896,7 +1033,7 @@ const setTransaksiPage = async (page) => {
 const onTransaksiPageSizeChange = async () => {
   transaksiPagination.value.page = 1;
   if (useLocalLists.value.transaksi) {
-    modalData.value.transaksi = applyLocalPagination(localLists.value.transaksi, transaksiPagination);
+    modalData.value.transaksi = applyLocalPagination(filterLocalTransaksi(localLists.value.transaksi), transaksiPagination);
     return;
   }
   if (modalData.value?.masjid?.id) await fetchTransaksiPage(modalData.value.masjid.id);
@@ -905,7 +1042,7 @@ const onTransaksiPageSizeChange = async () => {
 const setMustahiqPage = async (page) => {
   mustahiqPagination.value.page = page;
   if (useLocalLists.value.mustahiq) {
-    modalData.value.mustahiq = applyLocalPagination(localLists.value.mustahiq, mustahiqPagination);
+    modalData.value.mustahiq = applyLocalPagination(filterLocalMustahiq(localLists.value.mustahiq), mustahiqPagination);
     return;
   }
   if (modalData.value?.masjid?.id) await fetchMustahiqPage(modalData.value.masjid.id);
@@ -914,10 +1051,48 @@ const setMustahiqPage = async (page) => {
 const onMustahiqPageSizeChange = async () => {
   mustahiqPagination.value.page = 1;
   if (useLocalLists.value.mustahiq) {
-    modalData.value.mustahiq = applyLocalPagination(localLists.value.mustahiq, mustahiqPagination);
+    modalData.value.mustahiq = applyLocalPagination(filterLocalMustahiq(localLists.value.mustahiq), mustahiqPagination);
     return;
   }
   if (modalData.value?.masjid?.id) await fetchMustahiqPage(modalData.value.masjid.id);
+};
+
+const onPublicJenisFilterChange = () => {
+  const jenis = String(transaksiFilters.value.jenis_zakat || '').trim().toLowerCase();
+  showPublicBentukFilter.value = jenis === 'fitrah' || jenis === 'fidyah';
+  if (!showPublicBentukFilter.value) {
+    transaksiFilters.value.bentuk_zakat = '';
+  }
+  applyPublicTransaksiFilters();
+};
+
+const applyPublicTransaksiFilters = async () => {
+  transaksiPagination.value.page = 1;
+  if (useLocalLists.value.transaksi) {
+    modalData.value.transaksi = applyLocalPagination(filterLocalTransaksi(localLists.value.transaksi), transaksiPagination);
+    return;
+  }
+  if (modalData.value?.masjid?.id) await fetchTransaksiPage(modalData.value.masjid.id);
+};
+
+const resetPublicTransaksiFilters = async () => {
+  transaksiFilters.value = { jenis_zakat: '', bentuk_zakat: '', q: '' };
+  showPublicBentukFilter.value = false;
+  await applyPublicTransaksiFilters();
+};
+
+const applyPublicMustahiqFilters = async () => {
+  mustahiqPagination.value.page = 1;
+  if (useLocalLists.value.mustahiq) {
+    modalData.value.mustahiq = applyLocalPagination(filterLocalMustahiq(localLists.value.mustahiq), mustahiqPagination);
+    return;
+  }
+  if (modalData.value?.masjid?.id) await fetchMustahiqPage(modalData.value.masjid.id);
+};
+
+const resetPublicMustahiqFilters = async () => {
+  mustahiqFilters.value = { jenis_penerima: '', q: '' };
+  await applyPublicMustahiqFilters();
 };
 
 const setDistribusiPage = async (page) => {
@@ -986,19 +1161,33 @@ const formatJumlah = (t) => {
   return t.jumlah_orang > 0 ? `${t.jumlah_orang} orang` : '-'
 }
 
-const formatTotal = (t) => {
+const getTotalBerasKg = (t) => {
+  if (!t) return 0
+  const numericKg = Number(t.kg_beras_dibayar || 0)
+  if (numericKg > 0) return numericKg
+  if (String(t.bentuk_zakat || '').toLowerCase() !== 'beras') return 0
+  const kg = parseKgFromKeterangan(t.keterangan)
+  return kg > 0 ? kg : 0
+}
+
+const formatTotalUang = (t) => {
   if (!t) return '-'
-  if (t.bentuk_zakat === 'beras') {
-    const kg = parseKgFromKeterangan(t.keterangan)
-    return kg > 0 ? `${kg.toLocaleString('id-ID')} Kg` : '-'
-  }
+  if (String(t.bentuk_zakat || '').toLowerCase() === 'beras') return '-'
   return formatCurrency(t.total_dibayar)
+}
+
+const formatTotalBerasKg = (t) => {
+  const kg = getTotalBerasKg(t)
+  return kg > 0 ? `${kg.toLocaleString('id-ID', { maximumFractionDigits: 2 })} kg` : '-'
 }
 
 const viewMasjidStats = async (id) => {
   try {
     isLoadingModal.value = true;
     activeTab.value = 'zakat'; // Reset to first tab
+    transaksiFilters.value = { jenis_zakat: '', bentuk_zakat: '', q: '' };
+    mustahiqFilters.value = { jenis_penerima: '', q: '' };
+    showPublicBentukFilter.value = false;
     const [statsData, pengurusMasjid, pengurusZakat] = await Promise.all([
       api.getPublicMasjidStats(id),
       api.getPublicPengurusMasjid(id),

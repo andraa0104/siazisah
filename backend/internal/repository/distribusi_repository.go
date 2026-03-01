@@ -284,8 +284,8 @@ func (r *DistribusiZakatRepository) GetInsight(masjidID int) (*models.Distribusi
 
 	if insight.TotalMustahiqAktif > 0 {
 		div := float64(insight.TotalMustahiqAktif)
-		insight.RekomendasiUangPerOrang = insight.SisaUang / div
-		insight.RekomendasiBerasPerOrang = insight.SisaBerasKg / div
+		insight.RekomendasiUangPerOrang = insight.TotalPoolUang / div
+		insight.RekomendasiBerasPerOrang = insight.TotalPoolBerasKg / div
 	}
 
 	return insight, nil

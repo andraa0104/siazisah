@@ -218,13 +218,13 @@
         <!-- Tabs Navigation -->
         <div class="stats-tabs" data-aos="fade-up" data-aos-delay="100">
           <button 
-            v-for="tab in ['fitrah', 'mal', 'fidyah']" 
+            v-for="tab in ['fitrah', 'mal', 'fidyah', 'mustahiq']" 
             :key="tab"
             @click="() => { console.log('Clicking tab:', tab, '-> Stats:', zakatStats[tab]); activeTab = tab }"
             :class="['tab-btn', { active: activeTab === tab }]"
           >
-            <i :class="tab === 'fitrah' ? 'bx bxs-leaf' : tab === 'mal' ? 'bx bxs-coin' : 'bx bxs-heart-circle'"></i>
-            {{ tab === 'fitrah' ? 'Zakat Fitrah' : tab === 'mal' ? 'Zakat Mal' : 'Fidyah' }}
+            <i :class="tab === 'fitrah' ? 'bx bxs-leaf' : tab === 'mal' ? 'bx bxs-coin' : tab === 'fidyah' ? 'bx bxs-heart-circle' : 'bx bxs-user-detail'"></i>
+            {{ tab === 'fitrah' ? 'Zakat Fitrah' : tab === 'mal' ? 'Zakat Mal' : tab === 'fidyah' ? 'Fidyah' : 'Data Mustahiq' }}
           </button>
         </div>
 
@@ -237,57 +237,67 @@
           </div>
 
           <div v-else class="row">
-            <!-- Total Muzakki -->
-            <div class="col-lg-3 col-md-6">
-              <div class="count-box">
-                <i class="bi bi-people-fill"></i>
-                <span>{{ currentStats.muzakki }}</span>
-                <p>Muzakki (Pembayar)</p>
+            <template v-if="activeTab === 'fitrah'">
+              <div class="col-lg-4 col-md-6">
+                <div class="count-box">
+                  <i class="bi bi-people-fill"></i>
+                  <span>{{ currentStats.muzakki }}</span>
+                  <p>Muzakki (Pembayar)</p>
+                </div>
               </div>
-            </div>
-
-            <!-- Second Metric: Conditional based on activeTab -->
-            <div class="col-lg-3 col-md-6 mt-5 mt-md-0">
-              <div class="count-box">
-                <!-- Only show beras for Fitrah -->
-                <template v-if="activeTab === 'fitrah'">
+              <div class="col-lg-4 col-md-6 mt-5 mt-md-0">
+                <div class="count-box">
                   <i class="bi bi-bag-check"></i>
                   <span>{{ currentStats.beras }} kg</span>
                   <p>Beras Terkumpul</p>
-                </template>
-                
-                <!-- For Mal & Fidyah: Show different metric or hide -->
-                <template v-else-if="activeTab === 'mal'">
-                  <i class="bi bi-wallet2"></i>
-                  <span>{{ currentStats.muzakki > 0 ? '2.5%' : '0%' }}</span>
-                  <p>Kadar Zakat Mal</p>
-                </template>
-                
-                <template v-else>
-                  <i class="bi bi-calendar-check"></i>
-                  <span>{{ currentStats.muzakki > 0 ? 'Aktif' : 'Belum Ada' }}</span>
-                  <p>Status Fidyah</p>
-                </template>
+                </div>
               </div>
-            </div>
+              <div class="col-lg-4 col-md-6 mt-5 mt-lg-0">
+                <div class="count-box">
+                  <i class="bi bi-cash-coin"></i>
+                  <span>Rp {{ formatCurrency(currentStats.uang) }}</span>
+                  <p>Dana Terkumpul</p>
+                </div>
+              </div>
+            </template>
 
-            <!-- Dana Terkumpul -->
-            <div class="col-lg-3 col-md-6 mt-5 mt-lg-0">
-              <div class="count-box">
-                <i class="bi bi-cash-coin"></i>
-                <span>Rp {{ formatCurrency(currentStats.uang) }}</span>
-                <p>Dana Terkumpul</p>
+            <template v-else-if="activeTab === 'mal' || activeTab === 'fidyah'">
+              <div class="col-lg-6 col-md-6">
+                <div class="count-box">
+                  <i class="bi bi-people-fill"></i>
+                  <span>{{ currentStats.muzakki }}</span>
+                  <p>Muzakki (Pembayar)</p>
+                </div>
               </div>
-            </div>
+              <div class="col-lg-6 col-md-6 mt-5 mt-md-0">
+                <div class="count-box">
+                  <i class="bi bi-cash-coin"></i>
+                  <span>Rp {{ formatCurrency(currentStats.uang) }}</span>
+                  <p>Dana Terkumpul</p>
+                </div>
+              </div>
+            </template>
 
-            <!-- Mustahiq (Penerima) -->
-            <div class="col-lg-3 col-md-6 mt-5 mt-lg-0">
-              <div class="count-box">
-                <i class="bi bi-heart-hands"></i>
-                <span>{{ currentStats.mustahiq }}</span>
-                <p>Mustahiq (Penerima)</p>
+            <template v-else>
+              <div class="col-lg-3 col-md-6 mb-4">
+                <div class="count-box">
+                  <i class="bi bi-heart-hands"></i>
+                  <span>{{ mustahiqGlobalStats.total }}</span>
+                  <p>Total Mustahiq (Global)</p>
+                </div>
               </div>
-            </div>
+              <div
+                v-for="item in mustahiqJenisCards"
+                :key="item.jenis_penerima"
+                class="col-lg-3 col-md-6 mb-4"
+              >
+                <div class="count-box">
+                  <i class="bi bi-person-badge"></i>
+                  <span>{{ item.total }}</span>
+                  <p>{{ formatJenisMustahiq(item.jenis_penerima) }}</p>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
 
@@ -365,6 +375,10 @@ const zakatStats = ref({
   mal: { muzakki: 0, beras: 0, uang: 0, mustahiq: 0 },
   fidyah: { muzakki: 0, beras: 0, uang: 0, mustahiq: 0 }
 })
+const mustahiqGlobalStats = ref({
+  total: 0,
+  perJenis: []
+})
 const isLoadingStats = ref(true)
 const activeTab = ref('fitrah')
 // Use window.location.hostname to get correct IP/hostname for API calls
@@ -375,6 +389,55 @@ const currentStats = computed(() => {
   console.log(`Getting stats for tab: ${activeTab.value}`)
   return zakatStats.value[activeTab.value] || { muzakki: 0, beras: 0, uang: 0, mustahiq: 0 }
 })
+
+const defaultMustahiqJenis = [
+  'amil',
+  'fakir',
+  'miskin',
+  'mualaf',
+  'riqab',
+  'gharim',
+  'fisabilillah',
+  'ibnu sabil'
+]
+
+const normalizeJenisMustahiq = (jenis) => String(jenis || '').trim().toLowerCase()
+
+const mustahiqJenisCards = computed(() => {
+  const incoming = Array.isArray(mustahiqGlobalStats.value.perJenis)
+    ? mustahiqGlobalStats.value.perJenis
+    : []
+
+  const jenisMap = new Map()
+  incoming.forEach((item) => {
+    const key = normalizeJenisMustahiq(item.jenis_penerima)
+    if (!key) return
+    jenisMap.set(key, Number(item.total || 0))
+  })
+
+  const defaults = defaultMustahiqJenis.map((jenis) => ({
+    jenis_penerima: jenis,
+    total: Number(jenisMap.get(jenis) || 0)
+  }))
+
+  const extras = []
+  jenisMap.forEach((total, jenis) => {
+    if (!defaultMustahiqJenis.includes(jenis)) {
+      extras.push({ jenis_penerima: jenis, total })
+    }
+  })
+
+  return [...defaults, ...extras]
+})
+
+const formatJenisMustahiq = (jenis) => {
+  const value = String(jenis || '').trim()
+  if (!value) return 'Lainnya'
+  return value
+    .split(' ')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ')
+}
 
 // Load vendor scripts dynamically
 const loadScript = (src) => {
@@ -463,6 +526,37 @@ const fetchZakatStats = async () => {
       }
     } catch (fidyahError) {
       console.error('✗ Fidyah fetch error:', fidyahError)
+    }
+
+    // Fetch Mustahiq global stats
+    try {
+      const mustahiqRes = await fetch(`${apiUrl}/public/stats/mustahiq`)
+      console.log('Mustahiq Request - Status:', mustahiqRes.status, mustahiqRes.statusText)
+      const mustahiqData = mustahiqRes.ok ? await mustahiqRes.json() : null
+      console.log('Mustahiq Response Data:', mustahiqData)
+
+      if (mustahiqData?.data) {
+        const perJenis = Array.isArray(mustahiqData.data.per_jenis) ? mustahiqData.data.per_jenis : []
+        const totalFromJenis = perJenis.reduce((sum, item) => sum + Number(item.total || 0), 0)
+        mustahiqGlobalStats.value = {
+          total: Number(mustahiqData.data.total_mustahiq || 0) || totalFromJenis,
+          perJenis
+        }
+        console.log('✓ Mustahiq global stats updated:', mustahiqGlobalStats.value)
+      } else {
+        console.warn('⚠ Mustahiq response has no data property')
+      }
+    } catch (mustahiqError) {
+      console.error('✗ Mustahiq fetch error:', mustahiqError)
+      try {
+        const dashboardRes = await fetch(`${apiUrl}/public/dashboard`)
+        const dashboardData = dashboardRes.ok ? await dashboardRes.json() : null
+        if (dashboardData?.data) {
+          mustahiqGlobalStats.value.total = Number(dashboardData.data.total_mustahiq || 0)
+        }
+      } catch (fallbackError) {
+        console.error('✗ Mustahiq fallback fetch error:', fallbackError)
+      }
     }
     
     const endTime = performance.now()

@@ -145,14 +145,24 @@ onMounted(async () => {
       masjidName.value = masjidData.data.data.nama
       masjidId.value = masjidData.data.data.id
       
-      // Get detailed stats for this masjid
-      const statsData = await api.getPublicMasjidStats(masjidId.value)
+      // Get detailed stats for this masjid + transaksi list untuk hitung muzakki/transaksi
+      const [statsData, transaksiData] = await Promise.all([
+        api.getPublicMasjidStats(masjidId.value),
+        api.getTransaksi({ page_size: 'all' })
+      ])
       
       if (statsData.data.success && statsData.data.data) {
         const d = statsData.data.data
-        const transaksi = Array.isArray(d.transaksi) ? d.transaksi : []
+        const transaksiPayload = transaksiData?.data?.data
+        const transaksi = Array.isArray(transaksiPayload?.items)
+          ? transaksiPayload.items
+          : (Array.isArray(transaksiPayload) ? transaksiPayload : [])
         const totalTransaksi = transaksi.length
-        const totalMuzakki = new Set(transaksi.map((item) => item.muzakki_nama)).size
+        const totalMuzakki = new Set(
+          transaksi
+            .map((item) => String(item?.muzakki_nama || '').trim().toLowerCase())
+            .filter((name) => name !== '' && name !== 'unknown')
+        ).size
         stats.value[0].value = formatCurrency(d.total_zakat_fitrah_uang || 0)
         stats.value[1].value = `${Number(d.total_zakat_fitrah_beras_kg || 0).toLocaleString('id-ID')} Kg`
         stats.value[2].value = formatCurrency(d.total_zakat_mal || 0)

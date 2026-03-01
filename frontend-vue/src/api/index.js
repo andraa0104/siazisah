@@ -36,6 +36,10 @@ export default {
   createMasjid: (data) => api.post('/superadmin/masjid', data),
   updateMasjid: (id, data) => api.put(`/superadmin/masjid/${id}`, data),
   deleteMasjid: (id) => api.delete(`/superadmin/masjid/${id}`),
+  getPrintSuperadminZakatData: (signDate) => api.get('/superadmin/reports/print-zakat', {
+    params: { sign_date: signDate, _ts: Date.now() },
+    responseType: 'text'
+  }),
   
   getUsers: (params) => api.get('/superadmin/users', { params }),
   createUser: (data) => api.post('/superadmin/users', data),
@@ -68,9 +72,17 @@ export default {
   createTransaksi: (data) => api.post('/petugas/transaksi', data),
   deleteTransaksi: (id) => api.delete(`/petugas/transaksi/${id}`),
   printTransaksi: (id) => `http://localhost:8082/api/petugas/transaksi/${id}/print`,
+  getPrintTransaksiData: (signDate) => api.get('/petugas/transaksi/print-data', {
+    params: { sign_date: signDate, _ts: Date.now() },
+    responseType: 'text'
+  }),
 
   getDistribusiInsight: () => api.get('/petugas/distribusi/insight'),
   getDistribusi: (params) => api.get('/petugas/distribusi', { params }),
+  getPrintDistribusiData: (signDate) => api.get('/petugas/distribusi/print-data', {
+    params: { sign_date: signDate, _ts: Date.now() },
+    responseType: 'text'
+  }),
   createDistribusi: (data) => api.post('/petugas/distribusi', data),
   updateDistribusi: (id, data) => api.put(`/petugas/distribusi/${id}`, data),
   deleteDistribusi: (id) => api.delete(`/petugas/distribusi/${id}`)

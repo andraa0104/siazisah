@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"strings"
 	"github.com/yourusername/siazisah/internal/models"
 )
 
@@ -137,6 +138,111 @@ func (r *TransaksiZakatRepository) CountByMasjidID(masjidID int) (int, error) {
 	var total int
 	query := `SELECT COUNT(*) FROM transaksi_zakat WHERE masjid_id = ?`
 	if err := r.DB.QueryRow(query, masjidID).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
+func (r *TransaksiZakatRepository) buildFilterClause(masjidID int, jenisZakat, bentukZakat, muzakkiQuery string) (string, []interface{}) {
+	whereClause := " WHERE t.masjid_id = ?"
+	args := []interface{}{masjidID}
+
+	if strings.TrimSpace(jenisZakat) != "" {
+		whereClause += " AND t.jenis_zakat = ?"
+		args = append(args, strings.TrimSpace(jenisZakat))
+	}
+
+	if strings.TrimSpace(bentukZakat) != "" {
+		whereClause += " AND t.bentuk_zakat = ?"
+		args = append(args, strings.TrimSpace(bentukZakat))
+	}
+
+	if strings.TrimSpace(muzakkiQuery) != "" {
+		whereClause += " AND LOWER(COALESCE(m.nama, '')) LIKE ?"
+		args = append(args, "%"+strings.ToLower(strings.TrimSpace(muzakkiQuery))+"%")
+	}
+
+	return whereClause, args
+}
+
+func (r *TransaksiZakatRepository) GetByMasjidIDFiltered(masjidID int, jenisZakat, bentukZakat, muzakkiQuery string) ([]models.TransaksiZakat, error) {
+	baseQuery := `SELECT t.id, t.masjid_id, t.muzakki_id, t.jenis_zakat, t.bentuk_zakat, t.jenis_harta,
+			  t.nominal_harta, t.persentase_zakat, t.kelas_zakat, t.jumlah_orang, t.jumlah_hari_fidyah,
+			  t.standar_beras_per_jiwa, t.kg_beras_dibayar, t.harga_beras_per_kg, t.nominal_per_orang, 
+			  t.total_wajib, t.total_dibayar, t.infaq_tambahan, t.keterangan, t.tahun, t.tanggal_bayar, 
+			  t.created_at, t.updated_at, COALESCE(m.nama, 'Unknown'), COALESCE(m.alamat, ''), COALESCE(m.telepon, '')
+			  FROM transaksi_zakat t
+			  LEFT JOIN muzakki m ON t.muzakki_id = m.id`
+	whereClause, args := r.buildFilterClause(masjidID, jenisZakat, bentukZakat, muzakkiQuery)
+	query := baseQuery + whereClause + " ORDER BY t.tanggal_bayar DESC, t.created_at DESC"
+
+	rows, err := r.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var transaksis []models.TransaksiZakat
+	for rows.Next() {
+		var transaksi models.TransaksiZakat
+		err := rows.Scan(&transaksi.ID, &transaksi.MasjidID, &transaksi.MuzakkiID, &transaksi.JenisZakat,
+			&transaksi.BentukZakat, &transaksi.JenisHarta, &transaksi.NominalHarta, &transaksi.PersentaseZakat,
+			&transaksi.KelasZakat, &transaksi.JumlahOrang, &transaksi.JumlahHariFidyah,
+			&transaksi.StandarBerasPerJiwa, &transaksi.KgBerasDibayar, &transaksi.HargaBerasPerKg,
+			&transaksi.NominalPerOrang, &transaksi.TotalWajib, &transaksi.TotalDibayar, &transaksi.InfaqTambahan,
+			&transaksi.Keterangan, &transaksi.Tahun, &transaksi.TanggalBayar, &transaksi.CreatedAt, &transaksi.UpdatedAt,
+			&transaksi.MuzakkiNama, &transaksi.MuzakkiAlamat, &transaksi.MuzakkiTelepon)
+		if err != nil {
+			continue
+		}
+		transaksis = append(transaksis, transaksi)
+	}
+	return transaksis, nil
+}
+
+func (r *TransaksiZakatRepository) GetByMasjidIDPaginatedFiltered(masjidID int, jenisZakat, bentukZakat, muzakkiQuery string, limit, offset int) ([]models.TransaksiZakat, error) {
+	baseQuery := `SELECT t.id, t.masjid_id, t.muzakki_id, t.jenis_zakat, t.bentuk_zakat, t.jenis_harta,
+			  t.nominal_harta, t.persentase_zakat, t.kelas_zakat, t.jumlah_orang, t.jumlah_hari_fidyah,
+			  t.standar_beras_per_jiwa, t.kg_beras_dibayar, t.harga_beras_per_kg, t.nominal_per_orang, 
+			  t.total_wajib, t.total_dibayar, t.infaq_tambahan, t.keterangan, t.tahun, t.tanggal_bayar, 
+			  t.created_at, t.updated_at, COALESCE(m.nama, 'Unknown'), COALESCE(m.alamat, ''), COALESCE(m.telepon, '')
+			  FROM transaksi_zakat t
+			  LEFT JOIN muzakki m ON t.muzakki_id = m.id`
+	whereClause, args := r.buildFilterClause(masjidID, jenisZakat, bentukZakat, muzakkiQuery)
+	query := baseQuery + whereClause + " ORDER BY t.tanggal_bayar DESC, t.created_at DESC LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
+
+	rows, err := r.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var transaksis []models.TransaksiZakat
+	for rows.Next() {
+		var transaksi models.TransaksiZakat
+		err := rows.Scan(&transaksi.ID, &transaksi.MasjidID, &transaksi.MuzakkiID, &transaksi.JenisZakat,
+			&transaksi.BentukZakat, &transaksi.JenisHarta, &transaksi.NominalHarta, &transaksi.PersentaseZakat,
+			&transaksi.KelasZakat, &transaksi.JumlahOrang, &transaksi.JumlahHariFidyah,
+			&transaksi.StandarBerasPerJiwa, &transaksi.KgBerasDibayar, &transaksi.HargaBerasPerKg,
+			&transaksi.NominalPerOrang, &transaksi.TotalWajib, &transaksi.TotalDibayar, &transaksi.InfaqTambahan,
+			&transaksi.Keterangan, &transaksi.Tahun, &transaksi.TanggalBayar, &transaksi.CreatedAt, &transaksi.UpdatedAt,
+			&transaksi.MuzakkiNama, &transaksi.MuzakkiAlamat, &transaksi.MuzakkiTelepon)
+		if err != nil {
+			continue
+		}
+		transaksis = append(transaksis, transaksi)
+	}
+	return transaksis, nil
+}
+
+func (r *TransaksiZakatRepository) CountByMasjidIDFiltered(masjidID int, jenisZakat, bentukZakat, muzakkiQuery string) (int, error) {
+	var total int
+	baseQuery := `SELECT COUNT(*) FROM transaksi_zakat t LEFT JOIN muzakki m ON t.muzakki_id = m.id`
+	whereClause, args := r.buildFilterClause(masjidID, jenisZakat, bentukZakat, muzakkiQuery)
+	query := baseQuery + whereClause
+
+	if err := r.DB.QueryRow(query, args...).Scan(&total); err != nil {
 		return 0, err
 	}
 	return total, nil

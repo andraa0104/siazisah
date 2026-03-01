@@ -345,6 +345,16 @@ const showAnggotaModal = ref(false);
 const anggotaForm = ref({ nama: "", telepon: "", alamat: "" });
 const toast = ref({ message: "", type: "success" });
 
+const MAL_KEY_SEPARATOR = "|||";
+
+const extractMalJenisFromKey = (rawKey) => {
+  const key = String(rawKey || "");
+  if (key.includes(MAL_KEY_SEPARATOR)) {
+    return key.split(MAL_KEY_SEPARATOR)[0].trim();
+  }
+  return key.trim();
+};
+
 const saveMasjid = async () => {
   isSaving.value = true;
   try {
@@ -366,11 +376,12 @@ const saveZakat = async () => {
   isSaving.value = true;
   try {
     const malRatesMap = {};
-    zakatForm.value.malRates.forEach((item) => {
+    zakatForm.value.malRates.forEach((item, index) => {
       const jenis = String(item.jenis || "").trim();
       const persen = Number(item.persen || 0);
       if (jenis && persen > 0) {
-        malRatesMap[jenis] = persen;
+        const uniqueKey = `${jenis}${MAL_KEY_SEPARATOR}${index + 1}`;
+        malRatesMap[uniqueKey] = persen;
       }
     });
 
@@ -548,8 +559,8 @@ onMounted(async () => {
   try {
     const { data } = await api.getPengaturanZakat();
     if (data.success && data.data) {
-      const malRatesEntries = Object.entries(data.data.malRates || {}).map(([jenis, persen]) => ({
-        jenis,
+      const malRatesEntries = Object.entries(data.data.malRates || {}).map(([rawJenis, persen]) => ({
+        jenis: extractMalJenisFromKey(rawJenis),
         persen: Number(persen || 0),
       }));
       zakatForm.value = {

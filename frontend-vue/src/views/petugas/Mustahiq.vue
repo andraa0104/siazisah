@@ -18,6 +18,54 @@
       </header>
 
       <main class="flex-1 overflow-y-auto p-4 md:p-6">
+        <div class="bg-white rounded-xl shadow-md p-4 mb-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Filter Jenis Penerima</label>
+              <select v-model="filters.jenis_penerima" @change="applyFilters" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                <option value="">Semua Jenis</option>
+                <option value="fakir">Fakir</option>
+                <option value="miskin">Miskin</option>
+                <option value="amil">Amil</option>
+                <option value="mualaf">Mualaf</option>
+                <option value="riqab">Riqab</option>
+                <option value="gharim">Gharim</option>
+                <option value="fisabilillah">Fisabilillah</option>
+                <option value="ibnu sabil">Ibnu Sabil</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-xs text-gray-500 mb-1">Cari Mustahiq</label>
+              <div class="flex gap-2">
+                <input
+                  v-model="filters.q"
+                  @keyup.enter="applyFilters"
+                  placeholder="Ketik nama mustahiq..."
+                  class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                <button @click="applyFilters" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
+                  Cari
+                </button>
+                <button @click="resetFilters" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="activeFilterChips.length > 0" class="mt-3 flex flex-wrap items-center gap-2">
+            <span class="text-xs text-gray-500">Filter aktif:</span>
+            <span
+              v-for="chip in activeFilterChips"
+              :key="chip"
+              class="px-2 py-1 text-xs rounded-full bg-green-50 text-green-700 border border-green-200"
+            >
+              {{ chip }}
+            </span>
+          </div>
+        </div>
+
         <!-- Desktop Table -->
         <div class="hidden md:block bg-white rounded-xl shadow-md overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
@@ -183,7 +231,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Swal from 'sweetalert2'
 import Sidebar from '../../components/Sidebar.vue'
 import Modal from '../../components/Modal.vue'
@@ -211,6 +259,29 @@ const isLoading = ref(true)
 const isSaving = ref(false)
 const pageSizeOptions = [5, 10, 25, 50, 'all']
 const pagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false })
+const filters = ref({ jenis_penerima: '', q: '' })
+
+const activeFilterChips = computed(() => {
+  const chips = []
+  if (filters.value.jenis_penerima) {
+    chips.push(`Jenis: ${filters.value.jenis_penerima}`)
+  }
+  if (filters.value.q && filters.value.q.trim()) {
+    chips.push(`Cari: ${filters.value.q.trim()}`)
+  }
+  return chips
+})
+
+const applyFilters = () => {
+  pagination.value.page = 1
+  loadMustahiq()
+}
+
+const resetFilters = () => {
+  filters.value = { jenis_penerima: '', q: '' }
+  pagination.value.page = 1
+  loadMustahiq()
+}
 
 const setPage = (page) => {
   pagination.value.page = page
@@ -262,22 +333,50 @@ const applyLocalPagination = (items) => {
   return sliced
 }
 
+const filterLocalMustahiq = (items) => {
+  const query = String(filters.value.q || '').trim().toLowerCase()
+  return items.filter((item) => {
+    if (filters.value.jenis_penerima && item.jenis_penerima !== filters.value.jenis_penerima) {
+      return false
+    }
+
+    if (query) {
+      const nama = String(item.nama || '').toLowerCase()
+      if (!nama.includes(query)) {
+        return false
+      }
+    }
+
+    return true
+  })
+}
+
 const loadMustahiq = async () => {
   isLoading.value = true
   try {
     const params = pagination.value.pageSize === 'all'
       ? { page_size: 'all' }
       : { page: pagination.value.page, page_size: pagination.value.pageSize }
+
+    if (filters.value.jenis_penerima) {
+      params.jenis_penerima = filters.value.jenis_penerima
+    }
+    if (filters.value.q && filters.value.q.trim()) {
+      params.q = filters.value.q.trim()
+    }
+
     const { data } = await api.getMustahiq(params)
     console.log('Mustahiq Response:', data)
     console.log('Mustahiq List Length:', data.data?.length || 0)
     if (data.success) {
       const payload = data.data || {}
       if (Array.isArray(payload.items)) {
-        mustahiqList.value = payload.items
-        syncPagination(payload, payload.items.length)
+        const filteredItems = filterLocalMustahiq(payload.items)
+        mustahiqList.value = filteredItems
+        syncPagination(payload, filteredItems.length)
       } else if (Array.isArray(payload)) {
-        mustahiqList.value = applyLocalPagination(payload)
+        const filteredItems = filterLocalMustahiq(payload)
+        mustahiqList.value = applyLocalPagination(filteredItems)
       } else {
         mustahiqList.value = []
         syncPagination(payload, 0)

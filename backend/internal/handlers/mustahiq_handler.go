@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yourusername/siazisah/internal/models"
@@ -38,10 +39,12 @@ func (h *MustahiqHandler) Create(c *gin.Context) {
 
 func (h *MustahiqHandler) GetAll(c *gin.Context) {
 	masjidID, _ := c.Get("masjid_id")
+	jenisPenerima := strings.TrimSpace(c.Query("jenis_penerima"))
+	queryNama := strings.TrimSpace(c.Query("q"))
 	page, pageSize, isAll := parsePagination(c)
 
 	if isAll {
-		mustahiqs, err := h.mustahiqRepo.GetByMasjidID(*masjidID.(*int))
+		mustahiqs, err := h.mustahiqRepo.GetByMasjidIDFiltered(*masjidID.(*int), jenisPenerima, queryNama)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiqs"})
 			return
@@ -51,14 +54,14 @@ func (h *MustahiqHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	total, err := h.mustahiqRepo.CountByMasjidID(*masjidID.(*int))
+	total, err := h.mustahiqRepo.CountByMasjidIDFiltered(*masjidID.(*int), jenisPenerima, queryNama)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiqs"})
 		return
 	}
 
 	offset := (page - 1) * pageSize
-	mustahiqs, err := h.mustahiqRepo.GetByMasjidIDPaginated(*masjidID.(*int), pageSize, offset)
+	mustahiqs, err := h.mustahiqRepo.GetByMasjidIDPaginatedFiltered(*masjidID.(*int), jenisPenerima, queryNama, pageSize, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to get mustahiqs"})
 		return
