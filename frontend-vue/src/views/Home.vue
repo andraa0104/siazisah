@@ -611,126 +611,37 @@ const fetchZakatStats = async () => {
     const startTime = performance.now();
     console.log("Fetching zakat stats from:", apiUrl);
 
-    // Fetch Zakat Fitrah stats
-    try {
-      const fitrahRes = await fetch(`${apiUrl}/public/stats/fitrah`);
-      console.log(
-        "Fitrah Request - Status:",
-        fitrahRes.status,
-        fitrahRes.statusText,
-      );
-      const fitrahData = fitrahRes.ok ? await fitrahRes.json() : null;
-      console.log("Fitrah Response Data:", fitrahData);
+    const dashboardRes = await fetch(`${apiUrl}/public/dashboard`);
+    const dashboardData = dashboardRes.ok ? await dashboardRes.json() : null;
 
-      if (fitrahData?.data) {
-        zakatStats.value.fitrah = {
-          muzakki: fitrahData.data.total_muzakki || 0,
-          beras: fitrahData.data.total_beras || 0,
-          uang: fitrahData.data.total_uang || 0,
-          mustahiq: fitrahData.data.total_mustahiq || 0,
-        };
-        console.log("✓ Fitrah stats updated:", zakatStats.value.fitrah);
-      } else {
-        console.warn("⚠ Fitrah response has no data property");
-      }
-    } catch (fitrahError) {
-      console.error("✗ Fitrah fetch error:", fitrahError);
-    }
+    if (dashboardData?.data) {
+      zakatStats.value.fitrah = {
+        muzakki: Number(dashboardData.data.total_muzakki || 0),
+        beras: Number(dashboardData.data.total_zakat_fitrah_beras_kg || 0),
+        uang: Number(dashboardData.data.total_zakat_fitrah_uang || 0),
+        mustahiq: Number(dashboardData.data.total_mustahiq || 0),
+      };
 
-    // Fetch Zakat Mal stats
-    try {
-      const malRes = await fetch(`${apiUrl}/public/stats/mal`);
-      console.log("Mal Request - Status:", malRes.status, malRes.statusText);
-      const malData = malRes.ok ? await malRes.json() : null;
-      console.log("Mal Response Data:", malData);
+      zakatStats.value.mal = {
+        muzakki: 0,
+        beras: 0,
+        uang: Number(dashboardData.data.total_zakat_mal || 0),
+        mustahiq: Number(dashboardData.data.total_mustahiq || 0),
+      };
 
-      if (malData?.data) {
-        zakatStats.value.mal = {
-          muzakki: malData.data.total_muzakki || 0,
-          beras: malData.data.total_beras || 0,
-          uang: malData.data.total_uang || 0,
-          mustahiq: malData.data.total_mustahiq || 0,
-        };
-        console.log("✓ Mal stats updated:", zakatStats.value.mal);
-      } else {
-        console.warn("⚠ Mal response has no data property");
-      }
-    } catch (malError) {
-      console.error("✗ Mal fetch error:", malError);
-    }
+      zakatStats.value.fidyah = {
+        muzakki: 0,
+        beras: Number(dashboardData.data.total_fidyah_beras_kg || 0),
+        uang: Number(dashboardData.data.total_fidyah_uang || 0),
+        mustahiq: Number(dashboardData.data.total_mustahiq || 0),
+      };
 
-    // Fetch Fidyah stats
-    try {
-      const fidyahRes = await fetch(`${apiUrl}/public/stats/fidyah`);
-      console.log(
-        "Fidyah Request - Status:",
-        fidyahRes.status,
-        fidyahRes.statusText,
-      );
-      const fidyahData = fidyahRes.ok ? await fidyahRes.json() : null;
-      console.log("Fidyah Response Data:", fidyahData);
-
-      if (fidyahData?.data) {
-        zakatStats.value.fidyah = {
-          muzakki: fidyahData.data.total_muzakki || 0,
-          beras: fidyahData.data.total_beras || 0,
-          uang: fidyahData.data.total_uang || 0,
-          mustahiq: fidyahData.data.total_mustahiq || 0,
-        };
-        console.log("✓ Fidyah stats updated:", zakatStats.value.fidyah);
-      } else {
-        console.warn("⚠ Fidyah response has no data property");
-      }
-    } catch (fidyahError) {
-      console.error("✗ Fidyah fetch error:", fidyahError);
-    }
-
-    // Fetch Mustahiq global stats
-    try {
-      const mustahiqRes = await fetch(`${apiUrl}/public/stats/mustahiq`);
-      console.log(
-        "Mustahiq Request - Status:",
-        mustahiqRes.status,
-        mustahiqRes.statusText,
-      );
-      const mustahiqData = mustahiqRes.ok ? await mustahiqRes.json() : null;
-      console.log("Mustahiq Response Data:", mustahiqData);
-
-      if (mustahiqData?.data) {
-        const perJenis = Array.isArray(mustahiqData.data.per_jenis)
-          ? mustahiqData.data.per_jenis
-          : [];
-        const totalFromJenis = perJenis.reduce(
-          (sum, item) => sum + Number(item.total || 0),
-          0,
-        );
-        mustahiqGlobalStats.value = {
-          total:
-            Number(mustahiqData.data.total_mustahiq || 0) || totalFromJenis,
-          perJenis,
-        };
-        console.log(
-          "✓ Mustahiq global stats updated:",
-          mustahiqGlobalStats.value,
-        );
-      } else {
-        console.warn("⚠ Mustahiq response has no data property");
-      }
-    } catch (mustahiqError) {
-      console.error("✗ Mustahiq fetch error:", mustahiqError);
-      try {
-        const dashboardRes = await fetch(`${apiUrl}/public/dashboard`);
-        const dashboardData = dashboardRes.ok
-          ? await dashboardRes.json()
-          : null;
-        if (dashboardData?.data) {
-          mustahiqGlobalStats.value.total = Number(
-            dashboardData.data.total_mustahiq || 0,
-          );
-        }
-      } catch (fallbackError) {
-        console.error("✗ Mustahiq fallback fetch error:", fallbackError);
-      }
+      mustahiqGlobalStats.value = {
+        total: Number(dashboardData.data.total_mustahiq || 0),
+        perJenis: [],
+      };
+    } else {
+      console.warn("⚠ Dashboard response has no data property");
     }
 
     const endTime = performance.now();
