@@ -57,8 +57,8 @@ func (h *PublicHandler) GetPublicDashboard(c *gin.Context) {
 	// Total masjid
 	h.DB.QueryRow("SELECT COUNT(*) FROM masjid WHERE is_active = 1").Scan(&stats.TotalMasjid)
 
-	// Total orang yang dizakati
-	h.DB.QueryRow("SELECT COALESCE(SUM(jumlah_orang), 0) FROM transaksi_zakat WHERE jenis_zakat = 'fitrah'").Scan(&stats.TotalMuzakki)
+	// Total muzakki (pemberi zakat)
+	h.DB.QueryRow("SELECT COUNT(*) FROM muzakki").Scan(&stats.TotalMuzakki)
 
 	// Total mustahiq
 	h.DB.QueryRow("SELECT COUNT(*) FROM mustahiq WHERE is_active = 1").Scan(&stats.TotalMustahiq)
@@ -153,23 +153,23 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 	includeLists := strings.EqualFold(c.Query("include_lists"), "1") || strings.EqualFold(c.Query("include_lists"), "true")
 
 	var stats struct {
-		Masjid                   models.Masjid            `json:"masjid"`
-		TotalMuzakki             int                      `json:"total_muzakki"`
-		TotalMustahiq            int                      `json:"total_mustahiq"`
-		TotalZakatFitrah         float64                  `json:"total_zakat_fitrah"`
-		TotalZakatFitrahUang     float64                  `json:"total_zakat_fitrah_uang"`
-		TotalZakatFitrahBerasKg  float64                  `json:"total_zakat_fitrah_beras_kg"`
-		TotalZakatFitrahBerasRp  float64                  `json:"total_zakat_fitrah_beras_rupiah"`
-		TotalZakatMal            float64                  `json:"total_zakat_mal"`
-		TotalFidyah              float64                  `json:"total_fidyah"`
-		TotalFidyahUang          float64                  `json:"total_fidyah_uang"`
-		TotalFidyahBerasKg       float64                  `json:"total_fidyah_beras_kg"`
-		TotalFidyahBerasRp       float64                  `json:"total_fidyah_beras_rupiah"`
-		TotalInfaq               float64                  `json:"total_infaq"`
-		LastUpdate               string                   `json:"last_update"`
-		Transaksi                []map[string]interface{} `json:"transaksi"`
-		Mustahiq                 []map[string]interface{} `json:"mustahiq"`
-		Distribusi               []map[string]interface{} `json:"distribusi"`
+		Masjid                  models.Masjid            `json:"masjid"`
+		TotalMuzakki            int                      `json:"total_muzakki"`
+		TotalMustahiq           int                      `json:"total_mustahiq"`
+		TotalZakatFitrah        float64                  `json:"total_zakat_fitrah"`
+		TotalZakatFitrahUang    float64                  `json:"total_zakat_fitrah_uang"`
+		TotalZakatFitrahBerasKg float64                  `json:"total_zakat_fitrah_beras_kg"`
+		TotalZakatFitrahBerasRp float64                  `json:"total_zakat_fitrah_beras_rupiah"`
+		TotalZakatMal           float64                  `json:"total_zakat_mal"`
+		TotalFidyah             float64                  `json:"total_fidyah"`
+		TotalFidyahUang         float64                  `json:"total_fidyah_uang"`
+		TotalFidyahBerasKg      float64                  `json:"total_fidyah_beras_kg"`
+		TotalFidyahBerasRp      float64                  `json:"total_fidyah_beras_rupiah"`
+		TotalInfaq              float64                  `json:"total_infaq"`
+		LastUpdate              string                   `json:"last_update"`
+		Transaksi               []map[string]interface{} `json:"transaksi"`
+		Mustahiq                []map[string]interface{} `json:"mustahiq"`
+		Distribusi              []map[string]interface{} `json:"distribusi"`
 	}
 
 	// Get masjid info
@@ -186,12 +186,12 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 	}
 
 	// Get stats
-	h.DB.QueryRow("SELECT COALESCE(SUM(jumlah_orang), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah'", id).Scan(&stats.TotalMuzakki)
+	h.DB.QueryRow("SELECT COUNT(*) FROM muzakki WHERE masjid_id = ?", id).Scan(&stats.TotalMuzakki)
 	h.DB.QueryRow("SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ?", id).Scan(&stats.TotalMustahiq)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah'", id).Scan(&stats.TotalZakatFitrah)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'uang'", id).Scan(&stats.TotalZakatFitrahUang)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'beras'", id).Scan(&stats.TotalZakatFitrahBerasRp)
-	
+
 	// Total kg beras fitrah
 	h.DB.QueryRow("SELECT COALESCE(SUM(kg_beras_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'beras'", id).Scan(&stats.TotalZakatFitrahBerasKg)
 	berasRows, err := h.DB.Query("SELECT keterangan FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'beras' AND (kg_beras_dibayar IS NULL OR kg_beras_dibayar = 0) AND keterangan IS NOT NULL", id)
@@ -204,12 +204,12 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 			}
 		}
 	}
-	
+
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'mal'", id).Scan(&stats.TotalZakatMal)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fidyah'", id).Scan(&stats.TotalFidyah)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fidyah' AND bentuk_zakat = 'uang'", id).Scan(&stats.TotalFidyahUang)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fidyah' AND bentuk_zakat = 'beras'", id).Scan(&stats.TotalFidyahBerasRp)
-	
+
 	// Total kg beras fidyah
 	h.DB.QueryRow("SELECT COALESCE(SUM(kg_beras_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fidyah' AND bentuk_zakat = 'beras'", id).Scan(&stats.TotalFidyahBerasKg)
 	fidyahRows, err := h.DB.Query("SELECT keterangan FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fidyah' AND bentuk_zakat = 'beras' AND (kg_beras_dibayar IS NULL OR kg_beras_dibayar = 0) AND keterangan IS NOT NULL", id)
@@ -222,7 +222,7 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 			}
 		}
 	}
-	
+
 	h.DB.QueryRow("SELECT COALESCE(SUM(infaq_tambahan), 0) + COALESCE(SUM(CASE WHEN jenis_zakat = 'infaq' THEN total_dibayar ELSE 0 END), 0) FROM transaksi_zakat WHERE masjid_id = ?", id).Scan(&stats.TotalInfaq)
 
 	stats.Transaksi = []map[string]interface{}{}
@@ -325,7 +325,7 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 					"mustahiq_nama":      nama,
 					"nominal":            nominal,
 					"tanggal_distribusi": tanggal,
-					"beras_kg":            parseDistribusiKg(keterangan),
+					"beras_kg":           parseDistribusiKg(keterangan),
 					"keterangan":         cleanDistribusiKeterangan(keterangan),
 				})
 			}
@@ -497,13 +497,13 @@ func (h *PublicHandler) GetMasjidMustahiq(c *gin.Context) {
 			continue
 		}
 		items = append(items, map[string]interface{}{
-			"id":         mid,
-			"nama":       nama,
-			"alamat":     alamat,
-			"kategori":   kategori,
+			"id":             mid,
+			"nama":           nama,
+			"alamat":         alamat,
+			"kategori":       kategori,
 			"jenis_penerima": kategori,
-			"rt":         rt,
-			"keterangan": keterangan,
+			"rt":             rt,
+			"keterangan":     keterangan,
 		})
 	}
 
@@ -556,7 +556,7 @@ func (h *PublicHandler) GetMasjidDistribusi(c *gin.Context) {
 			"mustahiq_nama":      nama,
 			"nominal":            nominal,
 			"tanggal_distribusi": tanggal,
-			"beras_kg":            parseDistribusiKg(keterangan),
+			"beras_kg":           parseDistribusiKg(keterangan),
 			"keterangan":         cleanDistribusiKeterangan(keterangan),
 		})
 	}
@@ -569,13 +569,9 @@ func (h *PublicHandler) GetMasjidDistribusi(c *gin.Context) {
 func (h *PublicHandler) GetZakatFitrahStats(c *gin.Context) {
 	stats := map[string]interface{}{}
 
-	// Count unique muzakki (wajib zakat) per transaction
+	// Count muzakki (pemberi zakat)
 	var totalMuzakki int
-	h.DB.QueryRow(`
-		SELECT COUNT(DISTINCT muzakki_id) 
-		FROM transaksi_zakat 
-		WHERE jenis_zakat = 'fitrah'
-	`).Scan(&totalMuzakki)
+	h.DB.QueryRow("SELECT COUNT(*) FROM muzakki").Scan(&totalMuzakki)
 	stats["total_muzakki"] = totalMuzakki
 
 	// Total beras (kg) - parsing from keterangan field
@@ -619,13 +615,9 @@ func (h *PublicHandler) GetZakatFitrahStats(c *gin.Context) {
 func (h *PublicHandler) GetZakatMalStats(c *gin.Context) {
 	stats := map[string]interface{}{}
 
-	// Count unique muzakki
+	// Count muzakki (pemberi zakat)
 	var totalMuzakki int
-	h.DB.QueryRow(`
-		SELECT COUNT(DISTINCT muzakki_id) 
-		FROM transaksi_zakat 
-		WHERE jenis_zakat = 'mal'
-	`).Scan(&totalMuzakki)
+	h.DB.QueryRow("SELECT COUNT(*) FROM muzakki").Scan(&totalMuzakki)
 	stats["total_muzakki"] = totalMuzakki
 
 	// Total beras (kg) - same approach as fitrah
@@ -664,13 +656,9 @@ func (h *PublicHandler) GetZakatMalStats(c *gin.Context) {
 func (h *PublicHandler) GetFidyahStats(c *gin.Context) {
 	stats := map[string]interface{}{}
 
-	// Count unique muzakki
+	// Count muzakki (pemberi zakat)
 	var totalMuzakki int
-	h.DB.QueryRow(`
-		SELECT COUNT(DISTINCT muzakki_id) 
-		FROM transaksi_zakat 
-		WHERE jenis_zakat = 'fidyah'
-	`).Scan(&totalMuzakki)
+	h.DB.QueryRow("SELECT COUNT(*) FROM muzakki").Scan(&totalMuzakki)
 	stats["total_muzakki"] = totalMuzakki
 
 	// Total beras (kg)

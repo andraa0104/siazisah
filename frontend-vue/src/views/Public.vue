@@ -40,7 +40,7 @@
         <template v-if="isLoadingStats">
           <SkeletonCard v-for="i in 7" :key="i" type="stat" />
         </template>
-        
+
         <!-- Actual Stats -->
         <div
           v-else
@@ -69,7 +69,8 @@
 
       <div v-if="lastUpdate" class="text-center mb-6">
         <p class="text-sm text-gray-500">
-          <i class="fas fa-clock mr-1"></i>Data terakhir diperbarui: <span class="font-medium">{{ formatDate(lastUpdate) }}</span>
+          <i class="fas fa-clock mr-1"></i>Data terakhir diperbarui:
+          <span class="font-medium">{{ formatDate(lastUpdate) }}</span>
         </p>
       </div>
 
@@ -82,7 +83,7 @@
           <template v-if="isLoadingMasjid">
             <SkeletonCard v-for="i in 3" :key="i" type="card" />
           </template>
-          
+
           <!-- Actual Masjid List -->
           <div
             v-else
@@ -134,7 +135,8 @@
               <h2 class="text-2xl font-bold">{{ modalData?.masjid.nama }}</h2>
               <p class="text-sm opacity-90">{{ modalData?.masjid.alamat }}</p>
               <p v-if="modalData?.last_update" class="text-xs opacity-75 mt-1">
-                <i class="fas fa-clock mr-1"></i>Update terakhir: {{ formatDate(modalData.last_update) }}
+                <i class="fas fa-clock mr-1"></i>Update terakhir:
+                {{ formatDate(modalData.last_update) }}
               </p>
             </div>
             <button
@@ -169,9 +171,15 @@
             <div class="bg-amber-50 p-4 rounded-lg">
               <p class="text-sm text-amber-600 font-medium">Fitrah (Beras)</p>
               <p class="text-lg font-bold text-amber-700">
-                {{ (modalData?.total_zakat_fitrah_beras_kg || 0).toFixed(1) }} kg
+                {{
+                  (modalData?.total_zakat_fitrah_beras_kg || 0).toFixed(1)
+                }}
+                kg
               </p>
-              <p v-if="modalData?.total_zakat_fitrah_beras_rupiah > 0" class="text-xs text-amber-600 mt-1">
+              <p
+                v-if="modalData?.total_zakat_fitrah_beras_rupiah > 0"
+                class="text-xs text-amber-600 mt-1"
+              >
                 {{ formatCurrency(modalData?.total_zakat_fitrah_beras_rupiah) }}
               </p>
             </div>
@@ -203,7 +211,7 @@
                 'px-6 py-3 font-medium transition-colors',
                 activeTab === 'zakat'
                   ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
+                  : 'text-gray-600 hover:text-gray-800',
               ]"
             >
               <i class="fas fa-receipt mr-2"></i>Data Zakat
@@ -214,7 +222,7 @@
                 'px-6 py-3 font-medium transition-colors',
                 activeTab === 'mustahiq'
                   ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
+                  : 'text-gray-600 hover:text-gray-800',
               ]"
             >
               <i class="fas fa-hand-holding-heart mr-2"></i>Mustahiq
@@ -225,7 +233,7 @@
                 'px-6 py-3 font-medium transition-colors',
                 activeTab === 'pengurus'
                   ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
+                  : 'text-gray-600 hover:text-gray-800',
               ]"
             >
               <i class="fas fa-users mr-2"></i>Pengurus
@@ -236,7 +244,7 @@
                 'px-6 py-3 font-medium transition-colors',
                 activeTab === 'distribusi'
                   ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
+                  : 'text-gray-600 hover:text-gray-800',
               ]"
             >
               <i class="fas fa-hand-holding-usd mr-2"></i>Distribusi
@@ -252,8 +260,14 @@
             <div class="bg-white border border-gray-200 rounded-lg p-3 mb-4">
               <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div>
-                  <label class="block text-xs text-gray-500 mb-1">Filter Jenis Zakat</label>
-                  <select v-model="transaksiFilters.jenis_zakat" @change="onPublicJenisFilterChange" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >Filter Jenis Zakat</label
+                  >
+                  <select
+                    v-model="transaksiFilters.jenis_zakat"
+                    @change="onPublicJenisFilterChange"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  >
                     <option value="">Semua Jenis</option>
                     <option value="fitrah">Zakat Fitrah</option>
                     <option value="mal">Zakat Mal</option>
@@ -262,26 +276,41 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block text-xs text-gray-500 mb-1">Bentuk (Fitrah/Fidyah)</label>
-                  <select v-model="transaksiFilters.bentuk_zakat" :disabled="!showPublicBentukFilter" @change="applyPublicTransaksiFilters" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm disabled:bg-gray-100 disabled:text-gray-400">
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >Bentuk (Fitrah/Fidyah)</label
+                  >
+                  <select
+                    v-model="transaksiFilters.bentuk_zakat"
+                    :disabled="!showPublicBentukFilter"
+                    @change="applyPublicTransaksiFilters"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm disabled:bg-gray-100 disabled:text-gray-400"
+                  >
                     <option value="">Semua Bentuk</option>
                     <option value="uang">Uang</option>
                     <option value="beras">Beras</option>
                   </select>
                 </div>
                 <div class="md:col-span-2">
-                  <label class="block text-xs text-gray-500 mb-1">Cari Muzakki</label>
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >Cari Muzakki</label
+                  >
                   <div class="flex gap-2">
                     <input
                       v-model="transaksiFilters.q"
                       @keyup.enter="applyPublicTransaksiFilters"
                       placeholder="Ketik nama muzakki..."
                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <button
+                      @click="applyPublicTransaksiFilters"
+                      class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
                     >
-                    <button @click="applyPublicTransaksiFilters" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
                       Cari
                     </button>
-                    <button @click="resetPublicTransaksiFilters" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
+                    <button
+                      @click="resetPublicTransaksiFilters"
+                      class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200"
+                    >
                       Reset
                     </button>
                   </div>
@@ -341,12 +370,15 @@
                         {{ t.muzakki_nama }}
                       </td>
                       <td class="px-4 py-2 text-sm">
+                        <span :class="getJenisBadgeClass(t.jenis_zakat)">{{
+                          t.jenis_zakat
+                        }}</span>
                         <span
-                          :class="getJenisBadgeClass(t.jenis_zakat)"
-                          >{{ t.jenis_zakat }}</span
+                          v-if="t.bentuk_zakat === 'beras'"
+                          class="block text-xs text-amber-600 mt-1"
                         >
-                        <span v-if="t.bentuk_zakat === 'beras'" class="block text-xs text-amber-600 mt-1">
-                          <i class="fas fa-seedling mr-1"></i>{{ t.keterangan || 'Beras' }}
+                          <i class="fas fa-seedling mr-1"></i
+                          >{{ t.keterangan || "Beras" }}
                         </span>
                       </td>
                       <td class="px-4 py-2 text-sm text-gray-700">
@@ -384,17 +416,23 @@
                       <p class="font-medium text-gray-900">
                         {{ t.muzakki_nama }}
                       </p>
-                      <span v-if="t.bentuk_zakat === 'beras'" class="text-xs text-amber-600 mt-1 block">
-                        <i class="fas fa-seedling mr-1"></i>{{ t.keterangan || 'Beras' }}
+                      <span
+                        v-if="t.bentuk_zakat === 'beras'"
+                        class="text-xs text-amber-600 mt-1 block"
+                      >
+                        <i class="fas fa-seedling mr-1"></i
+                        >{{ t.keterangan || "Beras" }}
                       </span>
                     </div>
-                    <span
-                      :class="getJenisBadgeClass(t.jenis_zakat)"
-                      >{{ t.jenis_zakat }}</span
-                    >
+                    <span :class="getJenisBadgeClass(t.jenis_zakat)">{{
+                      t.jenis_zakat
+                    }}</span>
                   </div>
                   <div class="space-y-1 text-sm">
-                    <div v-if="formatJumlah(t) !== '-'" class="flex justify-between">
+                    <div
+                      v-if="formatJumlah(t) !== '-'"
+                      class="flex justify-between"
+                    >
                       <span class="text-gray-600">Jumlah:</span
                       ><span class="font-medium">{{ formatJumlah(t) }}</span>
                     </div>
@@ -404,7 +442,9 @@
                     </div>
                     <div class="flex justify-between">
                       <span class="text-gray-600">Total Beras:</span
-                      ><span class="font-medium">{{ formatTotalBerasKg(t) }}</span>
+                      ><span class="font-medium">{{
+                        formatTotalBerasKg(t)
+                      }}</span>
                     </div>
                     <div
                       v-if="t.infaq_tambahan > 0"
@@ -422,28 +462,47 @@
                   </div>
                 </div>
               </div>
-              <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600">
+              <div
+                class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600"
+              >
                 <div>
-                  Menampilkan {{ modalData.transaksi.length }} dari {{ transaksiPagination.total }} data
+                  Menampilkan {{ modalData.transaksi.length }} dari
+                  {{ transaksiPagination.total }} data
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                   <label class="text-xs text-gray-500">Per halaman</label>
-                  <select v-model="transaksiPagination.pageSize" @change="onTransaksiPageSizeChange" class="px-2 py-1 border border-gray-300 rounded-lg text-sm">
-                    <option v-for="size in pageSizeOptions" :key="size" :value="size">
-                      {{ size === 'all' ? 'Semua' : size }}
+                  <select
+                    v-model="transaksiPagination.pageSize"
+                    @change="onTransaksiPageSizeChange"
+                    class="px-2 py-1 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option
+                      v-for="size in pageSizeOptions"
+                      :key="size"
+                      :value="size"
+                    >
+                      {{ size === "all" ? "Semua" : size }}
                     </option>
                   </select>
                   <button
                     class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
-                    :disabled="transaksiPagination.isAll || transaksiPagination.page <= 1"
+                    :disabled="
+                      transaksiPagination.isAll || transaksiPagination.page <= 1
+                    "
                     @click="setTransaksiPage(transaksiPagination.page - 1)"
                   >
                     Prev
                   </button>
-                  <span class="text-xs text-gray-500">{{ transaksiPagination.page }} / {{ transaksiPagination.totalPages }}</span>
+                  <span class="text-xs text-gray-500"
+                    >{{ transaksiPagination.page }} /
+                    {{ transaksiPagination.totalPages }}</span
+                  >
                   <button
                     class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
-                    :disabled="transaksiPagination.isAll || transaksiPagination.page >= transaksiPagination.totalPages"
+                    :disabled="
+                      transaksiPagination.isAll ||
+                      transaksiPagination.page >= transaksiPagination.totalPages
+                    "
                     @click="setTransaksiPage(transaksiPagination.page + 1)"
                   >
                     Next
@@ -465,8 +524,14 @@
             <div class="bg-white border border-gray-200 rounded-lg p-3 mb-4">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <label class="block text-xs text-gray-500 mb-1">Filter Jenis Penerima</label>
-                  <select v-model="mustahiqFilters.jenis_penerima" @change="applyPublicMustahiqFilters" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >Filter Jenis Penerima</label
+                  >
+                  <select
+                    v-model="mustahiqFilters.jenis_penerima"
+                    @change="applyPublicMustahiqFilters"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  >
                     <option value="">Semua Jenis</option>
                     <option value="fakir">Fakir</option>
                     <option value="miskin">Miskin</option>
@@ -479,18 +544,26 @@
                   </select>
                 </div>
                 <div class="md:col-span-2">
-                  <label class="block text-xs text-gray-500 mb-1">Cari Mustahiq</label>
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >Cari Mustahiq</label
+                  >
                   <div class="flex gap-2">
                     <input
                       v-model="mustahiqFilters.q"
                       @keyup.enter="applyPublicMustahiqFilters"
                       placeholder="Ketik nama mustahiq..."
                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <button
+                      @click="applyPublicMustahiqFilters"
+                      class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
                     >
-                    <button @click="applyPublicMustahiqFilters" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
                       Cari
                     </button>
-                    <button @click="resetPublicMustahiqFilters" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
+                    <button
+                      @click="resetPublicMustahiqFilters"
+                      class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200"
+                    >
                       Reset
                     </button>
                   </div>
@@ -579,28 +652,47 @@
                   </div>
                 </div>
               </div>
-              <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600">
+              <div
+                class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600"
+              >
                 <div>
-                  Menampilkan {{ modalData.mustahiq.length }} dari {{ mustahiqPagination.total }} data
+                  Menampilkan {{ modalData.mustahiq.length }} dari
+                  {{ mustahiqPagination.total }} data
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                   <label class="text-xs text-gray-500">Per halaman</label>
-                  <select v-model="mustahiqPagination.pageSize" @change="onMustahiqPageSizeChange" class="px-2 py-1 border border-gray-300 rounded-lg text-sm">
-                    <option v-for="size in pageSizeOptions" :key="size" :value="size">
-                      {{ size === 'all' ? 'Semua' : size }}
+                  <select
+                    v-model="mustahiqPagination.pageSize"
+                    @change="onMustahiqPageSizeChange"
+                    class="px-2 py-1 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option
+                      v-for="size in pageSizeOptions"
+                      :key="size"
+                      :value="size"
+                    >
+                      {{ size === "all" ? "Semua" : size }}
                     </option>
                   </select>
                   <button
                     class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
-                    :disabled="mustahiqPagination.isAll || mustahiqPagination.page <= 1"
+                    :disabled="
+                      mustahiqPagination.isAll || mustahiqPagination.page <= 1
+                    "
                     @click="setMustahiqPage(mustahiqPagination.page - 1)"
                   >
                     Prev
                   </button>
-                  <span class="text-xs text-gray-500">{{ mustahiqPagination.page }} / {{ mustahiqPagination.totalPages }}</span>
+                  <span class="text-xs text-gray-500"
+                    >{{ mustahiqPagination.page }} /
+                    {{ mustahiqPagination.totalPages }}</span
+                  >
                   <button
                     class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
-                    :disabled="mustahiqPagination.isAll || mustahiqPagination.page >= mustahiqPagination.totalPages"
+                    :disabled="
+                      mustahiqPagination.isAll ||
+                      mustahiqPagination.page >= mustahiqPagination.totalPages
+                    "
                     @click="setMustahiqPage(mustahiqPagination.page + 1)"
                   >
                     Next
@@ -621,9 +713,15 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Pengurus Masjid -->
               <div class="bg-blue-50 rounded-lg p-4">
-                <h4 class="font-semibold text-blue-800 mb-3">Pengurus Masjid/Langgar</h4>
+                <h4 class="font-semibold text-blue-800 mb-3">
+                  Pengurus Masjid/Langgar
+                </h4>
                 <div v-if="pengurusMasjidData.length > 0" class="space-y-2">
-                  <div v-for="p in pengurusMasjidData" :key="p.id" class="bg-white rounded p-3">
+                  <div
+                    v-for="p in pengurusMasjidData"
+                    :key="p.id"
+                    class="bg-white rounded p-3"
+                  >
                     <p class="text-xs text-gray-600 mb-1">{{ p.jabatan }}</p>
                     <p class="font-medium text-gray-900">{{ p.nama }}</p>
                     <p v-if="p.telepon" class="text-sm text-gray-600 mt-1">
@@ -631,14 +729,20 @@
                     </p>
                   </div>
                 </div>
-                <p v-else class="text-gray-500 text-sm text-center py-3">Belum ada data pengurus</p>
+                <p v-else class="text-gray-500 text-sm text-center py-3">
+                  Belum ada data pengurus
+                </p>
               </div>
 
               <!-- Pengurus UPZ -->
               <div class="bg-green-50 rounded-lg p-4">
                 <h4 class="font-semibold text-green-800 mb-3">Pengurus UPZ</h4>
                 <div v-if="pengurusZakatData.length > 0" class="space-y-2">
-                  <div v-for="p in pengurusZakatData" :key="p.id" class="bg-white rounded p-3">
+                  <div
+                    v-for="p in pengurusZakatData"
+                    :key="p.id"
+                    class="bg-white rounded p-3"
+                  >
                     <p class="text-xs text-gray-600 mb-1">{{ p.jabatan }}</p>
                     <p class="font-medium text-gray-900">{{ p.nama }}</p>
                     <p v-if="p.telepon" class="text-sm text-gray-600 mt-1">
@@ -646,7 +750,9 @@
                     </p>
                   </div>
                 </div>
-                <p v-else class="text-gray-500 text-sm text-center py-3">Belum ada data pengurus UPZ</p>
+                <p v-else class="text-gray-500 text-sm text-center py-3">
+                  Belum ada data pengurus UPZ
+                </p>
               </div>
             </div>
           </div>
@@ -655,77 +761,143 @@
         <!-- Tab Content: Distribusi -->
         <div v-show="activeTab === 'distribusi'" class="mb-6">
           <h3 class="text-lg font-bold text-gray-800 mb-3 pl-2 md:pl-4">
-            <i class="fas fa-hand-holding-usd mr-2 text-blue-600"></i>Data Distribusi Zakat
+            <i class="fas fa-hand-holding-usd mr-2 text-blue-600"></i>Data
+            Distribusi Zakat
           </h3>
           <div v-if="modalData?.distribusi?.length > 0" class="px-2 md:px-4">
             <div class="hidden md:block overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Mustahiq</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Beras</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Uang</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                    <th
+                      class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Mustahiq
+                    </th>
+                    <th
+                      class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Beras
+                    </th>
+                    <th
+                      class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Uang
+                    </th>
+                    <th
+                      class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Keterangan
+                    </th>
+                    <th
+                      class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                    >
+                      Tanggal
+                    </th>
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="d in modalData?.distribusi" :key="d.id" class="hover:bg-gray-50">
-                    <td class="px-4 py-2 text-sm text-gray-900">{{ d.mustahiq_nama }}</td>
-                    <td class="px-4 py-2 text-sm text-gray-700">{{ (d.beras_kg || 0).toFixed(1) }} kg</td>
-                    <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ formatCurrency(d.nominal || 0) }}</td>
-                    <td class="px-4 py-2 text-sm text-gray-700">{{ d.keterangan || '-' }}</td>
-                    <td class="px-4 py-2 text-sm text-gray-600">{{ formatDate(d.tanggal_distribusi) }}</td>
+                  <tr
+                    v-for="d in modalData?.distribusi"
+                    :key="d.id"
+                    class="hover:bg-gray-50"
+                  >
+                    <td class="px-4 py-2 text-sm text-gray-900">
+                      {{ d.mustahiq_nama }}
+                    </td>
+                    <td class="px-4 py-2 text-sm text-gray-700">
+                      {{ (d.beras_kg || 0).toFixed(1) }} kg
+                    </td>
+                    <td class="px-4 py-2 text-sm font-medium text-gray-900">
+                      {{ formatCurrency(d.nominal || 0) }}
+                    </td>
+                    <td class="px-4 py-2 text-sm text-gray-700">
+                      {{ d.keterangan || "-" }}
+                    </td>
+                    <td class="px-4 py-2 text-sm text-gray-600">
+                      {{ formatDate(d.tanggal_distribusi) }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <div class="md:hidden space-y-3">
-              <div v-for="d in modalData?.distribusi" :key="d.id" class="bg-gray-50 rounded-lg p-4">
+              <div
+                v-for="d in modalData?.distribusi"
+                :key="d.id"
+                class="bg-gray-50 rounded-lg p-4"
+              >
                 <div class="flex justify-between items-start mb-2">
                   <div>
-                    <p class="font-medium text-gray-900">{{ d.mustahiq_nama }}</p>
-                    <p class="text-xs text-gray-500">{{ formatDate(d.tanggal_distribusi) }}</p>
+                    <p class="font-medium text-gray-900">
+                      {{ d.mustahiq_nama }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      {{ formatDate(d.tanggal_distribusi) }}
+                    </p>
                   </div>
                 </div>
                 <div class="space-y-1 text-sm">
                   <div class="flex justify-between">
                     <span class="text-gray-600">Beras:</span>
-                    <span class="font-medium">{{ (d.beras_kg || 0).toFixed(1) }} kg</span>
+                    <span class="font-medium"
+                      >{{ (d.beras_kg || 0).toFixed(1) }} kg</span
+                    >
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600">Uang:</span>
-                    <span class="font-medium">{{ formatCurrency(d.nominal || 0) }}</span>
+                    <span class="font-medium">{{
+                      formatCurrency(d.nominal || 0)
+                    }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600">Keterangan:</span>
-                    <span class="font-medium">{{ d.keterangan || '-' }}</span>
+                    <span class="font-medium">{{ d.keterangan || "-" }}</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600">
+            <div
+              class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600"
+            >
               <div>
-                Menampilkan {{ modalData.distribusi.length }} dari {{ distribusiPagination.total }} data
+                Menampilkan {{ modalData.distribusi.length }} dari
+                {{ distribusiPagination.total }} data
               </div>
               <div class="flex flex-wrap items-center gap-2">
                 <label class="text-xs text-gray-500">Per halaman</label>
-                <select v-model="distribusiPagination.pageSize" @change="onDistribusiPageSizeChange" class="px-2 py-1 border border-gray-300 rounded-lg text-sm">
-                  <option v-for="size in pageSizeOptions" :key="size" :value="size">
-                    {{ size === 'all' ? 'Semua' : size }}
+                <select
+                  v-model="distribusiPagination.pageSize"
+                  @change="onDistribusiPageSizeChange"
+                  class="px-2 py-1 border border-gray-300 rounded-lg text-sm"
+                >
+                  <option
+                    v-for="size in pageSizeOptions"
+                    :key="size"
+                    :value="size"
+                  >
+                    {{ size === "all" ? "Semua" : size }}
                   </option>
                 </select>
                 <button
                   class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
-                  :disabled="distribusiPagination.isAll || distribusiPagination.page <= 1"
+                  :disabled="
+                    distribusiPagination.isAll || distribusiPagination.page <= 1
+                  "
                   @click="setDistribusiPage(distribusiPagination.page - 1)"
                 >
                   Prev
                 </button>
-                <span class="text-xs text-gray-500">{{ distribusiPagination.page }} / {{ distribusiPagination.totalPages }}</span>
+                <span class="text-xs text-gray-500"
+                  >{{ distribusiPagination.page }} /
+                  {{ distribusiPagination.totalPages }}</span
+                >
                 <button
                   class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50"
-                  :disabled="distribusiPagination.isAll || distribusiPagination.page >= distribusiPagination.totalPages"
+                  :disabled="
+                    distribusiPagination.isAll ||
+                    distribusiPagination.page >= distribusiPagination.totalPages
+                  "
                   @click="setDistribusiPage(distribusiPagination.page + 1)"
                 >
                   Next
@@ -814,20 +986,42 @@ const masjidList = ref([]);
 const lastUpdate = ref(null);
 const showModal = ref(false);
 const modalData = ref(null);
-const activeTab = ref('zakat');
+const activeTab = ref("zakat");
 const pengurusMasjidData = ref([]);
 const pengurusZakatData = ref([]);
 const isLoadingStats = ref(true);
 const isLoadingMasjid = ref(true);
 const isLoadingModal = ref(false);
-const pageSizeOptions = [5, 10, 25, 50, 'all'];
-const transaksiPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false });
-const mustahiqPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false });
-const distribusiPagination = ref({ page: 1, pageSize: 5, total: 0, totalPages: 1, isAll: false });
-const transaksiFilters = ref({ jenis_zakat: '', bentuk_zakat: '', q: '' });
-const mustahiqFilters = ref({ jenis_penerima: '', q: '' });
+const pageSizeOptions = [5, 10, 25, 50, "all"];
+const transaksiPagination = ref({
+  page: 1,
+  pageSize: 5,
+  total: 0,
+  totalPages: 1,
+  isAll: false,
+});
+const mustahiqPagination = ref({
+  page: 1,
+  pageSize: 5,
+  total: 0,
+  totalPages: 1,
+  isAll: false,
+});
+const distribusiPagination = ref({
+  page: 1,
+  pageSize: 5,
+  total: 0,
+  totalPages: 1,
+  isAll: false,
+});
+const transaksiFilters = ref({ jenis_zakat: "", bentuk_zakat: "", q: "" });
+const mustahiqFilters = ref({ jenis_penerima: "", q: "" });
 const localLists = ref({ transaksi: [], mustahiq: [], distribusi: [] });
-const useLocalLists = ref({ transaksi: false, mustahiq: false, distribusi: false });
+const useLocalLists = ref({
+  transaksi: false,
+  mustahiq: false,
+  distribusi: false,
+});
 
 const showPublicBentukFilter = ref(false);
 
@@ -836,7 +1030,7 @@ const syncPagination = (target, payload, itemCount) => {
     const meta = payload.pagination;
     target.value = {
       page: meta.page || 1,
-      pageSize: meta.is_all ? 'all' : (meta.page_size || target.value.pageSize),
+      pageSize: meta.is_all ? "all" : meta.page_size || target.value.pageSize,
       total: meta.total ?? itemCount,
       totalPages: meta.total_pages || 1,
       isAll: !!meta.is_all,
@@ -845,12 +1039,12 @@ const syncPagination = (target, payload, itemCount) => {
   }
   target.value.total = itemCount;
   target.value.totalPages = 1;
-  target.value.isAll = target.value.pageSize === 'all';
+  target.value.isAll = target.value.pageSize === "all";
 };
 
 const applyLocalPagination = (items, target) => {
   const total = items.length;
-  if (target.value.pageSize === 'all') {
+  if (target.value.pageSize === "all") {
     target.value.total = total;
     target.value.totalPages = 1;
     target.value.isAll = true;
@@ -873,15 +1067,23 @@ const applyLocalPagination = (items, target) => {
 
 const fetchTransaksiPage = async (id) => {
   try {
-    const normalizedJenis = String(transaksiFilters.value.jenis_zakat || '').trim().toLowerCase();
+    const normalizedJenis = String(transaksiFilters.value.jenis_zakat || "")
+      .trim()
+      .toLowerCase();
     const normalizedBentuk = showPublicBentukFilter.value
-      ? String(transaksiFilters.value.bentuk_zakat || '').trim().toLowerCase()
-      : '';
-    const normalizedQ = String(transaksiFilters.value.q || '').trim();
+      ? String(transaksiFilters.value.bentuk_zakat || "")
+          .trim()
+          .toLowerCase()
+      : "";
+    const normalizedQ = String(transaksiFilters.value.q || "").trim();
 
-    const params = transaksiPagination.value.pageSize === 'all'
-      ? { page_size: 'all' }
-      : { page: transaksiPagination.value.page, page_size: transaksiPagination.value.pageSize };
+    const params =
+      transaksiPagination.value.pageSize === "all"
+        ? { page_size: "all" }
+        : {
+            page: transaksiPagination.value.page,
+            page_size: transaksiPagination.value.pageSize,
+          };
     if (normalizedJenis) params.jenis_zakat = normalizedJenis;
     if (normalizedBentuk) params.bentuk_zakat = normalizedBentuk;
     if (normalizedQ) params.q = normalizedQ;
@@ -894,7 +1096,10 @@ const fetchTransaksiPage = async (id) => {
         syncPagination(transaksiPagination, payload, payload.items.length);
         useLocalLists.value.transaksi = false;
       } else if (Array.isArray(payload)) {
-        modalData.value.transaksi = applyLocalPagination(payload, transaksiPagination);
+        modalData.value.transaksi = applyLocalPagination(
+          payload,
+          transaksiPagination,
+        );
       } else {
         modalData.value.transaksi = [];
         syncPagination(transaksiPagination, payload, 0);
@@ -902,9 +1107,12 @@ const fetchTransaksiPage = async (id) => {
     }
     return true;
   } catch (error) {
-    console.error('Error loading transaksi:', error);
+    console.error("Error loading transaksi:", error);
     if (useLocalLists.value.transaksi) {
-      modalData.value.transaksi = applyLocalPagination(filterLocalTransaksi(localLists.value.transaksi), transaksiPagination);
+      modalData.value.transaksi = applyLocalPagination(
+        filterLocalTransaksi(localLists.value.transaksi),
+        transaksiPagination,
+      );
       return true;
     }
     return false;
@@ -913,12 +1121,18 @@ const fetchTransaksiPage = async (id) => {
 
 const fetchMustahiqPage = async (id) => {
   try {
-    const normalizedJenis = String(mustahiqFilters.value.jenis_penerima || '').trim().toLowerCase();
-    const normalizedQ = String(mustahiqFilters.value.q || '').trim();
+    const normalizedJenis = String(mustahiqFilters.value.jenis_penerima || "")
+      .trim()
+      .toLowerCase();
+    const normalizedQ = String(mustahiqFilters.value.q || "").trim();
 
-    const params = mustahiqPagination.value.pageSize === 'all'
-      ? { page_size: 'all' }
-      : { page: mustahiqPagination.value.page, page_size: mustahiqPagination.value.pageSize };
+    const params =
+      mustahiqPagination.value.pageSize === "all"
+        ? { page_size: "all" }
+        : {
+            page: mustahiqPagination.value.page,
+            page_size: mustahiqPagination.value.pageSize,
+          };
     if (normalizedJenis) params.jenis_penerima = normalizedJenis;
     if (normalizedQ) params.q = normalizedQ;
 
@@ -930,7 +1144,10 @@ const fetchMustahiqPage = async (id) => {
         syncPagination(mustahiqPagination, payload, payload.items.length);
         useLocalLists.value.mustahiq = false;
       } else if (Array.isArray(payload)) {
-        modalData.value.mustahiq = applyLocalPagination(payload, mustahiqPagination);
+        modalData.value.mustahiq = applyLocalPagination(
+          payload,
+          mustahiqPagination,
+        );
       } else {
         modalData.value.mustahiq = [];
         syncPagination(mustahiqPagination, payload, 0);
@@ -938,9 +1155,12 @@ const fetchMustahiqPage = async (id) => {
     }
     return true;
   } catch (error) {
-    console.error('Error loading mustahiq:', error);
+    console.error("Error loading mustahiq:", error);
     if (useLocalLists.value.mustahiq) {
-      modalData.value.mustahiq = applyLocalPagination(filterLocalMustahiq(localLists.value.mustahiq), mustahiqPagination);
+      modalData.value.mustahiq = applyLocalPagination(
+        filterLocalMustahiq(localLists.value.mustahiq),
+        mustahiqPagination,
+      );
       return true;
     }
     return false;
@@ -949,9 +1169,13 @@ const fetchMustahiqPage = async (id) => {
 
 const fetchDistribusiPage = async (id) => {
   try {
-    const params = distribusiPagination.value.pageSize === 'all'
-      ? { page_size: 'all' }
-      : { page: distribusiPagination.value.page, page_size: distribusiPagination.value.pageSize };
+    const params =
+      distribusiPagination.value.pageSize === "all"
+        ? { page_size: "all" }
+        : {
+            page: distribusiPagination.value.page,
+            page_size: distribusiPagination.value.pageSize,
+          };
     const response = await api.getPublicMasjidDistribusi(id, params);
     if (response.data.success) {
       const payload = response.data.data || {};
@@ -960,7 +1184,10 @@ const fetchDistribusiPage = async (id) => {
         syncPagination(distribusiPagination, payload, payload.items.length);
         useLocalLists.value.distribusi = false;
       } else if (Array.isArray(payload)) {
-        modalData.value.distribusi = applyLocalPagination(payload, distribusiPagination);
+        modalData.value.distribusi = applyLocalPagination(
+          payload,
+          distribusiPagination,
+        );
       } else {
         modalData.value.distribusi = [];
         syncPagination(distribusiPagination, payload, 0);
@@ -968,9 +1195,12 @@ const fetchDistribusiPage = async (id) => {
     }
     return true;
   } catch (error) {
-    console.error('Error loading distribusi:', error);
+    console.error("Error loading distribusi:", error);
     if (useLocalLists.value.distribusi) {
-      modalData.value.distribusi = applyLocalPagination(localLists.value.distribusi, distribusiPagination);
+      modalData.value.distribusi = applyLocalPagination(
+        localLists.value.distribusi,
+        distribusiPagination,
+      );
       return true;
     }
     return false;
@@ -985,20 +1215,43 @@ const hydrateListsFromStats = (data) => {
   localLists.value = { transaksi, mustahiq, distribusi };
   useLocalLists.value = { transaksi: true, mustahiq: true, distribusi: true };
 
-  modalData.value.transaksi = applyLocalPagination(filterLocalTransaksi(transaksi), transaksiPagination);
-  modalData.value.mustahiq = applyLocalPagination(filterLocalMustahiq(mustahiq), mustahiqPagination);
-  modalData.value.distribusi = applyLocalPagination(distribusi, distribusiPagination);
+  modalData.value.transaksi = applyLocalPagination(
+    filterLocalTransaksi(transaksi),
+    transaksiPagination,
+  );
+  modalData.value.mustahiq = applyLocalPagination(
+    filterLocalMustahiq(mustahiq),
+    mustahiqPagination,
+  );
+  modalData.value.distribusi = applyLocalPagination(
+    distribusi,
+    distribusiPagination,
+  );
 };
 
 const filterLocalTransaksi = (items) => {
-  const jenis = String(transaksiFilters.value.jenis_zakat || '').trim().toLowerCase();
-  const bentuk = showPublicBentukFilter.value ? String(transaksiFilters.value.bentuk_zakat || '').trim().toLowerCase() : '';
-  const keyword = String(transaksiFilters.value.q || '').trim().toLowerCase();
+  const jenis = String(transaksiFilters.value.jenis_zakat || "")
+    .trim()
+    .toLowerCase();
+  const bentuk = showPublicBentukFilter.value
+    ? String(transaksiFilters.value.bentuk_zakat || "")
+        .trim()
+        .toLowerCase()
+    : "";
+  const keyword = String(transaksiFilters.value.q || "")
+    .trim()
+    .toLowerCase();
 
-  return (Array.isArray(items) ? items : []).filter(item => {
-    const itemJenis = String(item.jenis_zakat || '').trim().toLowerCase();
-    const itemBentuk = String(item.bentuk_zakat || '').trim().toLowerCase();
-    const itemNama = String(item.muzakki_nama || '').trim().toLowerCase();
+  return (Array.isArray(items) ? items : []).filter((item) => {
+    const itemJenis = String(item.jenis_zakat || "")
+      .trim()
+      .toLowerCase();
+    const itemBentuk = String(item.bentuk_zakat || "")
+      .trim()
+      .toLowerCase();
+    const itemNama = String(item.muzakki_nama || "")
+      .trim()
+      .toLowerCase();
 
     if (jenis && itemJenis !== jenis) return false;
     if (bentuk && itemBentuk !== bentuk) return false;
@@ -1008,12 +1261,20 @@ const filterLocalTransaksi = (items) => {
 };
 
 const filterLocalMustahiq = (items) => {
-  const jenis = String(mustahiqFilters.value.jenis_penerima || '').trim().toLowerCase();
-  const keyword = String(mustahiqFilters.value.q || '').trim().toLowerCase();
+  const jenis = String(mustahiqFilters.value.jenis_penerima || "")
+    .trim()
+    .toLowerCase();
+  const keyword = String(mustahiqFilters.value.q || "")
+    .trim()
+    .toLowerCase();
 
-  return (Array.isArray(items) ? items : []).filter(item => {
-    const itemJenis = String(item.jenis_penerima || item.kategori || '').trim().toLowerCase();
-    const itemNama = String(item.nama || '').trim().toLowerCase();
+  return (Array.isArray(items) ? items : []).filter((item) => {
+    const itemJenis = String(item.jenis_penerima || item.kategori || "")
+      .trim()
+      .toLowerCase();
+    const itemNama = String(item.nama || "")
+      .trim()
+      .toLowerCase();
 
     if (jenis && itemJenis !== jenis) return false;
     if (keyword && !itemNama.includes(keyword)) return false;
@@ -1024,44 +1285,62 @@ const filterLocalMustahiq = (items) => {
 const setTransaksiPage = async (page) => {
   transaksiPagination.value.page = page;
   if (useLocalLists.value.transaksi) {
-    modalData.value.transaksi = applyLocalPagination(filterLocalTransaksi(localLists.value.transaksi), transaksiPagination);
+    modalData.value.transaksi = applyLocalPagination(
+      filterLocalTransaksi(localLists.value.transaksi),
+      transaksiPagination,
+    );
     return;
   }
-  if (modalData.value?.masjid?.id) await fetchTransaksiPage(modalData.value.masjid.id);
+  if (modalData.value?.masjid?.id)
+    await fetchTransaksiPage(modalData.value.masjid.id);
 };
 
 const onTransaksiPageSizeChange = async () => {
   transaksiPagination.value.page = 1;
   if (useLocalLists.value.transaksi) {
-    modalData.value.transaksi = applyLocalPagination(filterLocalTransaksi(localLists.value.transaksi), transaksiPagination);
+    modalData.value.transaksi = applyLocalPagination(
+      filterLocalTransaksi(localLists.value.transaksi),
+      transaksiPagination,
+    );
     return;
   }
-  if (modalData.value?.masjid?.id) await fetchTransaksiPage(modalData.value.masjid.id);
+  if (modalData.value?.masjid?.id)
+    await fetchTransaksiPage(modalData.value.masjid.id);
 };
 
 const setMustahiqPage = async (page) => {
   mustahiqPagination.value.page = page;
   if (useLocalLists.value.mustahiq) {
-    modalData.value.mustahiq = applyLocalPagination(filterLocalMustahiq(localLists.value.mustahiq), mustahiqPagination);
+    modalData.value.mustahiq = applyLocalPagination(
+      filterLocalMustahiq(localLists.value.mustahiq),
+      mustahiqPagination,
+    );
     return;
   }
-  if (modalData.value?.masjid?.id) await fetchMustahiqPage(modalData.value.masjid.id);
+  if (modalData.value?.masjid?.id)
+    await fetchMustahiqPage(modalData.value.masjid.id);
 };
 
 const onMustahiqPageSizeChange = async () => {
   mustahiqPagination.value.page = 1;
   if (useLocalLists.value.mustahiq) {
-    modalData.value.mustahiq = applyLocalPagination(filterLocalMustahiq(localLists.value.mustahiq), mustahiqPagination);
+    modalData.value.mustahiq = applyLocalPagination(
+      filterLocalMustahiq(localLists.value.mustahiq),
+      mustahiqPagination,
+    );
     return;
   }
-  if (modalData.value?.masjid?.id) await fetchMustahiqPage(modalData.value.masjid.id);
+  if (modalData.value?.masjid?.id)
+    await fetchMustahiqPage(modalData.value.masjid.id);
 };
 
 const onPublicJenisFilterChange = () => {
-  const jenis = String(transaksiFilters.value.jenis_zakat || '').trim().toLowerCase();
-  showPublicBentukFilter.value = jenis === 'fitrah' || jenis === 'fidyah';
+  const jenis = String(transaksiFilters.value.jenis_zakat || "")
+    .trim()
+    .toLowerCase();
+  showPublicBentukFilter.value = jenis === "fitrah" || jenis === "fidyah";
   if (!showPublicBentukFilter.value) {
-    transaksiFilters.value.bentuk_zakat = '';
+    transaksiFilters.value.bentuk_zakat = "";
   }
   applyPublicTransaksiFilters();
 };
@@ -1069,14 +1348,18 @@ const onPublicJenisFilterChange = () => {
 const applyPublicTransaksiFilters = async () => {
   transaksiPagination.value.page = 1;
   if (useLocalLists.value.transaksi) {
-    modalData.value.transaksi = applyLocalPagination(filterLocalTransaksi(localLists.value.transaksi), transaksiPagination);
+    modalData.value.transaksi = applyLocalPagination(
+      filterLocalTransaksi(localLists.value.transaksi),
+      transaksiPagination,
+    );
     return;
   }
-  if (modalData.value?.masjid?.id) await fetchTransaksiPage(modalData.value.masjid.id);
+  if (modalData.value?.masjid?.id)
+    await fetchTransaksiPage(modalData.value.masjid.id);
 };
 
 const resetPublicTransaksiFilters = async () => {
-  transaksiFilters.value = { jenis_zakat: '', bentuk_zakat: '', q: '' };
+  transaksiFilters.value = { jenis_zakat: "", bentuk_zakat: "", q: "" };
   showPublicBentukFilter.value = false;
   await applyPublicTransaksiFilters();
 };
@@ -1084,33 +1367,45 @@ const resetPublicTransaksiFilters = async () => {
 const applyPublicMustahiqFilters = async () => {
   mustahiqPagination.value.page = 1;
   if (useLocalLists.value.mustahiq) {
-    modalData.value.mustahiq = applyLocalPagination(filterLocalMustahiq(localLists.value.mustahiq), mustahiqPagination);
+    modalData.value.mustahiq = applyLocalPagination(
+      filterLocalMustahiq(localLists.value.mustahiq),
+      mustahiqPagination,
+    );
     return;
   }
-  if (modalData.value?.masjid?.id) await fetchMustahiqPage(modalData.value.masjid.id);
+  if (modalData.value?.masjid?.id)
+    await fetchMustahiqPage(modalData.value.masjid.id);
 };
 
 const resetPublicMustahiqFilters = async () => {
-  mustahiqFilters.value = { jenis_penerima: '', q: '' };
+  mustahiqFilters.value = { jenis_penerima: "", q: "" };
   await applyPublicMustahiqFilters();
 };
 
 const setDistribusiPage = async (page) => {
   distribusiPagination.value.page = page;
   if (useLocalLists.value.distribusi) {
-    modalData.value.distribusi = applyLocalPagination(localLists.value.distribusi, distribusiPagination);
+    modalData.value.distribusi = applyLocalPagination(
+      localLists.value.distribusi,
+      distribusiPagination,
+    );
     return;
   }
-  if (modalData.value?.masjid?.id) await fetchDistribusiPage(modalData.value.masjid.id);
+  if (modalData.value?.masjid?.id)
+    await fetchDistribusiPage(modalData.value.masjid.id);
 };
 
 const onDistribusiPageSizeChange = async () => {
   distribusiPagination.value.page = 1;
   if (useLocalLists.value.distribusi) {
-    modalData.value.distribusi = applyLocalPagination(localLists.value.distribusi, distribusiPagination);
+    modalData.value.distribusi = applyLocalPagination(
+      localLists.value.distribusi,
+      distribusiPagination,
+    );
     return;
   }
-  if (modalData.value?.masjid?.id) await fetchDistribusiPage(modalData.value.masjid.id);
+  if (modalData.value?.masjid?.id)
+    await fetchDistribusiPage(modalData.value.masjid.id);
 };
 
 const formatCurrency = (amount) => {
@@ -1127,87 +1422,91 @@ const formatDate = (date) => {
 
 const getJenisBadgeClass = (jenis) => {
   switch (jenis) {
-    case 'fitrah':
-      return 'px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs'
-    case 'mal':
-      return 'px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs'
-    case 'fidyah':
-      return 'px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs'
-    case 'infaq':
-      return 'px-2 py-1 bg-pink-100 text-pink-800 rounded-full text-xs'
+    case "fitrah":
+      return "px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs";
+    case "mal":
+      return "px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs";
+    case "fidyah":
+      return "px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs";
+    case "infaq":
+      return "px-2 py-1 bg-pink-100 text-pink-800 rounded-full text-xs";
     default:
-      return 'px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs'
+      return "px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs";
   }
-}
+};
 
 const parseHariFromKeterangan = (keterangan) => {
-  if (!keterangan) return 0
-  const match = keterangan.match(/(\d+)\s*hari/i)
-  return match ? Number(match[1]) : 0
-}
+  if (!keterangan) return 0;
+  const match = keterangan.match(/(\d+)\s*hari/i);
+  return match ? Number(match[1]) : 0;
+};
 
 const parseKgFromKeterangan = (keterangan) => {
-  if (!keterangan) return 0
-  const match = keterangan.match(/(?:Beras|Fidyah Beras):\s*([\d.]+)\s*kg/i)
-  return match ? Number(match[1]) : 0
-}
+  if (!keterangan) return 0;
+  const match = keterangan.match(/(?:Beras|Fidyah Beras):\s*([\d.]+)\s*kg/i);
+  return match ? Number(match[1]) : 0;
+};
 
 const formatJumlah = (t) => {
-  if (!t) return '-'
-  if (t.jenis_zakat === 'fidyah' && t.bentuk_zakat === 'beras') {
-    const hari = Number(t.jumlah_hari_fidyah || 0) || parseHariFromKeterangan(t.keterangan)
-    return hari > 0 ? `${hari} hari` : '-'
+  if (!t) return "-";
+  if (t.jenis_zakat === "fidyah" && t.bentuk_zakat === "beras") {
+    const hari =
+      Number(t.jumlah_hari_fidyah || 0) ||
+      parseHariFromKeterangan(t.keterangan);
+    return hari > 0 ? `${hari} hari` : "-";
   }
-  return t.jumlah_orang > 0 ? `${t.jumlah_orang} orang` : '-'
-}
+  return t.jumlah_orang > 0 ? `${t.jumlah_orang} orang` : "-";
+};
 
 const getTotalBerasKg = (t) => {
-  if (!t) return 0
-  const numericKg = Number(t.kg_beras_dibayar || 0)
-  if (numericKg > 0) return numericKg
-  if (String(t.bentuk_zakat || '').toLowerCase() !== 'beras') return 0
-  const kg = parseKgFromKeterangan(t.keterangan)
-  return kg > 0 ? kg : 0
-}
+  if (!t) return 0;
+  const numericKg = Number(t.kg_beras_dibayar || 0);
+  if (numericKg > 0) return numericKg;
+  if (String(t.bentuk_zakat || "").toLowerCase() !== "beras") return 0;
+  const kg = parseKgFromKeterangan(t.keterangan);
+  return kg > 0 ? kg : 0;
+};
 
 const formatTotalUang = (t) => {
-  if (!t) return '-'
-  if (String(t.bentuk_zakat || '').toLowerCase() === 'beras') return '-'
-  return formatCurrency(t.total_dibayar)
-}
+  if (!t) return "-";
+  if (String(t.bentuk_zakat || "").toLowerCase() === "beras") return "-";
+  return formatCurrency(t.total_dibayar);
+};
 
 const formatTotalBerasKg = (t) => {
-  const kg = getTotalBerasKg(t)
-  return kg > 0 ? `${kg.toLocaleString('id-ID', { maximumFractionDigits: 2 })} kg` : '-'
-}
+  const kg = getTotalBerasKg(t);
+  return kg > 0
+    ? `${kg.toLocaleString("id-ID", { maximumFractionDigits: 2 })} kg`
+    : "-";
+};
 
 const viewMasjidStats = async (id) => {
   try {
     isLoadingModal.value = true;
-    activeTab.value = 'zakat'; // Reset to first tab
-    transaksiFilters.value = { jenis_zakat: '', bentuk_zakat: '', q: '' };
-    mustahiqFilters.value = { jenis_penerima: '', q: '' };
+    activeTab.value = "zakat"; // Reset to first tab
+    transaksiFilters.value = { jenis_zakat: "", bentuk_zakat: "", q: "" };
+    mustahiqFilters.value = { jenis_penerima: "", q: "" };
     showPublicBentukFilter.value = false;
     const [statsData, pengurusMasjid, pengurusZakat] = await Promise.all([
       api.getPublicMasjidStats(id),
       api.getPublicPengurusMasjid(id),
-      api.getPublicPengurusZakat(id)
+      api.getPublicPengurusZakat(id),
     ]);
-    
+
     if (statsData.data.success) {
       modalData.value = {
         ...statsData.data.data,
         transaksi: [],
         mustahiq: [],
-        distribusi: []
+        distribusi: [],
       };
       showModal.value = true;
     }
-    
+
     if (pengurusMasjid.data.success) {
       pengurusMasjidData.value = pengurusMasjid.data.data || [];
     }
-    
+
     if (pengurusZakat.data.success) {
       pengurusZakatData.value = pengurusZakat.data.data || [];
     }
@@ -1218,11 +1517,14 @@ const viewMasjidStats = async (id) => {
       const results = await Promise.all([
         fetchTransaksiPage(modalData.value.masjid.id),
         fetchMustahiqPage(modalData.value.masjid.id),
-        fetchDistribusiPage(modalData.value.masjid.id)
+        fetchDistribusiPage(modalData.value.masjid.id),
       ]);
-      const hasFailure = results.some(result => !result);
+      const hasFailure = results.some((result) => !result);
       if (hasFailure) {
-        const fallback = await api.getPublicMasjidStats(modalData.value.masjid.id, { include_lists: true });
+        const fallback = await api.getPublicMasjidStats(
+          modalData.value.masjid.id,
+          { include_lists: true },
+        );
         if (fallback.data.success) {
           hydrateListsFromStats(fallback.data.data || {});
         }
@@ -1250,12 +1552,15 @@ onMounted(async () => {
       stats.value[0].value = d.total_masjid || 0;
       stats.value[1].value = d.total_muzakki || 0;
       stats.value[2].value = d.total_mustahiq || 0;
-      
+
       // Backward compatibility: gunakan field lama jika field baru belum ada
-      const fitrahUang = d.total_zakat_fitrah_uang !== undefined ? d.total_zakat_fitrah_uang : d.total_zakat_fitrah || 0;
+      const fitrahUang =
+        d.total_zakat_fitrah_uang !== undefined
+          ? d.total_zakat_fitrah_uang
+          : d.total_zakat_fitrah || 0;
       const fitrahBerasKg = d.total_zakat_fitrah_beras_kg || 0;
       const fitrahBerasRp = d.total_zakat_fitrah_beras_rupiah || 0;
-      
+
       stats.value[3].value = formatCurrency(fitrahUang);
       stats.value[4].value = `${fitrahBerasKg.toFixed(1)} kg`;
       if (fitrahBerasRp > 0) {
@@ -1264,7 +1569,7 @@ onMounted(async () => {
       stats.value[5].value = formatCurrency(d.total_zakat_mal || 0);
       stats.value[6].value = formatCurrency(d.total_fidyah || 0);
       stats.value[7].value = formatCurrency(d.total_infaq || 0);
-      
+
       // Set last update
       lastUpdate.value = d.last_update || null;
     }
