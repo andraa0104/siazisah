@@ -1,13 +1,17 @@
 import axios from 'axios'
 
-// Auto-detect backend URL based on current hostname
-const getBackendURL = () => {
-  const hostname = window.location.hostname;
-  return `http://${hostname}:8082/api`;
+const resolveApiBaseUrl = () => {
+  const rawUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082/api'
+  const withoutTrailingSlash = rawUrl.replace(/\/$/, '')
+  return withoutTrailingSlash.endsWith('/api')
+    ? withoutTrailingSlash
+    : `${withoutTrailingSlash}/api`
 }
 
+const API_BASE_URL = resolveApiBaseUrl()
+
 const api = axios.create({
-  baseURL: getBackendURL(),
+  baseURL: API_BASE_URL,
   headers: {'Content-Type': 'application/json'}
 })
 
@@ -75,7 +79,7 @@ export default {
   getTransaksi: (params) => api.get('/petugas/transaksi', { params }),
   createTransaksi: (data) => api.post('/petugas/transaksi', data),
   deleteTransaksi: (id) => api.delete(`/petugas/transaksi/${id}`),
-  printTransaksi: (id) => `http://localhost:8082/api/petugas/transaksi/${id}/print`,
+  printTransaksi: (id) => `${API_BASE_URL}/petugas/transaksi/${id}/print`,
   getPrintTransaksiData: (signDate) => api.get('/petugas/transaksi/print-data', {
     params: { sign_date: signDate, _ts: Date.now() },
     responseType: 'text'
