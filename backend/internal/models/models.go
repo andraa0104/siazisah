@@ -59,14 +59,14 @@ type KadarZakat struct {
 }
 
 type PengaturanZakat struct {
-	MasjidID            int     `json:"masjid_id"`
-	Kelas1              float64 `json:"kelas1"`
-	Kelas2              float64 `json:"kelas2"`
-	Kelas3              float64 `json:"kelas3"`
-	FitrahBerasPerJiwa  float64 `json:"fitrahBerasPerJiwa"`
-	FidyahPerHari       float64 `json:"fidyahPerHari"`
-	FidyahBerasPerHari  float64 `json:"fidyahBerasPerHari"`
-	MalRates            map[string]float64 `json:"malRates"`
+	MasjidID           int                `json:"masjid_id"`
+	Kelas1             float64            `json:"kelas1"`
+	Kelas2             float64            `json:"kelas2"`
+	Kelas3             float64            `json:"kelas3"`
+	FitrahBerasPerJiwa float64            `json:"fitrahBerasPerJiwa"`
+	FidyahPerHari      float64            `json:"fidyahPerHari"`
+	FidyahBerasPerHari float64            `json:"fidyahBerasPerHari"`
+	MalRates           map[string]float64 `json:"malRates"`
 }
 
 type JenisZakatTersedia struct {
@@ -149,18 +149,18 @@ type DistribusiZakat struct {
 }
 
 type DistribusiInsight struct {
-	TotalMustahiqAktif      int     `json:"total_mustahiq_aktif"`
-	TotalFitrahBerasKg      float64 `json:"total_fitrah_beras_kg"`
-	TotalFidyahBerasKg      float64 `json:"total_fidyah_beras_kg"`
-	TotalFitrahUang         float64 `json:"total_fitrah_uang"`
-	TotalFidyahUang         float64 `json:"total_fidyah_uang"`
-	TotalZakatMalUang       float64 `json:"total_zakat_mal_uang"`
-	TotalPoolBerasKg        float64 `json:"total_pool_beras_kg"`
-	TotalPoolUang           float64 `json:"total_pool_uang"`
-	TotalDistribusiBerasKg  float64 `json:"total_distribusi_beras_kg"`
-	TotalDistribusiUang     float64 `json:"total_distribusi_uang"`
-	SisaBerasKg             float64 `json:"sisa_beras_kg"`
-	SisaUang                float64 `json:"sisa_uang"`
+	TotalMustahiqAktif       int     `json:"total_mustahiq_aktif"`
+	TotalFitrahBerasKg       float64 `json:"total_fitrah_beras_kg"`
+	TotalFidyahBerasKg       float64 `json:"total_fidyah_beras_kg"`
+	TotalFitrahUang          float64 `json:"total_fitrah_uang"`
+	TotalFidyahUang          float64 `json:"total_fidyah_uang"`
+	TotalZakatMalUang        float64 `json:"total_zakat_mal_uang"`
+	TotalPoolBerasKg         float64 `json:"total_pool_beras_kg"`
+	TotalPoolUang            float64 `json:"total_pool_uang"`
+	TotalDistribusiBerasKg   float64 `json:"total_distribusi_beras_kg"`
+	TotalDistribusiUang      float64 `json:"total_distribusi_uang"`
+	SisaBerasKg              float64 `json:"sisa_beras_kg"`
+	SisaUang                 float64 `json:"sisa_uang"`
 	RekomendasiBerasPerOrang float64 `json:"rekomendasi_beras_per_orang"`
 	RekomendasiUangPerOrang  float64 `json:"rekomendasi_uang_per_orang"`
 }
@@ -182,18 +182,19 @@ type Response struct {
 }
 
 type DashboardStats struct {
-	TotalMasjid              int     `json:"total_masjid"`
-	TotalMuzakki             int     `json:"total_muzakki"`
-	TotalMustahiq            int     `json:"total_mustahiq"`
-	TotalZakatFitrah         float64 `json:"total_zakat_fitrah"`
-	TotalZakatFitrahUang     float64 `json:"total_zakat_fitrah_uang"`
-	TotalZakatFitrahBerasKg  float64 `json:"total_zakat_fitrah_beras_kg"`
-	TotalZakatFitrahBerasRp  float64 `json:"total_zakat_fitrah_beras_rupiah"`
-	TotalZakatMal            float64 `json:"total_zakat_mal"`
-	TotalFidyah              float64 `json:"total_fidyah"`
-	TotalFidyahUang          float64 `json:"total_fidyah_uang"`
-	TotalFidyahBerasKg       float64 `json:"total_fidyah_beras_kg"`
-	TotalFidyahBerasRp       float64 `json:"total_fidyah_beras_rupiah"`
-	TotalInfaq               float64 `json:"total_infaq"`
-	LastUpdate               string  `json:"last_update"`
+	TotalMasjid             int                      `json:"total_masjid"`
+	TotalMuzakki            int                      `json:"total_muzakki"`
+	TotalMustahiq           int                      `json:"total_mustahiq"`
+	TotalZakatFitrah        float64                  `json:"total_zakat_fitrah"`
+	TotalZakatFitrahUang    float64                  `json:"total_zakat_fitrah_uang"`
+	TotalZakatFitrahBerasKg float64                  `json:"total_zakat_fitrah_beras_kg"`
+	TotalZakatFitrahBerasRp float64                  `json:"total_zakat_fitrah_beras_rupiah"`
+	TotalZakatMal           float64                  `json:"total_zakat_mal"`
+	TotalFidyah             float64                  `json:"total_fidyah"`
+	TotalFidyahUang         float64                  `json:"total_fidyah_uang"`
+	TotalFidyahBerasKg      float64                  `json:"total_fidyah_beras_kg"`
+	TotalFidyahBerasRp      float64                  `json:"total_fidyah_beras_rupiah"`
+	TotalInfaq              float64                  `json:"total_infaq"`
+	LastUpdate              string                   `json:"last_update"`
+	MustahiqPerJenis        []map[string]interface{} `json:"mustahiq_per_jenis"`
 }

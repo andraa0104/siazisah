@@ -638,7 +638,9 @@ const fetchZakatStats = async () => {
 
       mustahiqGlobalStats.value = {
         total: Number(dashboardData.data.total_mustahiq || 0),
-        perJenis: [],
+        perJenis: Array.isArray(dashboardData.data.mustahiq_per_jenis)
+          ? dashboardData.data.mustahiq_per_jenis
+          : [],
       };
     } else {
       console.warn("⚠ Dashboard response has no data property");

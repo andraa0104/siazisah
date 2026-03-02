@@ -113,6 +113,29 @@ func (h *PublicHandler) GetPublicDashboard(c *gin.Context) {
 	// Total infaq
 	h.DB.QueryRow("SELECT COALESCE(SUM(infaq_tambahan), 0) + COALESCE(SUM(CASE WHEN jenis_zakat = 'infaq' THEN total_dibayar ELSE 0 END), 0) FROM transaksi_zakat").Scan(&stats.TotalInfaq)
 
+	// Mustahiq breakdown by jenis_penerima
+	stats.MustahiqPerJenis = []map[string]interface{}{}
+	jenisRows, err := h.DB.Query(`
+		SELECT jenis_penerima, COUNT(*) as total
+		FROM mustahiq
+		WHERE is_active = 1
+		GROUP BY jenis_penerima
+		ORDER BY jenis_penerima ASC
+	`)
+	if err == nil {
+		defer jenisRows.Close()
+		for jenisRows.Next() {
+			var jenis string
+			var total int
+			if err := jenisRows.Scan(&jenis, &total); err == nil {
+				stats.MustahiqPerJenis = append(stats.MustahiqPerJenis, map[string]interface{}{
+					"jenis_penerima": jenis,
+					"total":          total,
+				})
+			}
+		}
+	}
+
 	// Last update (tanggal transaksi terakhir)
 	var lastUpdate sql.NullString
 	h.DB.QueryRow("SELECT MAX(tanggal_bayar) FROM transaksi_zakat").Scan(&lastUpdate)
