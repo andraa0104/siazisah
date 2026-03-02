@@ -163,7 +163,9 @@
               </p>
             </div>
             <div class="bg-orange-50 p-4 rounded-lg">
-              <p class="text-sm text-orange-600 font-medium">Total Orang Dizakati</p>
+              <p class="text-sm text-orange-600 font-medium">
+                Total Orang Dizakati
+              </p>
               <p class="text-2xl font-bold text-orange-700">
                 {{ modalData?.total_orang_dizakati }}
               </p>
@@ -177,9 +179,7 @@
             <div class="bg-amber-50 p-4 rounded-lg">
               <p class="text-sm text-amber-600 font-medium">Fitrah (Beras)</p>
               <p class="text-lg font-bold text-amber-700">
-                {{
-                  (modalData?.total_zakat_fitrah_beras_kg || 0).toFixed(1)
-                }}
+                {{ (modalData?.total_zakat_fitrah_beras_kg || 0).toFixed(1) }}
                 kg
               </p>
               <p
