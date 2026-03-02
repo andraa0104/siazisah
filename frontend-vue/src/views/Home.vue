@@ -1,11 +1,26 @@
 <template>
   <!-- CSS Links -->
   <link rel="stylesheet" href="/homepage/assets/vendor/aos/aos.css" />
-  <link rel="stylesheet" href="/homepage/assets/vendor/bootstrap/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="/homepage/assets/vendor/bootstrap-icons/bootstrap-icons.css" />
-  <link rel="stylesheet" href="/homepage/assets/vendor/boxicons/css/boxicons.min.css" />
-  <link rel="stylesheet" href="/homepage/assets/vendor/glightbox/css/glightbox.min.css" />
-  <link rel="stylesheet" href="/homepage/assets/vendor/swiper/swiper-bundle.min.css" />
+  <link
+    rel="stylesheet"
+    href="/homepage/assets/vendor/bootstrap/css/bootstrap.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="/homepage/assets/vendor/bootstrap-icons/bootstrap-icons.css"
+  />
+  <link
+    rel="stylesheet"
+    href="/homepage/assets/vendor/boxicons/css/boxicons.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="/homepage/assets/vendor/glightbox/css/glightbox.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="/homepage/assets/vendor/swiper/swiper-bundle.min.css"
+  />
   <link rel="stylesheet" href="/homepage/assets/css/style.css" />
 
   <!-- Header -->
@@ -29,8 +44,16 @@
   <!-- Hero Section -->
   <section id="hero" class="d-flex align-items-center">
     <div class="container" data-aos="zoom-out" data-aos-delay="100">
-      <h1>Selamat Datang di <span>Sistem Informasi Zakat, Infaq, Sadaqah, dan Fidyah (SIaZISah)</span></h1>
-      <h2>Memudahkan memantau dan merekap data zakat fitrah, infaq, shodaqoh, dan fidyah untuk transparansi data</h2>
+      <h1>
+        Selamat Datang di
+        <span
+          >Sistem Informasi Zakat, Infaq, Sadaqah, dan Fidyah (SIaZISah)</span
+        >
+      </h1>
+      <h2>
+        Memudahkan memantau dan merekap data zakat fitrah, infaq, shodaqoh, dan
+        fidyah untuk transparansi data
+      </h2>
       <div class="d-flex">
         <a href="#about" class="btn-get-started scrollto">Hadist Zakat</a>
       </div>
@@ -43,7 +66,9 @@
       <div class="container" data-aos="fade-up">
         <div class="section-title">
           <h2>Jenis-Jenis Zakat</h2>
-          <h3>Kadar dan Kategori <span>Zakat Fitrah, Zakat Mal, dan Fidyah</span></h3>
+          <h3>
+            Kadar dan Kategori <span>Zakat Fitrah, Zakat Mal, dan Fidyah</span>
+          </h3>
         </div>
 
         <!-- Zakat Types Slider -->
@@ -53,111 +78,143 @@
               <!-- Zakat Fitrah -->
               <div class="swiper-slide">
                 <div class="zakat-card">
-                <div class="zakat-header zakat-fitrah">
-                  <i class="bx bxs-leaf"></i>
-                  <h3>Zakat Fitrah</h3>
-                </div>
-                <div class="zakat-content">
-                  <p class="description">Diwajibkan setiap Muslim pada akhir bulan Ramadhan sebelum shalat Idul Fitri</p>
-                  
-                  <div class="kategori-list">
-                    <div class="kategori-item">
-                      <h5>Kategori Umum</h5>
-                      <ul>
-                        <li><strong>Beras/Gandum:</strong> 2,5 kg per jiwa</li>
-                        <li><strong>Uang Tunai:</strong> Rp 35.000 - Rp 55.000</li>
-                        <li><strong>Kurma/Kismis:</strong> 2,5 kg per jiwa</li>
-                      </ul>
+                  <div class="zakat-header zakat-fitrah">
+                    <i class="bx bxs-leaf"></i>
+                    <h3>Zakat Fitrah</h3>
+                  </div>
+                  <div class="zakat-content">
+                    <p class="description">
+                      Diwajibkan setiap Muslim pada akhir bulan Ramadhan sebelum
+                      shalat Idul Fitri
+                    </p>
+
+                    <div class="kategori-list">
+                      <div class="kategori-item">
+                        <h5>Kategori Umum</h5>
+                        <ul>
+                          <li>
+                            <strong>Beras/Gandum:</strong> 2,5 kg per jiwa
+                          </li>
+                          <li>
+                            <strong>Uang Tunai:</strong> Rp 35.000 - Rp 55.000
+                          </li>
+                          <li>
+                            <strong>Kurma/Kismis:</strong> 2,5 kg per jiwa
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div class="kategori-item">
+                        <h5>Penerima</h5>
+                        <ul>
+                          <li>Fakir dan Miskin</li>
+                          <li>Ibu hamil & menyusui</li>
+                          <li>Janda & anak yatim</li>
+                          <li>Lansia terlantar</li>
+                        </ul>
+                      </div>
                     </div>
-                    
-                    <div class="kategori-item">
-                      <h5>Penerima</h5>
-                      <ul>
-                        <li>Fakir dan Miskin</li>
-                        <li>Ibu hamil & menyusui</li>
-                        <li>Janda & anak yatim</li>
-                        <li>Lansia terlantar</li>
-                      </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Zakat Mal -->
+              <div class="swiper-slide">
+                <div class="zakat-card">
+                  <div class="zakat-header zakat-mal">
+                    <i class="bx bxs-coin"></i>
+                    <h3>Zakat Mal</h3>
+                  </div>
+                  <div class="zakat-content">
+                    <p class="description">
+                      Zakat atas harta yang dimiliki setahun (haul) dengan nisab
+                      tertentu
+                    </p>
+
+                    <div class="kategori-list">
+                      <div class="kategori-item">
+                        <h5>Jenis Harta & Kadar</h5>
+                        <ul>
+                          <li>
+                            <strong>Emas:</strong> Nisab 87 gram, Zakat 2,5%
+                          </li>
+                          <li>
+                            <strong>Perak:</strong> Nisab 612 gram, Zakat 2,5%
+                          </li>
+                          <li>
+                            <strong>Uang:</strong> Disamakan emas, Zakat 2,5%
+                          </li>
+                          <li><strong>Ternak:</strong> Zakat sesuai jumlah</li>
+                        </ul>
+                      </div>
+
+                      <div class="kategori-item">
+                        <h5>Waktu Zakat</h5>
+                        <ul>
+                          <li>Satu tahun (haul) dari kepemilikan</li>
+                          <li>Diambil setelah nisab tercapai</li>
+                          <li>Bisa dibayar di depan atau belakang</li>
+                          <li>Bebas pilih waktu dalam setahun</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fidyah -->
+              <div class="swiper-slide">
+                <div class="zakat-card">
+                  <div class="zakat-header zakat-fidyah">
+                    <i class="bx bxs-heart-circle"></i>
+                    <h3>Fidyah</h3>
+                  </div>
+                  <div class="zakat-content">
+                    <p class="description">
+                      Tebusan untuk yang tidak mampu menjalankan puasa atau
+                      sudah meninggal masih berhutang puasa
+                    </p>
+
+                    <div class="kategori-list">
+                      <div class="kategori-item">
+                        <h5>Kadar Fidyah</h5>
+                        <ul>
+                          <li>
+                            <strong>Per hari:</strong> 2,5 kg beras/makanan
+                          </li>
+                          <li>
+                            <strong>Atau:</strong> Rp 25.000 - Rp 40.000 per
+                            hari
+                          </li>
+                          <li>
+                            <strong>Atau:</strong> Memberi makan 1-2 orang untuk
+                            1 hari
+                          </li>
+                          <li>
+                            <strong>Total:</strong> Sesuai hari yang tidak
+                            dipuasa
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div class="kategori-item">
+                        <h5>Penerima Fidyah</h5>
+                        <ul>
+                          <li>Fakir dan Miskin</li>
+                          <li>Anak yatim piatu</li>
+                          <li>Orang terlantar</li>
+                          <li>Dalam kondisi darurat</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Zakat Mal -->
-            <div class="swiper-slide">
-              <div class="zakat-card">
-                <div class="zakat-header zakat-mal">
-                  <i class="bx bxs-coin"></i>
-                  <h3>Zakat Mal</h3>
-                </div>
-                <div class="zakat-content">
-                  <p class="description">Zakat atas harta yang dimiliki setahun (haul) dengan nisab tertentu</p>
-                  
-                  <div class="kategori-list">
-                    <div class="kategori-item">
-                      <h5>Jenis Harta & Kadar</h5>
-                      <ul>
-                        <li><strong>Emas:</strong> Nisab 87 gram, Zakat 2,5%</li>
-                        <li><strong>Perak:</strong> Nisab 612 gram, Zakat 2,5%</li>
-                        <li><strong>Uang:</strong> Disamakan emas, Zakat 2,5%</li>
-                        <li><strong>Ternak:</strong> Zakat sesuai jumlah</li>
-                      </ul>
-                    </div>
-                    
-                    <div class="kategori-item">
-                      <h5>Waktu Zakat</h5>
-                      <ul>
-                        <li>Satu tahun (haul) dari kepemilikan</li>
-                        <li>Diambil setelah nisab tercapai</li>
-                        <li>Bisa dibayar di depan atau belakang</li>
-                        <li>Bebas pilih waktu dalam setahun</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Fidyah -->
-            <div class="swiper-slide">
-              <div class="zakat-card">
-                <div class="zakat-header zakat-fidyah">
-                  <i class="bx bxs-heart-circle"></i>
-                  <h3>Fidyah</h3>
-                </div>
-                <div class="zakat-content">
-                  <p class="description">Tebusan untuk yang tidak mampu menjalankan puasa atau sudah meninggal masih berhutang puasa</p>
-                  
-                  <div class="kategori-list">
-                    <div class="kategori-item">
-                      <h5>Kadar Fidyah</h5>
-                      <ul>
-                        <li><strong>Per hari:</strong> 2,5 kg beras/makanan</li>
-                        <li><strong>Atau:</strong> Rp 25.000 - Rp 40.000 per hari</li>
-                        <li><strong>Atau:</strong> Memberi makan 1-2 orang untuk 1 hari</li>
-                        <li><strong>Total:</strong> Sesuai hari yang tidak dipuasa</li>
-                      </ul>
-                    </div>
-                    
-                    <div class="kategori-item">
-                      <h5>Penerima Fidyah</h5>
-                      <ul>
-                        <li>Fakir dan Miskin</li>
-                        <li>Anak yatim piatu</li>
-                        <li>Orang terlantar</li>
-                        <li>Dalam kondisi darurat</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <!-- Pagination -->
+            <div class="swiper-pagination"></div>
           </div>
-
-          <!-- Pagination -->
-          <div class="swiper-pagination"></div>
-        </div>
         </div>
 
         <!-- Info Box -->
@@ -167,21 +224,30 @@
               <div class="info-item">
                 <i class="bx bxs-check-circle"></i>
                 <h5>Semua Zakat Dapat Dicatat</h5>
-                <p>Sistem ini membantu mencatat dan memantau semua jenis zakat dengan transparan</p>
+                <p>
+                  Sistem ini membantu mencatat dan memantau semua jenis zakat
+                  dengan transparan
+                </p>
               </div>
             </div>
             <div class="col-md-4">
               <div class="info-item">
                 <i class="bx bxs-user-check"></i>
                 <h5>Terdistribusi Tepat Sasaran</h5>
-                <p>Memastikan harta zakat sampai ke orang-orang yang benar-benar berhak menerimanya</p>
+                <p>
+                  Memastikan harta zakat sampai ke orang-orang yang benar-benar
+                  berhak menerimanya
+                </p>
               </div>
             </div>
             <div class="col-md-4">
               <div class="info-item">
                 <i class="bx bxs-bar-chart-alt-2"></i>
                 <h5>Laporan Terperinci</h5>
-                <p>Laporan lengkap untuk wajib zakat dan pengelola terhadap penggunaan dana zakat</p>
+                <p>
+                  Laporan lengkap untuk wajib zakat dan pengelola terhadap
+                  penggunaan dana zakat
+                </p>
               </div>
             </div>
           </div>
@@ -196,11 +262,30 @@
           <h2>Hadist</h2>
           <h3>Hadist Keutamaan Zakat Fitrah di <span>Bulan Ramadhan</span></h3>
           <br />
-          <h1 style="line-height: 150%; font-family: 'Traditional Arabic'; font-size: 22px">
-            فَرَضَ رَسُولُ اللَّهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ زَكَاةَ الْفِطْرِ طُهْرَةً لِلصَّائِمِ مِنَ اللَّغْوِ وَالرَّفَثِ، وَطُعْمَةً لِلْمَسَاكِينِ، فَمَنْ أَدَّاهَا قَبْلَ الصَّلَاةِ فَهِيَ زَكَاةٌ مَقْبُولَةٌ، وَمَنْ أَدَّاهَا بَعْدَ الصَّلَاةِ فَهِيَ صَدَقَةٌ مِنَ الصَّدَقَاتِ
+          <h1
+            style="
+              line-height: 150%;
+              font-family: &quot;Traditional Arabic&quot;;
+              font-size: 22px;
+            "
+          >
+            فَرَضَ رَسُولُ اللَّهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ زَكَاةَ
+            الْفِطْرِ طُهْرَةً لِلصَّائِمِ مِنَ اللَّغْوِ وَالرَّفَثِ،
+            وَطُعْمَةً لِلْمَسَاكِينِ، فَمَنْ أَدَّاهَا قَبْلَ الصَّلَاةِ فَهِيَ
+            زَكَاةٌ مَقْبُولَةٌ، وَمَنْ أَدَّاهَا بَعْدَ الصَّلَاةِ فَهِيَ
+            صَدَقَةٌ مِنَ الصَّدَقَاتِ
           </h1>
           <p>
-            <i>Dari Ibnu Abbas RA, ia berkata, Rasulullah SAW mewajibkan zakat fitrah untuk membersihkan orang yang berpuasa dari perkataan sia-sia dan perkataan kotor, dan sebagai makanan bagi orang-orang miskin. Barang siapa yang menunaikannya sebelum shalat (Idul Fitri), berarti ini merupakan zakat yang diterima, dan barang siapa yang menunaikannya setelah shalat (idul fitri) berati hal itu merupakan sedekah biasa". (HR. Abu Daud, Ibnu Majah, dan Daru Quthni)</i>
+            <i
+              >Dari Ibnu Abbas RA, ia berkata, Rasulullah SAW mewajibkan zakat
+              fitrah untuk membersihkan orang yang berpuasa dari perkataan
+              sia-sia dan perkataan kotor, dan sebagai makanan bagi orang-orang
+              miskin. Barang siapa yang menunaikannya sebelum shalat (Idul
+              Fitri), berarti ini merupakan zakat yang diterima, dan barang
+              siapa yang menunaikannya setelah shalat (idul fitri) berati hal
+              itu merupakan sedekah biasa". (HR. Abu Daud, Ibnu Majah, dan Daru
+              Quthni)</i
+            >
           </p>
         </div>
       </div>
@@ -217,14 +302,37 @@
 
         <!-- Tabs Navigation -->
         <div class="stats-tabs" data-aos="fade-up" data-aos-delay="100">
-          <button 
-            v-for="tab in ['fitrah', 'mal', 'fidyah', 'mustahiq']" 
+          <button
+            v-for="tab in ['fitrah', 'mal', 'fidyah', 'mustahiq']"
             :key="tab"
-            @click="() => { console.log('Clicking tab:', tab, '-> Stats:', zakatStats[tab]); activeTab = tab }"
+            @click="
+              () => {
+                console.log('Clicking tab:', tab, '-> Stats:', zakatStats[tab]);
+                activeTab = tab;
+              }
+            "
             :class="['tab-btn', { active: activeTab === tab }]"
           >
-            <i :class="tab === 'fitrah' ? 'bx bxs-leaf' : tab === 'mal' ? 'bx bxs-coin' : tab === 'fidyah' ? 'bx bxs-heart-circle' : 'bx bxs-user-detail'"></i>
-            {{ tab === 'fitrah' ? 'Zakat Fitrah' : tab === 'mal' ? 'Zakat Mal' : tab === 'fidyah' ? 'Fidyah' : 'Data Mustahiq' }}
+            <i
+              :class="
+                tab === 'fitrah'
+                  ? 'bx bxs-leaf'
+                  : tab === 'mal'
+                    ? 'bx bxs-coin'
+                    : tab === 'fidyah'
+                      ? 'bx bxs-heart-circle'
+                      : 'bx bxs-user-detail'
+              "
+            ></i>
+            {{
+              tab === "fitrah"
+                ? "Zakat Fitrah"
+                : tab === "mal"
+                  ? "Zakat Mal"
+                  : tab === "fidyah"
+                    ? "Fidyah"
+                    : "Data Mustahiq"
+            }}
           </button>
         </div>
 
@@ -307,7 +415,9 @@
             <i class="bi bi-graph-up"></i>
             Akses Dashboard Publik
           </router-link>
-          <p class="cta-text">Lihat detail lengkap data zakat, infaq, sadaqah, dan fidyah</p>
+          <p class="cta-text">
+            Lihat detail lengkap data zakat, infaq, sadaqah, dan fidyah
+          </p>
         </div>
       </div>
     </section>
@@ -315,16 +425,26 @@
     <!-- Testimonials Section -->
     <section id="testimonials" class="testimonials">
       <div class="container" data-aos="zoom-in">
-        <div class="testimonials-slider swiper-container" data-aos="fade-up" data-aos-delay="100">
+        <div
+          class="testimonials-slider swiper-container"
+          data-aos="fade-up"
+          data-aos-delay="100"
+        >
           <div class="swiper-wrapper">
             <div class="swiper-slide">
               <div class="testimonial-item">
                 <h3>Niat Zakat Untuk Diri Sendiri</h3>
                 <br />
-                <h1>ﻧَﻮَﻳْﺖُ ﺃَﻥْ ﺃُﺧْﺮِﺝَ ﺯَﻛَﺎﺓَ ﺍﻟْﻔِﻄْﺮِ ﻋَنِّيْ ﻭَﻋَﻦْ ﺟَﻤِﻴْﻊِ ﻣَﺎ ﻳَﻠْﺰَﻣُنِيْ ﻧَﻔَﻘَﺎﺗُﻬُﻢْ ﺷَﺮْﻋًﺎ ﻓَﺮْﺿًﺎ ﻟﻠﻪِ ﺗَﻌَﺎﻟَﻰ</h1>
+                <h1>
+                  ﻧَﻮَﻳْﺖُ ﺃَﻥْ ﺃُﺧْﺮِﺝَ ﺯَﻛَﺎﺓَ ﺍﻟْﻔِﻄْﺮِ ﻋَنِّيْ ﻭَﻋَﻦْ
+                  ﺟَﻤِﻴْﻊِ ﻣَﺎ ﻳَﻠْﺰَﻣُنِيْ ﻧَﻔَﻘَﺎﺗُﻬُﻢْ ﺷَﺮْﻋًﺎ ﻓَﺮْﺿًﺎ ﻟﻠﻪِ
+                  ﺗَﻌَﺎﻟَﻰ
+                </h1>
                 <p>
                   <i class="bx bxs-quote-alt-left quote-icon-left"></i>
-                  Aku niat mengeluarkan zakat fitrah untuk diriku dan seluruh orang yang nafkahnya menjadi tanggunganku fardhu karena Allah Taala.
+                  Aku niat mengeluarkan zakat fitrah untuk diriku dan seluruh
+                  orang yang nafkahnya menjadi tanggunganku fardhu karena Allah
+                  Taala.
                   <i class="bx bxs-quote-alt-right quote-icon-right"></i>
                 </p>
               </div>
@@ -334,10 +454,16 @@
               <div class="testimonial-item">
                 <h3>Niat Zakat Untuk Diri Sendiri dan seluruh keluarga</h3>
                 <br />
-                <h1>ﻧَﻮَﻳْﺖُ ﺃَﻥْ ﺃُﺧْﺮِﺝَ ﺯَﻛَﺎﺓَ ﺍﻟْﻔِﻄْﺮِ ﻋَنِّيْ ﻭَﻋَﻦْ ﺟَﻤِﻴْﻊِ ﻣَﺎ ﻳَﻠْﺰَﻣُنِيْ ﻧَﻔَﻘَﺎﺗُﻬُﻢْ ﺷَﺮْﻋًﺎ ﻓَﺮْﺿًﺎ ﻟﻠﻪِ ﺗَﻌَﺎﻟَﻰ</h1>
+                <h1>
+                  ﻧَﻮَﻳْﺖُ ﺃَﻥْ ﺃُﺧْﺮِﺝَ ﺯَﻛَﺎﺓَ ﺍﻟْﻔِﻄْﺮِ ﻋَنِّيْ ﻭَﻋَﻦْ
+                  ﺟَﻤِﻴْﻊِ ﻣَﺎ ﻳَﻠْﺰَﻣُنِيْ ﻧَﻔَﻘَﺎﺗُﻬُﻢْ ﺷَﺮْﻋًﺎ ﻓَﺮْﺿًﺎ ﻟﻠﻪِ
+                  ﺗَﻌَﺎﻟَﻰ
+                </h1>
                 <p>
                   <i class="bx bxs-quote-alt-left quote-icon-left"></i>
-                  Aku niat mengeluarkan zakat fitrah untuk diriku dan seluruh orang yang nafkahnya menjadi tanggunganku fardhu karena Allah Taala.
+                  Aku niat mengeluarkan zakat fitrah untuk diriku dan seluruh
+                  orang yang nafkahnya menjadi tanggunganku fardhu karena Allah
+                  Taala.
                   <i class="bx bxs-quote-alt-right quote-icon-right"></i>
                 </p>
               </div>
@@ -353,7 +479,8 @@
   <footer id="footer">
     <div class="container py-4">
       <div class="copyright">
-        &copy; Copyright <strong><span>SI-AZISAH</span></strong>. All Rights Reserved
+        &copy; Copyright <strong><span>SI-AZISAH</span></strong
+        >. All Rights Reserved
       </div>
       <div class="credits">
         Sistem Informasi Zakat, Infaq, Sadaqah, dan Fidyah
@@ -362,421 +489,474 @@
   </footer>
 
   <div id="preloader"></div>
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <a
+    href="#"
+    class="back-to-top d-flex align-items-center justify-content-center"
+    ><i class="bi bi-arrow-up-short"></i
+  ></a>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, computed } from 'vue'
-import SkeletonCard from '../components/SkeletonCard.vue'
+import { onMounted, onUnmounted, ref, computed } from "vue";
+import SkeletonCard from "../components/SkeletonCard.vue";
 
-const isInitialized = ref(false)
+const isInitialized = ref(false);
 const zakatStats = ref({
   fitrah: { muzakki: 0, beras: 0, uang: 0, mustahiq: 0 },
   mal: { muzakki: 0, beras: 0, uang: 0, mustahiq: 0 },
-  fidyah: { muzakki: 0, beras: 0, uang: 0, mustahiq: 0 }
-})
+  fidyah: { muzakki: 0, beras: 0, uang: 0, mustahiq: 0 },
+});
 const mustahiqGlobalStats = ref({
   total: 0,
-  perJenis: []
-})
-const isLoadingStats = ref(true)
-const activeTab = ref('fitrah')
-// Use window.location.hostname to get correct IP/hostname for API calls
-const apiUrl = `http://${window.location.hostname}:8082/api`
+  perJenis: [],
+});
+const isLoadingStats = ref(true);
+const activeTab = ref("fitrah");
+const resolveApiUrl = () => {
+  const rawUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8082/api";
+  const withoutTrailingSlash = rawUrl.replace(/\/$/, "");
+  return withoutTrailingSlash.endsWith("/api")
+    ? withoutTrailingSlash
+    : `${withoutTrailingSlash}/api`;
+};
+
+const apiUrl = resolveApiUrl();
 
 // Computed property for current zakat stats based on active tab
 const currentStats = computed(() => {
-  console.log(`Getting stats for tab: ${activeTab.value}`)
-  return zakatStats.value[activeTab.value] || { muzakki: 0, beras: 0, uang: 0, mustahiq: 0 }
-})
+  console.log(`Getting stats for tab: ${activeTab.value}`);
+  return (
+    zakatStats.value[activeTab.value] || {
+      muzakki: 0,
+      beras: 0,
+      uang: 0,
+      mustahiq: 0,
+    }
+  );
+});
 
 const defaultMustahiqJenis = [
-  'amil',
-  'fakir',
-  'miskin',
-  'mualaf',
-  'riqab',
-  'gharim',
-  'fisabilillah',
-  'ibnu sabil'
-]
+  "amil",
+  "fakir",
+  "miskin",
+  "mualaf",
+  "riqab",
+  "gharim",
+  "fisabilillah",
+  "ibnu sabil",
+];
 
-const normalizeJenisMustahiq = (jenis) => String(jenis || '').trim().toLowerCase()
+const normalizeJenisMustahiq = (jenis) =>
+  String(jenis || "")
+    .trim()
+    .toLowerCase();
 
 const mustahiqJenisCards = computed(() => {
   const incoming = Array.isArray(mustahiqGlobalStats.value.perJenis)
     ? mustahiqGlobalStats.value.perJenis
-    : []
+    : [];
 
-  const jenisMap = new Map()
+  const jenisMap = new Map();
   incoming.forEach((item) => {
-    const key = normalizeJenisMustahiq(item.jenis_penerima)
-    if (!key) return
-    jenisMap.set(key, Number(item.total || 0))
-  })
+    const key = normalizeJenisMustahiq(item.jenis_penerima);
+    if (!key) return;
+    jenisMap.set(key, Number(item.total || 0));
+  });
 
   const defaults = defaultMustahiqJenis.map((jenis) => ({
     jenis_penerima: jenis,
-    total: Number(jenisMap.get(jenis) || 0)
-  }))
+    total: Number(jenisMap.get(jenis) || 0),
+  }));
 
-  const extras = []
+  const extras = [];
   jenisMap.forEach((total, jenis) => {
     if (!defaultMustahiqJenis.includes(jenis)) {
-      extras.push({ jenis_penerima: jenis, total })
+      extras.push({ jenis_penerima: jenis, total });
     }
-  })
+  });
 
-  return [...defaults, ...extras]
-})
+  return [...defaults, ...extras];
+});
 
 const formatJenisMustahiq = (jenis) => {
-  const value = String(jenis || '').trim()
-  if (!value) return 'Lainnya'
+  const value = String(jenis || "").trim();
+  if (!value) return "Lainnya";
   return value
-    .split(' ')
+    .split(" ")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join(' ')
-}
+    .join(" ");
+};
 
 // Load vendor scripts dynamically
 const loadScript = (src) => {
   return new Promise((resolve) => {
-    const script = document.createElement('script')
-    script.src = src
+    const script = document.createElement("script");
+    script.src = src;
     script.onload = () => {
-      console.log('✓ Loaded:', src)
-      resolve(true)
-    }
+      console.log("✓ Loaded:", src);
+      resolve(true);
+    };
     script.onerror = (err) => {
-      console.error('✗ Failed to load:', src, err)
-      resolve(false) // Don't reject - continue anyway
-    }
-    document.body.appendChild(script)
-  })
-}
+      console.error("✗ Failed to load:", src, err);
+      resolve(false); // Don't reject - continue anyway
+    };
+    document.body.appendChild(script);
+  });
+};
 // Fetch zakat statistics
 const fetchZakatStats = async () => {
   try {
-    isLoadingStats.value = true
-    const startTime = performance.now()
-    console.log('Fetching zakat stats from:', apiUrl)
-    
+    isLoadingStats.value = true;
+    const startTime = performance.now();
+    console.log("Fetching zakat stats from:", apiUrl);
+
     // Fetch Zakat Fitrah stats
     try {
-      const fitrahRes = await fetch(`${apiUrl}/public/stats/fitrah`)
-      console.log('Fitrah Request - Status:', fitrahRes.status, fitrahRes.statusText)
-      const fitrahData = fitrahRes.ok ? await fitrahRes.json() : null
-      console.log('Fitrah Response Data:', fitrahData)
-      
+      const fitrahRes = await fetch(`${apiUrl}/public/stats/fitrah`);
+      console.log(
+        "Fitrah Request - Status:",
+        fitrahRes.status,
+        fitrahRes.statusText,
+      );
+      const fitrahData = fitrahRes.ok ? await fitrahRes.json() : null;
+      console.log("Fitrah Response Data:", fitrahData);
+
       if (fitrahData?.data) {
         zakatStats.value.fitrah = {
           muzakki: fitrahData.data.total_muzakki || 0,
           beras: fitrahData.data.total_beras || 0,
           uang: fitrahData.data.total_uang || 0,
-          mustahiq: fitrahData.data.total_mustahiq || 0
-        }
-        console.log('✓ Fitrah stats updated:', zakatStats.value.fitrah)
+          mustahiq: fitrahData.data.total_mustahiq || 0,
+        };
+        console.log("✓ Fitrah stats updated:", zakatStats.value.fitrah);
       } else {
-        console.warn('⚠ Fitrah response has no data property')
+        console.warn("⚠ Fitrah response has no data property");
       }
     } catch (fitrahError) {
-      console.error('✗ Fitrah fetch error:', fitrahError)
+      console.error("✗ Fitrah fetch error:", fitrahError);
     }
-    
+
     // Fetch Zakat Mal stats
     try {
-      const malRes = await fetch(`${apiUrl}/public/stats/mal`)
-      console.log('Mal Request - Status:', malRes.status, malRes.statusText)
-      const malData = malRes.ok ? await malRes.json() : null
-      console.log('Mal Response Data:', malData)
-      
+      const malRes = await fetch(`${apiUrl}/public/stats/mal`);
+      console.log("Mal Request - Status:", malRes.status, malRes.statusText);
+      const malData = malRes.ok ? await malRes.json() : null;
+      console.log("Mal Response Data:", malData);
+
       if (malData?.data) {
         zakatStats.value.mal = {
           muzakki: malData.data.total_muzakki || 0,
           beras: malData.data.total_beras || 0,
           uang: malData.data.total_uang || 0,
-          mustahiq: malData.data.total_mustahiq || 0
-        }
-        console.log('✓ Mal stats updated:', zakatStats.value.mal)
+          mustahiq: malData.data.total_mustahiq || 0,
+        };
+        console.log("✓ Mal stats updated:", zakatStats.value.mal);
       } else {
-        console.warn('⚠ Mal response has no data property')
+        console.warn("⚠ Mal response has no data property");
       }
     } catch (malError) {
-      console.error('✗ Mal fetch error:', malError)
+      console.error("✗ Mal fetch error:", malError);
     }
-    
+
     // Fetch Fidyah stats
     try {
-      const fidyahRes = await fetch(`${apiUrl}/public/stats/fidyah`)
-      console.log('Fidyah Request - Status:', fidyahRes.status, fidyahRes.statusText)
-      const fidyahData = fidyahRes.ok ? await fidyahRes.json() : null
-      console.log('Fidyah Response Data:', fidyahData)
-      
+      const fidyahRes = await fetch(`${apiUrl}/public/stats/fidyah`);
+      console.log(
+        "Fidyah Request - Status:",
+        fidyahRes.status,
+        fidyahRes.statusText,
+      );
+      const fidyahData = fidyahRes.ok ? await fidyahRes.json() : null;
+      console.log("Fidyah Response Data:", fidyahData);
+
       if (fidyahData?.data) {
         zakatStats.value.fidyah = {
           muzakki: fidyahData.data.total_muzakki || 0,
           beras: fidyahData.data.total_beras || 0,
           uang: fidyahData.data.total_uang || 0,
-          mustahiq: fidyahData.data.total_mustahiq || 0
-        }
-        console.log('✓ Fidyah stats updated:', zakatStats.value.fidyah)
+          mustahiq: fidyahData.data.total_mustahiq || 0,
+        };
+        console.log("✓ Fidyah stats updated:", zakatStats.value.fidyah);
       } else {
-        console.warn('⚠ Fidyah response has no data property')
+        console.warn("⚠ Fidyah response has no data property");
       }
     } catch (fidyahError) {
-      console.error('✗ Fidyah fetch error:', fidyahError)
+      console.error("✗ Fidyah fetch error:", fidyahError);
     }
 
     // Fetch Mustahiq global stats
     try {
-      const mustahiqRes = await fetch(`${apiUrl}/public/stats/mustahiq`)
-      console.log('Mustahiq Request - Status:', mustahiqRes.status, mustahiqRes.statusText)
-      const mustahiqData = mustahiqRes.ok ? await mustahiqRes.json() : null
-      console.log('Mustahiq Response Data:', mustahiqData)
+      const mustahiqRes = await fetch(`${apiUrl}/public/stats/mustahiq`);
+      console.log(
+        "Mustahiq Request - Status:",
+        mustahiqRes.status,
+        mustahiqRes.statusText,
+      );
+      const mustahiqData = mustahiqRes.ok ? await mustahiqRes.json() : null;
+      console.log("Mustahiq Response Data:", mustahiqData);
 
       if (mustahiqData?.data) {
-        const perJenis = Array.isArray(mustahiqData.data.per_jenis) ? mustahiqData.data.per_jenis : []
-        const totalFromJenis = perJenis.reduce((sum, item) => sum + Number(item.total || 0), 0)
+        const perJenis = Array.isArray(mustahiqData.data.per_jenis)
+          ? mustahiqData.data.per_jenis
+          : [];
+        const totalFromJenis = perJenis.reduce(
+          (sum, item) => sum + Number(item.total || 0),
+          0,
+        );
         mustahiqGlobalStats.value = {
-          total: Number(mustahiqData.data.total_mustahiq || 0) || totalFromJenis,
-          perJenis
-        }
-        console.log('✓ Mustahiq global stats updated:', mustahiqGlobalStats.value)
+          total:
+            Number(mustahiqData.data.total_mustahiq || 0) || totalFromJenis,
+          perJenis,
+        };
+        console.log(
+          "✓ Mustahiq global stats updated:",
+          mustahiqGlobalStats.value,
+        );
       } else {
-        console.warn('⚠ Mustahiq response has no data property')
+        console.warn("⚠ Mustahiq response has no data property");
       }
     } catch (mustahiqError) {
-      console.error('✗ Mustahiq fetch error:', mustahiqError)
+      console.error("✗ Mustahiq fetch error:", mustahiqError);
       try {
-        const dashboardRes = await fetch(`${apiUrl}/public/dashboard`)
-        const dashboardData = dashboardRes.ok ? await dashboardRes.json() : null
+        const dashboardRes = await fetch(`${apiUrl}/public/dashboard`);
+        const dashboardData = dashboardRes.ok
+          ? await dashboardRes.json()
+          : null;
         if (dashboardData?.data) {
-          mustahiqGlobalStats.value.total = Number(dashboardData.data.total_mustahiq || 0)
+          mustahiqGlobalStats.value.total = Number(
+            dashboardData.data.total_mustahiq || 0,
+          );
         }
       } catch (fallbackError) {
-        console.error('✗ Mustahiq fallback fetch error:', fallbackError)
+        console.error("✗ Mustahiq fallback fetch error:", fallbackError);
       }
     }
-    
-    const endTime = performance.now()
-    console.log('Final stats:', zakatStats.value)
-    console.log(`Fetching completed in ${(endTime - startTime).toFixed(2)}ms`)
+
+    const endTime = performance.now();
+    console.log("Final stats:", zakatStats.value);
+    console.log(`Fetching completed in ${(endTime - startTime).toFixed(2)}ms`);
   } catch (error) {
-    console.error('Error fetching zakat stats:', error)
+    console.error("Error fetching zakat stats:", error);
   } finally {
-    isLoadingStats.value = false
+    isLoadingStats.value = false;
   }
-}
+};
 
 // Format currency to Rupiah
 const formatCurrency = (value) => {
-  if (!value || value === 0) return '0'
+  if (!value || value === 0) return "0";
   if (value >= 1000000) {
-    return (value / 1000000).toFixed(1) + ' Jt'
+    return (value / 1000000).toFixed(1) + " Jt";
   } else if (value >= 1000) {
-    return (value / 1000).toFixed(1) + ' Rb'
+    return (value / 1000).toFixed(1) + " Rb";
   }
-  return value.toString()
-}
-let swiper = null
+  return value.toString();
+};
+let swiper = null;
 
 const initSwiper = () => {
   try {
-    const Swiper = window.Swiper
+    const Swiper = window.Swiper;
     if (!Swiper) {
-      console.warn('Swiper not loaded')
-      return
+      console.warn("Swiper not loaded");
+      return;
     }
-    
+
     // Testimonials slider
-    new Swiper('.testimonials-slider', {
+    new Swiper(".testimonials-slider", {
       speed: 600,
       loop: true,
       autoplay: {
         delay: 5000,
-        disableOnInteraction: false
+        disableOnInteraction: false,
       },
-      slidesPerView: 'auto',
+      slidesPerView: "auto",
       pagination: {
-        el: '.testimonials-slider .swiper-pagination',
-        type: 'bullets',
-        clickable: true
-      }
-    })
-    console.log('✓ Testimonials slider initialized')
+        el: ".testimonials-slider .swiper-pagination",
+        type: "bullets",
+        clickable: true,
+      },
+    });
+    console.log("✓ Testimonials slider initialized");
 
     // Zakat types slider
-    const zakatSliderEl = document.querySelector('.zakat-slider')
-    const zakatPaginationEl = document.querySelector('.zakat-slider .swiper-pagination')
-    
-    console.log('Zakat slider element:', zakatSliderEl)
-    console.log('Zakat pagination element:', zakatPaginationEl)
-    
+    const zakatSliderEl = document.querySelector(".zakat-slider");
+    const zakatPaginationEl = document.querySelector(
+      ".zakat-slider .swiper-pagination",
+    );
+
+    console.log("Zakat slider element:", zakatSliderEl);
+    console.log("Zakat pagination element:", zakatPaginationEl);
+
     if (zakatSliderEl) {
-      new Swiper('.zakat-slider', {
+      new Swiper(".zakat-slider", {
         speed: 600,
         loop: true,
         autoplay: {
           delay: 6000,
-          disableOnInteraction: false
+          disableOnInteraction: false,
         },
         slidesPerView: 1,
         pagination: {
-          el: '.zakat-slider .swiper-pagination',
-          type: 'bullets',
-          clickable: true
+          el: ".zakat-slider .swiper-pagination",
+          type: "bullets",
+          clickable: true,
         },
         breakpoints: {
           768: {
-            slidesPerView: 1
-          }
-        }
-      })
-      console.log('✓ Zakat types slider initialized')
+            slidesPerView: 1,
+          },
+        },
+      });
+      console.log("✓ Zakat types slider initialized");
     } else {
-      console.error('Zakat slider element not found!')
+      console.error("Zakat slider element not found!");
     }
   } catch (error) {
-    console.error('Swiper init error:', error)
+    console.error("Swiper init error:", error);
   }
-}
+};
 
 const initAOS = () => {
   try {
-    const AOS = window.AOS
+    const AOS = window.AOS;
     if (!AOS) {
-      console.warn('AOS not loaded')
-      return
+      console.warn("AOS not loaded");
+      return;
     }
-    
+
     AOS.init({
       duration: 1000,
-      easing: 'ease-in-out',
+      easing: "ease-in-out",
       once: true,
-      mirror: false
-    })
-    console.log('✓ AOS initialized')
+      mirror: false,
+    });
+    console.log("✓ AOS initialized");
   } catch (error) {
-    console.error('AOS init error:', error)
+    console.error("AOS init error:", error);
   }
-}
+};
 
 const initGLightbox = () => {
   try {
-    const GLightbox = window.GLightbox
+    const GLightbox = window.GLightbox;
     if (!GLightbox) {
-      console.warn('GLightbox not loaded')
-      return
+      console.warn("GLightbox not loaded");
+      return;
     }
-    
+
     GLightbox({
-      selector: '.glightbox'
-    })
-    console.log('✓ GLightbox initialized')
+      selector: ".glightbox",
+    });
+    console.log("✓ GLightbox initialized");
   } catch (error) {
-    console.error('GLightbox init error:', error)
+    console.error("GLightbox init error:", error);
   }
-}
+};
 
 const handleNavClick = (e) => {
-  const navLinks = document.querySelectorAll('#navbar a')
-  navLinks.forEach(link => {
-    link.classList.remove('active')
-  })
-  if (e.target.classList.contains('nav-link')) {
-    e.target.classList.add('active')
+  const navLinks = document.querySelectorAll("#navbar a");
+  navLinks.forEach((link) => {
+    link.classList.remove("active");
+  });
+  if (e.target.classList.contains("nav-link")) {
+    e.target.classList.add("active");
   }
-}
+};
 
 const handleMobileMenuToggle = () => {
-  const navbar = document.getElementById('navbar')
+  const navbar = document.getElementById("navbar");
   if (navbar) {
-    navbar.classList.toggle('navbar-mobile')
+    navbar.classList.toggle("navbar-mobile");
   }
-}
+};
 
 const scrollWithOffset = (e) => {
-  if (e.target.classList.contains('scrollto') && e.target.getAttribute('href')?.startsWith('#')) {
-    e.preventDefault()
-    const target = document.querySelector(e.target.getAttribute('href'))
+  if (
+    e.target.classList.contains("scrollto") &&
+    e.target.getAttribute("href")?.startsWith("#")
+  ) {
+    e.preventDefault();
+    const target = document.querySelector(e.target.getAttribute("href"));
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth' })
+      target.scrollIntoView({ behavior: "smooth" });
     }
   }
-}
+};
 
 onMounted(async () => {
-  console.log('Home.vue mounted - starting script loading...')
-  
+  console.log("Home.vue mounted - starting script loading...");
+
   // Hide preloader immediately
-  const preloader = document.getElementById('preloader')
+  const preloader = document.getElementById("preloader");
   if (preloader) {
-    preloader.style.display = 'none'
+    preloader.style.display = "none";
   }
-  
+
   // Fetch zakat stats from database
-  fetchZakatStats()
-  
+  fetchZakatStats();
+
   // Load vendor scripts in parallel with Promise.allSettled (don't fail if any fail)
   try {
     await Promise.allSettled([
-      loadScript('/homepage/assets/vendor/bootstrap/js/bootstrap.bundle.min.js'),
-      loadScript('/homepage/assets/vendor/aos/aos.js'),
-      loadScript('/homepage/assets/vendor/glightbox/js/glightbox.min.js'),
-      loadScript('/homepage/assets/vendor/swiper/swiper-bundle.min.js')
-    ])
-    
+      loadScript(
+        "/homepage/assets/vendor/bootstrap/js/bootstrap.bundle.min.js",
+      ),
+      loadScript("/homepage/assets/vendor/aos/aos.js"),
+      loadScript("/homepage/assets/vendor/glightbox/js/glightbox.min.js"),
+      loadScript("/homepage/assets/vendor/swiper/swiper-bundle.min.js"),
+    ]);
+
     // Initialize components - they check if libraries exist
     setTimeout(() => {
-      initAOS()
-      initGLightbox()
-      initSwiper()
-      isInitialized.value = true
-    }, 500)
-    
+      initAOS();
+      initGLightbox();
+      initSwiper();
+      isInitialized.value = true;
+    }, 500);
   } catch (error) {
-    console.error('Script loading error:', error)
-    isInitialized.value = true // Show content anyway
+    console.error("Script loading error:", error);
+    isInitialized.value = true; // Show content anyway
   }
 
   // Add event listeners
-  document.querySelectorAll('.mobile-nav-toggle').forEach(toggle => {
-    toggle.addEventListener('click', handleMobileMenuToggle)
-  })
+  document.querySelectorAll(".mobile-nav-toggle").forEach((toggle) => {
+    toggle.addEventListener("click", handleMobileMenuToggle);
+  });
 
-  document.querySelectorAll('#navbar a').forEach(link => {
-    link.addEventListener('click', handleNavClick)
-    link.addEventListener('click', scrollWithOffset)
-  })
+  document.querySelectorAll("#navbar a").forEach((link) => {
+    link.addEventListener("click", handleNavClick);
+    link.addEventListener("click", scrollWithOffset);
+  });
 
   // Back to top button
-  const backToTopBtn = document.querySelector('.back-to-top')
+  const backToTopBtn = document.querySelector(".back-to-top");
   if (backToTopBtn) {
-    window.addEventListener('scroll', () => {
+    window.addEventListener("scroll", () => {
       if (window.scrollY > 100) {
-        backToTopBtn.classList.add('active')
+        backToTopBtn.classList.add("active");
       } else {
-        backToTopBtn.classList.remove('active')
+        backToTopBtn.classList.remove("active");
       }
-    })
+    });
 
-    backToTopBtn.addEventListener('click', (e) => {
-      e.preventDefault()
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    })
+    backToTopBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   }
-})
+});
 
 onUnmounted(() => {
   if (swiper) {
-    swiper.destroy()
+    swiper.destroy();
   }
-})
+});
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Roboto:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i');
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Roboto:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i");
 
 :global(#preloader) {
   display: none !important;
