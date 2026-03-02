@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const resolveApiBaseUrl = () => {
-  const rawUrl = import.meta.env.VITE_API_BASE_URL || 'http://202.155.95.118:8082/api'
+  const rawUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082/api'
   const withoutTrailingSlash = rawUrl.replace(/\/$/, '')
   return withoutTrailingSlash.endsWith('/api')
     ? withoutTrailingSlash
