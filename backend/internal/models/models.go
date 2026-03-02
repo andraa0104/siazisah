@@ -185,6 +185,7 @@ type DashboardStats struct {
 	TotalMasjid             int                      `json:"total_masjid"`
 	TotalMuzakki            int                      `json:"total_muzakki"`
 	TotalMustahiq           int                      `json:"total_mustahiq"`
+	TotalOrangDizakati      int                      `json:"total_orang_dizakati"`
 	TotalZakatFitrah        float64                  `json:"total_zakat_fitrah"`
 	TotalZakatFitrahUang    float64                  `json:"total_zakat_fitrah_uang"`
 	TotalZakatFitrahBerasKg float64                  `json:"total_zakat_fitrah_beras_kg"`

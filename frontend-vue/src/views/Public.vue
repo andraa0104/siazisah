@@ -149,7 +149,7 @@
         </div>
 
         <div class="p-6">
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="bg-green-50 p-4 rounded-lg">
               <p class="text-sm text-green-600 font-medium">Total Muzakki</p>
               <p class="text-2xl font-bold text-green-700">
@@ -160,6 +160,12 @@
               <p class="text-sm text-purple-600 font-medium">Total Mustahiq</p>
               <p class="text-2xl font-bold text-purple-700">
                 {{ modalData?.total_mustahiq }}
+              </p>
+            </div>
+            <div class="bg-orange-50 p-4 rounded-lg">
+              <p class="text-sm text-orange-600 font-medium">Total Orang Dizakati</p>
+              <p class="text-2xl font-bold text-orange-700">
+                {{ modalData?.total_orang_dizakati }}
               </p>
             </div>
             <div class="bg-green-50 p-4 rounded-lg">
@@ -945,6 +951,13 @@ const stats = ref([
     textColor: "text-purple-600",
   },
   {
+    label: "Total Orang Dizakati",
+    value: 0,
+    icon: "fas fa-person-circle-check",
+    bgColor: "bg-orange-100",
+    textColor: "text-orange-600",
+  },
+  {
     label: "Zakat Fitrah (Uang)",
     value: "Rp 0",
     icon: "fas fa-money-bill-wave",
@@ -1552,6 +1565,7 @@ onMounted(async () => {
       stats.value[0].value = d.total_masjid || 0;
       stats.value[1].value = d.total_muzakki || 0;
       stats.value[2].value = d.total_mustahiq || 0;
+      stats.value[3].value = d.total_orang_dizakati || 0;
 
       // Backward compatibility: gunakan field lama jika field baru belum ada
       const fitrahUang =
@@ -1561,14 +1575,14 @@ onMounted(async () => {
       const fitrahBerasKg = d.total_zakat_fitrah_beras_kg || 0;
       const fitrahBerasRp = d.total_zakat_fitrah_beras_rupiah || 0;
 
-      stats.value[3].value = formatCurrency(fitrahUang);
-      stats.value[4].value = `${fitrahBerasKg.toFixed(1)} kg`;
+      stats.value[4].value = formatCurrency(fitrahUang);
+      stats.value[5].value = `${fitrahBerasKg.toFixed(1)} kg`;
       if (fitrahBerasRp > 0) {
-        stats.value[4].valueRp = formatCurrency(fitrahBerasRp);
+        stats.value[5].valueRp = formatCurrency(fitrahBerasRp);
       }
-      stats.value[5].value = formatCurrency(d.total_zakat_mal || 0);
-      stats.value[6].value = formatCurrency(d.total_fidyah || 0);
-      stats.value[7].value = formatCurrency(d.total_infaq || 0);
+      stats.value[6].value = formatCurrency(d.total_zakat_mal || 0);
+      stats.value[7].value = formatCurrency(d.total_fidyah || 0);
+      stats.value[8].value = formatCurrency(d.total_infaq || 0);
 
       // Set last update
       lastUpdate.value = d.last_update || null;

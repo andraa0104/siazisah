@@ -63,6 +63,9 @@ func (h *PublicHandler) GetPublicDashboard(c *gin.Context) {
 	// Total mustahiq
 	h.DB.QueryRow("SELECT COUNT(*) FROM mustahiq WHERE is_active = 1").Scan(&stats.TotalMustahiq)
 
+	// Total orang yang dizakati (distinct mustahiq yang menerima distribusi)
+	h.DB.QueryRow("SELECT COUNT(DISTINCT mustahiq_id) FROM distribusi_zakat").Scan(&stats.TotalOrangDizakati)
+
 	// Total zakat fitrah (semua bentuk)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE jenis_zakat = 'fitrah'").Scan(&stats.TotalZakatFitrah)
 
@@ -179,6 +182,7 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 		Masjid                  models.Masjid            `json:"masjid"`
 		TotalMuzakki            int                      `json:"total_muzakki"`
 		TotalMustahiq           int                      `json:"total_mustahiq"`
+		TotalOrangDizakati      int                      `json:"total_orang_dizakati"`
 		TotalZakatFitrah        float64                  `json:"total_zakat_fitrah"`
 		TotalZakatFitrahUang    float64                  `json:"total_zakat_fitrah_uang"`
 		TotalZakatFitrahBerasKg float64                  `json:"total_zakat_fitrah_beras_kg"`
@@ -211,6 +215,7 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 	// Get stats
 	h.DB.QueryRow("SELECT COUNT(*) FROM muzakki WHERE masjid_id = ?", id).Scan(&stats.TotalMuzakki)
 	h.DB.QueryRow("SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ?", id).Scan(&stats.TotalMustahiq)
+	h.DB.QueryRow("SELECT COUNT(DISTINCT mustahiq_id) FROM distribusi_zakat WHERE masjid_id = ?", id).Scan(&stats.TotalOrangDizakati)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah'", id).Scan(&stats.TotalZakatFitrah)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'uang'", id).Scan(&stats.TotalZakatFitrahUang)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'beras'", id).Scan(&stats.TotalZakatFitrahBerasRp)
