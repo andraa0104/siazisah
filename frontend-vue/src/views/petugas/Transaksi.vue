@@ -39,7 +39,8 @@
 
       <main class="flex-1 overflow-y-auto p-4 md:p-6">
         <div class="bg-white rounded-xl shadow-md p-4 mb-4">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="space-y-3 md:space-y-0 md:grid md:grid-cols-4 md:gap-3">
+            <!-- Filter Jenis Zakat -->
             <div>
               <label class="block text-xs text-gray-500 mb-1"
                 >Filter Jenis Zakat</label
@@ -57,6 +58,7 @@
               </select>
             </div>
 
+            <!-- Bentuk Fitrah/Fidyah -->
             <div>
               <label class="block text-xs text-gray-500 mb-1"
                 >Bentuk (Fitrah/Fidyah)</label
@@ -73,29 +75,32 @@
               </select>
             </div>
 
+            <!-- Cari Muzakki -->
             <div class="md:col-span-2">
               <label class="block text-xs text-gray-500 mb-1"
                 >Cari Muzakki</label
               >
-              <div class="flex gap-2">
+              <div class="flex flex-col sm:flex-row gap-2">
                 <input
                   v-model="filters.q"
                   @keyup.enter="applyFilters"
                   placeholder="Ketik nama muzakki..."
                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
                 />
-                <button
-                  @click="applyFilters"
-                  class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-                >
-                  Cari
-                </button>
-                <button
-                  @click="resetFilters"
-                  class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200"
-                >
-                  Reset
-                </button>
+                <div class="flex gap-2">
+                  <button
+                    @click="applyFilters"
+                    class="flex-1 sm:flex-none px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 font-medium"
+                  >
+                    Cari
+                  </button>
+                  <button
+                    @click="resetFilters"
+                    class="flex-1 sm:flex-none px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 font-medium"
+                  >
+                    Reset
+                  </button>
+                </div>
               </div>
             </div>
           </div>

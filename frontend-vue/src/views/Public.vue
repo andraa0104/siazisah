@@ -121,150 +121,222 @@
 
     <div
       v-if="showModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
       @click.self="showModal = false"
     >
       <div
-        class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        class="bg-white rounded-lg sm:rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
       >
         <div
-          class="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-xl"
+          class="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 sm:p-6 rounded-t-lg sm:rounded-t-xl"
         >
-          <div class="flex justify-between items-center">
-            <div>
-              <h2 class="text-2xl font-bold">{{ modalData?.masjid.nama }}</h2>
-              <p class="text-sm opacity-90">{{ modalData?.masjid.alamat }}</p>
+          <div class="flex justify-between items-start gap-2">
+            <div class="min-w-0 flex-1">
+              <h2 class="text-lg sm:text-2xl font-bold truncate">
+                {{ modalData?.masjid.nama }}
+              </h2>
+              <p class="text-xs sm:text-sm opacity-90 line-clamp-2">
+                {{ modalData?.masjid.alamat }}
+              </p>
               <p v-if="modalData?.last_update" class="text-xs opacity-75 mt-1">
-                <i class="fas fa-clock mr-1"></i>Update terakhir:
+                <i class="fas fa-clock mr-1"></i>
+                <span class="hidden sm:inline">Update terakhir: </span>
                 {{ formatDate(modalData.last_update) }}
               </p>
             </div>
             <button
               @click="showModal = false"
-              class="text-white hover:bg-white hover:bg-opacity-20 rounded-full w-8 h-8"
+              class="flex-shrink-0 text-white hover:bg-white hover:bg-opacity-20 rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center"
             >
-              <i class="fas fa-times"></i>
+              <i class="fas fa-times text-base sm:text-lg"></i>
             </button>
           </div>
         </div>
 
-        <div class="p-6">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-green-50 p-4 rounded-lg">
-              <p class="text-sm text-green-600 font-medium">Total Muzakki</p>
-              <p class="text-2xl font-bold text-green-700">
+        <div class="p-3 sm:p-6">
+          <div
+            class="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6"
+          >
+            <div class="bg-green-50 p-2 sm:p-3 md:p-4 rounded-lg">
+              <p class="text-xs sm:text-sm text-green-600 font-medium">
+                Total Muzakki
+              </p>
+              <p class="text-xl sm:text-2xl font-bold text-green-700">
                 {{ modalData?.total_muzakki }}
               </p>
             </div>
-            <div class="bg-orange-50 p-4 rounded-lg">
-              <p class="text-sm text-orange-600 font-medium">
+            <div class="bg-orange-50 p-2 sm:p-3 md:p-4 rounded-lg">
+              <p
+                class="text-xs sm:text-sm text-orange-600 font-medium line-clamp-2"
+              >
                 Total Orang Dizakati
               </p>
-              <p class="text-2xl font-bold text-orange-700">
+              <p class="text-xl sm:text-2xl font-bold text-orange-700">
                 {{ modalData?.total_orang_dizakati }}
               </p>
             </div>
-            <div class="bg-purple-50 p-4 rounded-lg">
-              <p class="text-sm text-purple-600 font-medium">Total Mustahiq</p>
-              <p class="text-2xl font-bold text-purple-700">
+            <div class="bg-purple-50 p-2 sm:p-3 md:p-4 rounded-lg">
+              <p class="text-xs sm:text-sm text-purple-600 font-medium">
+                Total Mustahiq
+              </p>
+              <p class="text-xl sm:text-2xl font-bold text-purple-700">
                 {{ modalData?.total_mustahiq }}
               </p>
             </div>
-            <div class="bg-green-50 p-4 rounded-lg">
-              <p class="text-sm text-green-600 font-medium">Fitrah (Uang)</p>
-              <p class="text-lg font-bold text-green-700">
+            <div class="bg-green-50 p-2 sm:p-3 md:p-4 rounded-lg">
+              <p class="text-xs sm:text-sm text-green-600 font-medium">
+                Fitrah (Uang)
+              </p>
+              <p
+                class="text-sm sm:text-base md:text-lg font-bold text-green-700 line-clamp-2"
+              >
                 {{ formatCurrency(modalData?.total_zakat_fitrah_uang || 0) }}
               </p>
             </div>
-            <div class="bg-amber-50 p-4 rounded-lg">
-              <p class="text-sm text-amber-600 font-medium">Fitrah (Beras)</p>
-              <p class="text-lg font-bold text-amber-700">
-                {{ (modalData?.total_zakat_fitrah_beras_kg || 0).toFixed(1) }}
-                kg
+            <div class="bg-amber-50 p-2 sm:p-3 md:p-4 rounded-lg">
+              <p class="text-xs sm:text-sm text-amber-600 font-medium">
+                Fitrah (Beras)
+              </p>
+              <p
+                class="text-sm sm:text-base md:text-lg font-bold text-amber-700"
+              >
+                {{ (modalData?.total_zakat_fitrah_beras_kg || 0).toFixed(1)
+                }}<span class="text-xs">kg</span>
               </p>
               <p
                 v-if="modalData?.total_zakat_fitrah_beras_rupiah > 0"
-                class="text-xs text-amber-600 mt-1"
+                class="text-xs text-amber-600 mt-0.5 line-clamp-1"
               >
                 {{ formatCurrency(modalData?.total_zakat_fitrah_beras_rupiah) }}
               </p>
             </div>
-            <div class="bg-indigo-50 p-4 rounded-lg">
-              <p class="text-sm text-indigo-600 font-medium">Zakat Mal</p>
-              <p class="text-lg font-bold text-indigo-700">
+            <div class="bg-indigo-50 p-2 sm:p-3 md:p-4 rounded-lg">
+              <p class="text-xs sm:text-sm text-indigo-600 font-medium">
+                Zakat Mal
+              </p>
+              <p
+                class="text-sm sm:text-base md:text-lg font-bold text-indigo-700 line-clamp-2"
+              >
                 {{ formatCurrency(modalData?.total_zakat_mal || 0) }}
               </p>
             </div>
-            <div class="bg-yellow-50 p-4 rounded-lg">
-              <p class="text-sm text-yellow-600 font-medium">Fidyah</p>
-              <p class="text-lg font-bold text-yellow-700">
-                {{ formatCurrency(modalData?.total_fidyah || 0) }}
+            <div class="bg-yellow-50 p-2 sm:p-3 md:p-4 rounded-lg">
+              <p class="text-xs sm:text-sm text-yellow-600 font-medium">
+                Fidyah (Uang)
+              </p>
+              <p
+                class="text-sm sm:text-base md:text-lg font-bold text-yellow-700 line-clamp-2"
+              >
+                {{
+                  formatCurrency(
+                    modalData?.total_fidyah_uang ||
+                      modalData?.total_fidyah ||
+                      0,
+                  )
+                }}
               </p>
             </div>
-            <div class="bg-pink-50 p-4 rounded-lg">
-              <p class="text-sm text-pink-600 font-medium">Infaq</p>
-              <p class="text-lg font-bold text-pink-700">
+            <div class="bg-lime-50 p-2 sm:p-3 md:p-4 rounded-lg">
+              <p class="text-xs sm:text-sm text-lime-600 font-medium">
+                Fidyah (Beras)
+              </p>
+              <p
+                class="text-sm sm:text-base md:text-lg font-bold text-lime-700"
+              >
+                {{ (modalData?.total_fidyah_beras_kg || 0).toFixed(1)
+                }}<span class="text-xs">kg</span>
+              </p>
+              <p
+                v-if="modalData?.total_fidyah_beras_rupiah > 0"
+                class="text-xs text-lime-600 mt-0.5 line-clamp-1"
+              >
+                {{ formatCurrency(modalData?.total_fidyah_beras_rupiah) }}
+              </p>
+            </div>
+            <div class="bg-pink-50 p-2 sm:p-3 md:p-4 rounded-lg">
+              <p class="text-xs sm:text-sm text-pink-600 font-medium">Infaq</p>
+              <p
+                class="text-sm sm:text-base md:text-lg font-bold text-pink-700 line-clamp-2"
+              >
                 {{ formatCurrency(modalData?.total_infaq || 0) }}
               </p>
             </div>
           </div>
 
           <!-- Tab Navigation -->
-          <div class="flex border-b border-gray-200 mb-6">
+          <div
+            class="flex gap-1 sm:gap-0 border-b border-gray-200 mb-4 sm:mb-6 overflow-x-auto"
+          >
             <button
               @click="activeTab = 'zakat'"
               :class="[
-                'px-6 py-3 font-medium transition-colors',
+                'px-2 sm:px-6 py-2 sm:py-3 text-xs sm:text-base font-medium transition-colors whitespace-nowrap',
                 activeTab === 'zakat'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-800',
               ]"
             >
-              <i class="fas fa-receipt mr-2"></i>Data Zakat
+              <i class="fas fa-receipt mr-1 sm:mr-2 text-xs sm:text-base"></i
+              ><span class="hidden sm:inline">Data Zakat</span
+              ><span class="sm:hidden">Zakat</span>
             </button>
             <button
               @click="activeTab = 'mustahiq'"
               :class="[
-                'px-6 py-3 font-medium transition-colors',
+                'px-2 sm:px-6 py-2 sm:py-3 text-xs sm:text-base font-medium transition-colors whitespace-nowrap',
                 activeTab === 'mustahiq'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-800',
               ]"
             >
-              <i class="fas fa-hand-holding-heart mr-2"></i>Mustahiq
+              <i
+                class="fas fa-hand-holding-heart mr-1 sm:mr-2 text-xs sm:text-base"
+              ></i
+              >Mustahiq
             </button>
             <button
               @click="activeTab = 'pengurus'"
               :class="[
-                'px-6 py-3 font-medium transition-colors',
+                'px-2 sm:px-6 py-2 sm:py-3 text-xs sm:text-base font-medium transition-colors whitespace-nowrap',
                 activeTab === 'pengurus'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-800',
               ]"
             >
-              <i class="fas fa-users mr-2"></i>Pengurus
+              <i class="fas fa-users mr-1 sm:mr-2 text-xs sm:text-base"></i
+              >Pengurus
             </button>
             <button
               @click="activeTab = 'distribusi'"
               :class="[
-                'px-6 py-3 font-medium transition-colors',
+                'px-2 sm:px-6 py-2 sm:py-3 text-xs sm:text-base font-medium transition-colors whitespace-nowrap',
                 activeTab === 'distribusi'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-800',
               ]"
             >
-              <i class="fas fa-hand-holding-usd mr-2"></i>Distribusi
+              <i
+                class="fas fa-hand-holding-usd mr-1 sm:mr-2 text-xs sm:text-base"
+              ></i
+              ><span class="hidden sm:inline">Distribusi</span
+              ><span class="sm:hidden">Dist</span>
             </button>
           </div>
 
           <!-- Tab Content: Data Zakat -->
-          <div v-show="activeTab === 'zakat'" class="mb-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-3">
-              <i class="fas fa-receipt mr-2 text-blue-600"></i>Data Transaksi
-              Zakat
+          <div v-show="activeTab === 'zakat'" class="mb-4 sm:mb-6">
+            <h3
+              class="text-base sm:text-lg font-bold text-gray-800 mb-2 sm:mb-3"
+            >
+              <i class="fas fa-receipt mr-2 text-blue-600"></i
+              ><span class="hidden sm:inline">Data Transaksi</span>Zakat
             </h3>
-            <div class="bg-white border border-gray-200 rounded-lg p-3 mb-4">
-              <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4 overflow-x-auto"
+            >
+              <div
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 min-w-max sm:min-w-0"
+              >
                 <div>
                   <label class="block text-xs text-gray-500 mb-1"
                     >Filter Jenis Zakat</label
@@ -522,13 +594,19 @@
           </div>
 
           <!-- Tab Content: Data Mustahiq -->
-          <div v-show="activeTab === 'mustahiq'">
-            <h3 class="text-lg font-bold text-gray-800 mb-3">
+          <div v-show="activeTab === 'mustahiq'" class="mb-4 sm:mb-6">
+            <h3
+              class="text-base sm:text-lg font-bold text-gray-800 mb-2 sm:mb-3"
+            >
               <i class="fas fa-hand-holding-heart mr-2 text-purple-600"></i>Data
               Mustahiq
             </h3>
-            <div class="bg-white border border-gray-200 rounded-lg p-3 mb-4">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4 overflow-x-auto"
+            >
+              <div
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 min-w-max sm:min-w-0"
+              >
                 <div>
                   <label class="block text-xs text-gray-500 mb-1"
                     >Filter Jenis Penerima</label
@@ -712,51 +790,75 @@
           </div>
 
           <!-- Tab Content: Pengurus -->
-          <div v-show="activeTab === 'pengurus'" class="mb-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-3">
+          <div v-show="activeTab === 'pengurus'" class="mb-4 sm:mb-6">
+            <h3
+              class="text-base sm:text-lg font-bold text-gray-800 mb-2 sm:mb-3"
+            >
               <i class="fas fa-users mr-2 text-blue-600"></i>Struktur Pengurus
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <!-- Pengurus Masjid -->
-              <div class="bg-blue-50 rounded-lg p-4">
-                <h4 class="font-semibold text-blue-800 mb-3">
+              <div class="bg-blue-50 rounded-lg p-3 sm:p-4">
+                <h4
+                  class="font-semibold text-sm sm:text-base text-blue-800 mb-2 sm:mb-3"
+                >
                   Pengurus Masjid/Langgar
                 </h4>
                 <div v-if="pengurusMasjidData.length > 0" class="space-y-2">
                   <div
                     v-for="p in pengurusMasjidData"
                     :key="p.id"
-                    class="bg-white rounded p-3"
+                    class="bg-white rounded p-2 sm:p-3"
                   >
                     <p class="text-xs text-gray-600 mb-1">{{ p.jabatan }}</p>
-                    <p class="font-medium text-gray-900">{{ p.nama }}</p>
-                    <p v-if="p.telepon" class="text-sm text-gray-600 mt-1">
+                    <p class="font-medium text-sm sm:text-base text-gray-900">
+                      {{ p.nama }}
+                    </p>
+                    <p
+                      v-if="p.telepon"
+                      class="text-xs sm:text-sm text-gray-600 mt-1"
+                    >
                       <i class="fas fa-phone mr-1"></i>{{ p.telepon }}
                     </p>
                   </div>
                 </div>
-                <p v-else class="text-gray-500 text-sm text-center py-3">
+                <p
+                  v-else
+                  class="text-gray-500 text-xs sm:text-sm text-center py-3"
+                >
                   Belum ada data pengurus
                 </p>
               </div>
 
               <!-- Pengurus UPZ -->
-              <div class="bg-green-50 rounded-lg p-4">
-                <h4 class="font-semibold text-green-800 mb-3">Pengurus UPZ</h4>
+              <div class="bg-green-50 rounded-lg p-3 sm:p-4">
+                <h4
+                  class="font-semibold text-sm sm:text-base text-green-800 mb-2 sm:mb-3"
+                >
+                  Pengurus UPZ
+                </h4>
                 <div v-if="pengurusZakatData.length > 0" class="space-y-2">
                   <div
                     v-for="p in pengurusZakatData"
                     :key="p.id"
-                    class="bg-white rounded p-3"
+                    class="bg-white rounded p-2 sm:p-3"
                   >
                     <p class="text-xs text-gray-600 mb-1">{{ p.jabatan }}</p>
-                    <p class="font-medium text-gray-900">{{ p.nama }}</p>
-                    <p v-if="p.telepon" class="text-sm text-gray-600 mt-1">
+                    <p class="font-medium text-sm sm:text-base text-gray-900">
+                      {{ p.nama }}
+                    </p>
+                    <p
+                      v-if="p.telepon"
+                      class="text-xs sm:text-sm text-gray-600 mt-1"
+                    >
                       <i class="fas fa-phone mr-1"></i>{{ p.telepon }}
                     </p>
                   </div>
                 </div>
-                <p v-else class="text-gray-500 text-sm text-center py-3">
+                <p
+                  v-else
+                  class="text-gray-500 text-xs sm:text-sm text-center py-3"
+                >
                   Belum ada data pengurus UPZ
                 </p>
               </div>
@@ -765,12 +867,17 @@
         </div>
 
         <!-- Tab Content: Distribusi -->
-        <div v-show="activeTab === 'distribusi'" class="mb-6">
-          <h3 class="text-lg font-bold text-gray-800 mb-3 pl-2 md:pl-4">
+        <div v-show="activeTab === 'distribusi'" class="mb-4 sm:mb-6">
+          <h3
+            class="text-base sm:text-lg font-bold text-gray-800 mb-2 sm:mb-3 pl-0 sm:pl-2 md:pl-4"
+          >
             <i class="fas fa-hand-holding-usd mr-2 text-blue-600"></i>Data
             Distribusi Zakat
           </h3>
-          <div v-if="modalData?.distribusi?.length > 0" class="px-2 md:px-4">
+          <div
+            v-if="modalData?.distribusi?.length > 0"
+            class="px-0 sm:px-2 md:px-4"
+          >
             <div class="hidden md:block overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -980,11 +1087,19 @@ const stats = ref([
     textColor: "text-indigo-600",
   },
   {
-    label: "Fidyah",
+    label: "Fidyah (Uang)",
     value: "Rp 0",
     icon: "fas fa-moon",
     bgColor: "bg-yellow-100",
     textColor: "text-yellow-600",
+  },
+  {
+    label: "Fidyah (Beras)",
+    value: "0 kg",
+    valueRp: null,
+    icon: "fas fa-leaf",
+    bgColor: "bg-lime-100",
+    textColor: "text-lime-600",
   },
   {
     label: "Infaq",
@@ -1462,7 +1577,7 @@ const parseKgFromKeterangan = (keterangan) => {
 
 const formatJumlah = (t) => {
   if (!t) return "-";
-  if (t.jenis_zakat === "fidyah" && t.bentuk_zakat === "beras") {
+  if (t.jenis_zakat === "fidyah") {
     const hari =
       Number(t.jumlah_hari_fidyah || 0) ||
       parseHariFromKeterangan(t.keterangan);
@@ -1581,8 +1696,19 @@ onMounted(async () => {
         stats.value[5].valueRp = formatCurrency(fitrahBerasRp);
       }
       stats.value[6].value = formatCurrency(d.total_zakat_mal || 0);
-      stats.value[7].value = formatCurrency(d.total_fidyah || 0);
-      stats.value[8].value = formatCurrency(d.total_infaq || 0);
+
+      // Fidyah split into uang and beras
+      const fidyahUang = d.total_fidyah_uang || d.total_fidyah || 0;
+      const fidyahBerasKg = d.total_fidyah_beras_kg || 0;
+      const fidyahBerasRp = d.total_fidyah_beras_rupiah || 0;
+
+      stats.value[7].value = formatCurrency(fidyahUang);
+      stats.value[8].value = `${fidyahBerasKg.toFixed(1)} kg`;
+      if (fidyahBerasRp > 0) {
+        stats.value[8].valueRp = formatCurrency(fidyahBerasRp);
+      }
+
+      stats.value[9].value = formatCurrency(d.total_infaq || 0);
 
       // Set last update
       lastUpdate.value = d.last_update || null;
