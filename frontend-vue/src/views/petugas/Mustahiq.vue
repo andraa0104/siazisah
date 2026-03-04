@@ -725,7 +725,14 @@ const loadAllMustahiqForStats = async () => {
 
 const editMustahiq = (m) => {
   editingId.value = m.id;
-  form.value = { ...m };
+  form.value = {
+    nama: m.nama || "",
+    jenis_penerima: m.jenis_penerima || "",
+    alamat: m.alamat || "",
+    lokasi: m.lokasi || "",
+    rt: String(m.rt || ""),
+    telepon: m.telepon || "",
+  };
   showModal.value = true;
 };
 
@@ -767,10 +774,19 @@ const saveMustahiq = async () => {
     }
   }
 
+  isSaving.value = true;
   try {
+    const payload = {
+      nama: form.value.nama || "",
+      jenis_penerima: form.value.jenis_penerima || "",
+      alamat: form.value.alamat || "",
+      lokasi: form.value.lokasi || "",
+      rt: String(form.value.rt || ""),
+      telepon: form.value.telepon || "",
+    };
     const { data } = editingId.value
-      ? await api.updateMustahiq(editingId.value, form.value)
-      : await api.createMustahiq(form.value);
+      ? await api.updateMustahiq(editingId.value, payload)
+      : await api.createMustahiq(payload);
 
     if (data.success) {
       toast.value = {
@@ -782,9 +798,16 @@ const saveMustahiq = async () => {
       closeModal();
       loadMustahiq();
       loadAllMustahiqForStats();
+    } else {
+      toast.value = {
+        message: data.message || "Gagal menyimpan data",
+        type: "error",
+      };
     }
   } catch (error) {
-    toast.value = { message: "Gagal menyimpan data", type: "error" };
+    const message =
+      error?.response?.data?.message || error?.message || "Unknown error";
+    toast.value = { message, type: "error" };
   } finally {
     isSaving.value = false;
   }
