@@ -171,7 +171,7 @@ onMounted(async () => {
         stats.value[5].value = formatCurrency(d.total_infaq || 0)
         stats.value[6].value = formatNumber(totalMuzakki)
         stats.value[7].value = formatNumber(totalTransaksi)
-        stats.value[8].value = formatNumber(d.total_muzakki || 0)
+        stats.value[8].value = formatNumber(d.total_orang_dizakati || 0)
       }
     }
   } catch (error) {
