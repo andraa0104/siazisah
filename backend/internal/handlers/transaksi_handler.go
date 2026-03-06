@@ -158,12 +158,39 @@ func (h *TransaksiHandler) Create(c *gin.Context) {
 	transaksi.MasjidID = *masjidID.(*int)
 	transaksi.Tahun = time.Now().Year()
 
-	// Hitung total wajib dan infaq tambahan
-	if transaksi.JenisZakat == "fitrah" && transaksi.BentukZakat != nil && *transaksi.BentukZakat == "uang" {
-		transaksi.TotalWajib = transaksi.NominalPerOrang * float64(transaksi.JumlahOrang)
-		if transaksi.TotalDibayar > transaksi.TotalWajib {
-			transaksi.InfaqTambahan = transaksi.TotalDibayar - transaksi.TotalWajib
+	// Hitung total wajib dan infaq tambahan (server-side source of truth)
+	originalTotalWajib := transaksi.TotalWajib
+	transaksi.TotalWajib = 0
+	transaksi.InfaqTambahan = 0
+
+	switch transaksi.JenisZakat {
+	case "fitrah":
+		if transaksi.BentukZakat != nil && *transaksi.BentukZakat == "uang" {
+			transaksi.TotalWajib = transaksi.NominalPerOrang * float64(transaksi.JumlahOrang)
 		}
+	case "mal":
+		if transaksi.NominalHarta != nil && transaksi.PersentaseZakat != nil {
+			transaksi.TotalWajib = (*transaksi.NominalHarta) * (*transaksi.PersentaseZakat) / 100
+		}
+	case "fidyah":
+		if transaksi.BentukZakat != nil && *transaksi.BentukZakat == "uang" {
+			jumlahHari := 0
+			if transaksi.JumlahHariFidyah != nil {
+				jumlahHari = *transaksi.JumlahHariFidyah
+			}
+			if jumlahHari <= 0 {
+				jumlahHari = transaksi.JumlahOrang
+			}
+			transaksi.TotalWajib = transaksi.NominalPerOrang * float64(jumlahHari)
+		}
+	}
+
+	if transaksi.TotalWajib <= 0 && originalTotalWajib > 0 {
+		transaksi.TotalWajib = originalTotalWajib
+	}
+
+	if transaksi.TotalWajib > 0 && transaksi.TotalDibayar > transaksi.TotalWajib {
+		transaksi.InfaqTambahan = transaksi.TotalDibayar - transaksi.TotalWajib
 	}
 
 	if err := h.transaksiRepo.Create(&transaksi); err != nil {
