@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"strings"
+
 	"github.com/yourusername/siazisah/backend/internal/models"
 )
 
@@ -17,7 +18,7 @@ func NewMustahiqRepository(db *sql.DB) *MustahiqRepository {
 func (r *MustahiqRepository) Create(mustahiq *models.Mustahiq) error {
 	query := `INSERT INTO mustahiq (masjid_id, nama, jenis_penerima, alamat, lokasi, rt, telepon, keterangan, is_active) 
 			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	result, err := r.DB.Exec(query, mustahiq.MasjidID, mustahiq.Nama, mustahiq.JenisPenerima, 
+	result, err := r.DB.Exec(query, mustahiq.MasjidID, mustahiq.Nama, mustahiq.JenisPenerima,
 		mustahiq.Alamat, mustahiq.Lokasi, mustahiq.RT, mustahiq.Telepon, mustahiq.Keterangan, mustahiq.IsActive)
 	if err != nil {
 		return err
@@ -180,7 +181,7 @@ func (r *MustahiqRepository) CountByMasjidIDFiltered(masjidID int, jenisPenerima
 
 func (r *MustahiqRepository) Update(mustahiq *models.Mustahiq) error {
 	query := `UPDATE mustahiq SET nama=?, jenis_penerima=?, alamat=?, lokasi=?, rt=?, telepon=?, keterangan=?, is_active=? WHERE id=?`
-	_, err := r.DB.Exec(query, mustahiq.Nama, mustahiq.JenisPenerima, mustahiq.Alamat, 
+	_, err := r.DB.Exec(query, mustahiq.Nama, mustahiq.JenisPenerima, mustahiq.Alamat,
 		mustahiq.Lokasi, mustahiq.RT, mustahiq.Telepon, mustahiq.Keterangan, mustahiq.IsActive, mustahiq.ID)
 	return err
 }
