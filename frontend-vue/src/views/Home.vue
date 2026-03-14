@@ -107,10 +107,14 @@
                       <div class="kategori-item">
                         <h5>Penerima</h5>
                         <ul>
-                          <li>Fakir dan Miskin</li>
-                          <li>Ibu hamil & menyusui</li>
-                          <li>Janda & anak yatim</li>
-                          <li>Lansia terlantar</li>
+                          <li>Fakir</li>
+                          <li>Miskin</li>
+                          <li>Amil</li>
+                          <li>Muallaf</li>
+                          <li>Riqab</li>
+                          <li>Gharim</li>
+                          <li>Fisabilillah</li>
+                          <li>Ibnu Sabil</li>
                         </ul>
                       </div>
                     </div>
@@ -200,10 +204,14 @@
                       <div class="kategori-item">
                         <h5>Penerima Fidyah</h5>
                         <ul>
-                          <li>Fakir dan Miskin</li>
-                          <li>Anak yatim piatu</li>
-                          <li>Orang terlantar</li>
-                          <li>Dalam kondisi darurat</li>
+                          <li>Fakir</li>
+                          <li>Miskin</li>
+                          <li>Amil</li>
+                          <li>Muallaf</li>
+                          <li>Riqab</li>
+                          <li>Gharim</li>
+                          <li>Fisabilillah</li>
+                          <li>Ibnu Sabil</li>
                         </ul>
                       </div>
                     </div>
