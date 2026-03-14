@@ -259,34 +259,73 @@
     <section id="about" class="about section-bg">
       <div class="container" data-aos="fade-up">
         <div class="section-title">
-          <h2>Hadist</h2>
-          <h3>Hadist Keutamaan Zakat Fitrah di <span>Bulan Ramadhan</span></h3>
-          <br />
-          <h1
-            style="
-              line-height: 150%;
-              font-family: &quot;Traditional Arabic&quot;;
-              font-size: 22px;
-            "
-          >
-            فَرَضَ رَسُولُ اللَّهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ زَكَاةَ
-            الْفِطْرِ طُهْرَةً لِلصَّائِمِ مِنَ اللَّغْوِ وَالرَّفَثِ،
-            وَطُعْمَةً لِلْمَسَاكِينِ، فَمَنْ أَدَّاهَا قَبْلَ الصَّلَاةِ فَهِيَ
-            زَكَاةٌ مَقْبُولَةٌ، وَمَنْ أَدَّاهَا بَعْدَ الصَّلَاةِ فَهِيَ
-            صَدَقَةٌ مِنَ الصَّدَقَاتِ
-          </h1>
-          <p>
-            <i
-              >Dari Ibnu Abbas RA, ia berkata, Rasulullah SAW mewajibkan zakat
-              fitrah untuk membersihkan orang yang berpuasa dari perkataan
-              sia-sia dan perkataan kotor, dan sebagai makanan bagi orang-orang
-              miskin. Barang siapa yang menunaikannya sebelum shalat (Idul
-              Fitri), berarti ini merupakan zakat yang diterima, dan barang
-              siapa yang menunaikannya setelah shalat (idul fitri) berati hal
-              itu merupakan sedekah biasa". (HR. Abu Daud, Ibnu Majah, dan Daru
-              Quthni)</i
-            >
-          </p>
+          <h2>Dasar Kewajiban Zakat</h2>
+          <h3>Dalil Al-Qur'an dan Hadist tentang <span>Zakat</span></h3>
+        </div>
+
+        <div
+          class="dasar-slider swiper-container"
+          data-aos="fade-up"
+          data-aos-delay="100"
+        >
+          <div class="swiper-wrapper">
+            <div class="swiper-slide">
+              <div class="dasar-card">
+                <div class="dasar-title">Surat Al-Baqarah Ayat 43</div>
+                <div class="dasar-arabic">
+                  وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ
+                  الرَّاكِعِينَ
+                </div>
+                <div class="dasar-translation">
+                  Dan laksanakanlah salat, tunaikanlah zakat, dan rukuklah
+                  beserta orang-orang yang rukuk.
+                </div>
+              </div>
+            </div>
+
+            <div class="swiper-slide">
+              <div class="dasar-card">
+                <div class="dasar-title">Surat At-Taubah Ayat 103</div>
+                <div class="dasar-arabic">
+                  خُذْ مِنْ أَمْوَالِهِمْ صَدَقَةً تُطَهِّرُهُمْ وَتُزَكِّيهِمْ
+                  بِهَا وَصَلِّ عَلَيْهِمْ إِنَّ صَلَاتَكَ سَكَنٌ لَّهُمْ
+                  وَاللَّهُ سَمِيعٌ عَلِيمٌ
+                </div>
+                <div class="dasar-translation">
+                  Ambillah zakat dari sebagian harta mereka, dengan zakat itu
+                  kamu membersihkan dan menyucikan mereka dan berdoalah untuk
+                  mereka. Sesungguhnya doamu itu (menjadi) ketenteraman bagi
+                  mereka. Allah Maha Mendengar, Maha Mengetahui.
+                </div>
+              </div>
+            </div>
+
+            <div class="swiper-slide">
+              <div class="dasar-card">
+                <div class="dasar-title">
+                  Hadist Keutamaan Zakat Fitrah di Bulan Ramadhan
+                </div>
+                <div class="dasar-arabic">
+                  فَرَضَ رَسُولُ اللَّهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ زَكَاةَ
+                  الْفِطْرِ طُهْرَةً لِلصَّائِمِ مِنَ اللَّغْوِ وَالرَّفَثِ،
+                  وَطُعْمَةً لِلْمَسَاكِينِ، فَمَنْ أَدَّاهَا قَبْلَ الصَّلَاةِ
+                  فَهِيَ زَكَاةٌ مَقْبُولَةٌ، وَمَنْ أَدَّاهَا بَعْدَ الصَّلَاةِ
+                  فَهِيَ صَدَقَةٌ مِنَ الصَّدَقَاتِ
+                </div>
+                <div class="dasar-translation">
+                  Dari Ibnu Abbas RA, ia berkata, Rasulullah SAW mewajibkan
+                  zakat fitrah untuk membersihkan orang yang berpuasa dari
+                  perkataan sia-sia dan perkataan kotor, dan sebagai makanan
+                  bagi orang-orang miskin. Barang siapa yang menunaikannya
+                  sebelum shalat (Idul Fitri), berarti ini merupakan zakat yang
+                  diterima, dan barang siapa yang menunaikannya setelah shalat
+                  (Idul Fitri) berarti hal itu merupakan sedekah biasa. (HR. Abu
+                  Daud, Ibnu Majah, dan Daru Quthni)
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-pagination"></div>
         </div>
       </div>
     </section>
@@ -369,7 +408,7 @@
               </div>
             </template>
 
-            <template v-else-if="activeTab === 'mal' || activeTab === 'fidyah'">
+            <template v-else-if="activeTab === 'mal'">
               <div class="col-lg-6 col-md-6">
                 <div class="count-box">
                   <i class="bi bi-people-fill"></i>
@@ -378,6 +417,30 @@
                 </div>
               </div>
               <div class="col-lg-6 col-md-6 mt-5 mt-md-0">
+                <div class="count-box">
+                  <i class="bi bi-cash-coin"></i>
+                  <span>Rp {{ formatCurrency(currentStats.uang) }}</span>
+                  <p>Dana Terkumpul</p>
+                </div>
+              </div>
+            </template>
+
+            <template v-else-if="activeTab === 'fidyah'">
+              <div class="col-lg-4 col-md-6">
+                <div class="count-box">
+                  <i class="bi bi-people-fill"></i>
+                  <span>{{ currentStats.muzakki }}</span>
+                  <p>Muzakki (Pembayar)</p>
+                </div>
+              </div>
+              <div class="col-lg-4 col-md-6 mt-5 mt-md-0">
+                <div class="count-box">
+                  <i class="bi bi-bag-check"></i>
+                  <span>{{ currentStats.beras }} kg</span>
+                  <p>Beras Terkumpul</p>
+                </div>
+              </div>
+              <div class="col-lg-4 col-md-6 mt-5 mt-lg-0">
                 <div class="count-box">
                   <i class="bi bi-cash-coin"></i>
                   <span>Rp {{ formatCurrency(currentStats.uang) }}</span>
@@ -692,6 +755,23 @@ const initSwiper = () => {
       },
     });
     console.log("✓ Testimonials slider initialized");
+
+    // Dasar kewajiban zakat slider
+    new Swiper(".dasar-slider", {
+      speed: 600,
+      loop: true,
+      autoplay: {
+        delay: 6000,
+        disableOnInteraction: false,
+      },
+      slidesPerView: 1,
+      pagination: {
+        el: ".dasar-slider .swiper-pagination",
+        type: "bullets",
+        clickable: true,
+      },
+    });
+    console.log("✓ Dasar kewajiban zakat slider initialized");
 
     // Zakat types slider
     const zakatSliderEl = document.querySelector(".zakat-slider");
@@ -1071,6 +1151,64 @@ onUnmounted(() => {
 }
 
 :global(.testimonials-slider .swiper-pagination-bullet-active) {
+  background: #667eea;
+  opacity: 1;
+}
+
+/* Dasar Kewajiban Zakat Slider */
+.dasar-slider {
+  margin-top: 10px;
+}
+
+.dasar-slider :global(.swiper-slide) {
+  align-items: stretch;
+  justify-content: center;
+}
+
+.dasar-card {
+  background: white;
+  border-radius: 16px;
+  padding: 28px 32px;
+  max-width: 900px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(14, 21, 47, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.12);
+  text-align: center;
+}
+
+.dasar-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 14px;
+}
+
+.dasar-arabic {
+  font-family: "Traditional Arabic", serif;
+  font-size: 26px;
+  line-height: 1.7;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.dasar-translation {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #4b5563;
+  font-style: italic;
+}
+
+:global(.dasar-slider .swiper-pagination) {
+  position: relative;
+  margin-top: 20px;
+}
+
+:global(.dasar-slider .swiper-pagination-bullet) {
+  background: #667eea;
+  opacity: 0.5;
+}
+
+:global(.dasar-slider .swiper-pagination-bullet-active) {
   background: #667eea;
   opacity: 1;
 }

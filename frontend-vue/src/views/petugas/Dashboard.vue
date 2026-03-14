@@ -123,7 +123,6 @@ const stats = ref([
   { label: 'Fidyah Beras', value: '0 Kg', icon: 'fas fa-seedling', gradient: 'from-lime-500 to-lime-600' },
   { label: 'Total Infaq', value: 'Rp 0', icon: 'fas fa-heart', gradient: 'from-purple-500 to-purple-600' },
   { label: 'Total Muzakki', value: '0', icon: 'fas fa-users', gradient: 'from-teal-500 to-teal-600' },
-  { label: 'Total Transaksi', value: '0', icon: 'fas fa-receipt', gradient: 'from-rose-500 to-rose-600' },
   { label: 'Total Dizakati', value: '0', icon: 'fas fa-user-check', gradient: 'from-sky-500 to-sky-600' }
 ])
 
@@ -157,7 +156,6 @@ onMounted(async () => {
         const transaksi = Array.isArray(transaksiPayload?.items)
           ? transaksiPayload.items
           : (Array.isArray(transaksiPayload) ? transaksiPayload : [])
-        const totalTransaksi = transaksi.length
         const totalMuzakki = new Set(
           transaksi
             .map((item) => String(item?.muzakki_nama || '').trim().toLowerCase())
@@ -170,8 +168,7 @@ onMounted(async () => {
         stats.value[4].value = `${Number(d.total_fidyah_beras_kg || 0).toLocaleString('id-ID')} Kg`
         stats.value[5].value = formatCurrency(d.total_infaq || 0)
         stats.value[6].value = formatNumber(totalMuzakki)
-        stats.value[7].value = formatNumber(totalTransaksi)
-        stats.value[8].value = formatNumber(d.total_muzakki || 0)
+        stats.value[7].value = formatNumber(d.total_orang_dizakati || 0)
       }
     }
   } catch (error) {

@@ -39,7 +39,8 @@
 
       <main class="flex-1 overflow-y-auto p-4 md:p-6">
         <div class="bg-white rounded-xl shadow-md p-4 mb-4">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="space-y-3 md:space-y-0 md:grid md:grid-cols-4 md:gap-3">
+            <!-- Filter Jenis Zakat -->
             <div>
               <label class="block text-xs text-gray-500 mb-1"
                 >Filter Jenis Zakat</label
@@ -57,6 +58,7 @@
               </select>
             </div>
 
+            <!-- Bentuk Fitrah/Fidyah -->
             <div>
               <label class="block text-xs text-gray-500 mb-1"
                 >Bentuk (Fitrah/Fidyah)</label
@@ -73,29 +75,32 @@
               </select>
             </div>
 
+            <!-- Cari Muzakki -->
             <div class="md:col-span-2">
               <label class="block text-xs text-gray-500 mb-1"
                 >Cari Muzakki</label
               >
-              <div class="flex gap-2">
+              <div class="flex flex-col sm:flex-row gap-2">
                 <input
                   v-model="filters.q"
                   @keyup.enter="applyFilters"
                   placeholder="Ketik nama muzakki..."
                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
                 />
-                <button
-                  @click="applyFilters"
-                  class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-                >
-                  Cari
-                </button>
-                <button
-                  @click="resetFilters"
-                  class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200"
-                >
-                  Reset
-                </button>
+                <div class="flex gap-2">
+                  <button
+                    @click="applyFilters"
+                    class="flex-1 sm:flex-none px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 font-medium"
+                  >
+                    Cari
+                  </button>
+                  <button
+                    @click="resetFilters"
+                    class="flex-1 sm:flex-none px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 font-medium"
+                  >
+                    Reset
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -181,10 +186,10 @@
                     {{ formatCurrency(t.total_dibayar) }}
                   </div>
                   <div
-                    v-if="t.infaq_tambahan > 0"
+                    v-if="getTotalInfaqDisplay(t) > 0"
                     class="text-xs text-blue-600"
                   >
-                    +Infaq {{ formatCurrency(t.infaq_tambahan) }}
+                    +Infaq {{ formatCurrency(getTotalInfaqDisplay(t)) }}
                   </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
@@ -258,8 +263,8 @@
                     : "-"
                 }}
               </div>
-              <div v-if="t.infaq_tambahan > 0" class="text-xs text-blue-600">
-                +Infaq {{ formatCurrency(t.infaq_tambahan) }}
+              <div v-if="getTotalInfaqDisplay(t) > 0" class="text-xs text-blue-600">
+                +Infaq {{ formatCurrency(getTotalInfaqDisplay(t)) }}
               </div>
             </div>
             <div class="flex gap-2">
@@ -852,6 +857,24 @@
               >
             </div>
             <div
+              v-if="selectedTransaction.bentuk_zakat === 'uang'"
+              class="flex justify-between"
+            >
+              <span class="text-gray-600">Jumlah Orang:</span>
+              <span class="font-medium text-gray-900"
+                >{{ selectedTransaction.jumlah_orang }} orang</span
+              >
+            </div>
+            <div
+              v-if="selectedTransaction.bentuk_zakat === 'uang'"
+              class="border-t border-gray-200 pt-2 flex justify-between"
+            >
+              <span class="text-sm font-semibold text-green-700">Total Zakat Wajib:</span>
+              <span class="font-bold text-green-700">{{
+                formatCurrency(calculateTotalFitrahUang(selectedTransaction))
+              }}</span>
+            </div>
+            <div
               v-if="selectedTransaction.bentuk_zakat === 'beras'"
               class="flex justify-between"
             >
@@ -961,6 +984,31 @@
               </div>
             </div>
 
+            <!-- Breakdown Total Dibayar dan Infaq (hanya untuk Mal) -->
+            <!-- <div class="bg-white rounded-lg p-3 space-y-2 border-l-4 border-blue-500">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Total Dibayar:</span>
+                <span class="font-bold text-gray-900">{{
+                  formatCurrency(selectedTransaction.total_dibayar)
+                }}</span>
+              </div>
+              <div
+                v-if="selectedTransaction.total_dibayar > ((selectedTransaction.nominal_harta * selectedTransaction.persentase_zakat) / 100)"
+                class="border-t border-gray-200 pt-2"
+              >
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-semibold text-green-700"
+                    >Infaq:</span
+                  >
+                  <span class="font-bold text-green-700">{{
+                    formatCurrency(
+                      selectedTransaction.total_dibayar - ((selectedTransaction.nominal_harta * selectedTransaction.persentase_zakat) / 100)
+                    )
+                  }}</span>
+                </div>
+              </div>
+            </div> -->
+
             <!-- Informasi Tambahan -->
             <div class="bg-blue-100 rounded-lg p-3">
               <div class="flex items-start">
@@ -1048,6 +1096,24 @@
               }}</span>
             </div>
             <div
+              v-if="selectedTransaction.bentuk_zakat === 'uang'"
+              class="flex justify-between"
+            >
+              <span class="text-gray-600">Jumlah Hari:</span>
+              <span class="font-medium text-gray-900">{{
+                selectedTransaction.jumlah_hari_fidyah || 0
+              }} hari</span>
+            </div>
+            <div
+              v-if="selectedTransaction.bentuk_zakat === 'uang'"
+              class="border-t border-gray-200 pt-2 flex justify-between"
+            >
+              <span class="text-sm font-semibold text-yellow-700">Total Zakat Wajib:</span>
+              <span class="font-bold text-yellow-700">{{
+                formatCurrency(calculateTotalFidyahUang(selectedTransaction))
+              }}</span>
+            </div>
+            <div
               v-if="selectedTransaction.bentuk_zakat === 'beras'"
               class="flex justify-between"
             >
@@ -1120,13 +1186,13 @@
             }}</span>
           </div>
           <div
-            v-if="selectedTransaction.infaq_tambahan > 0"
+            v-if="getTotalInfaqDisplay(selectedTransaction) > 0"
             class="mt-2 pt-2 border-t border-green-200"
           >
             <div class="flex justify-between items-center">
               <span class="text-sm text-blue-700">Infaq Tambahan:</span>
               <span class="text-lg font-semibold text-blue-700">{{
-                formatCurrency(selectedTransaction.infaq_tambahan)
+                formatCurrency(getTotalInfaqDisplay(selectedTransaction))
               }}</span>
             </div>
           </div>
@@ -1476,6 +1542,56 @@ const getZakatBadge = (jenis) => {
     infaq: "bg-purple-100 text-purple-800",
   };
   return badges[jenis] || "bg-gray-100 text-gray-800";
+};
+
+// Calculate infaq from surplus payment for zakat mal
+const calculateMalInfaq = (transaction) => {
+  if (!transaction || transaction.jenis_zakat !== "mal") return 0;
+  
+  const zakatWajib = (transaction.nominal_harta * transaction.persentase_zakat) / 100;
+  const totalBayar = Number(transaction.total_dibayar || 0);
+  
+  if (totalBayar > zakatWajib) {
+    return totalBayar - zakatWajib;
+  }
+  return 0;
+};
+
+// Get total infaq to display (either from infaq_tambahan or calculated from mal surplus)
+const getTotalInfaqDisplay = (transaction) => {
+  if (!transaction) return 0;
+  
+  // If there's explicit infaq_tambahan, use it
+  if (transaction.infaq_tambahan && transaction.infaq_tambahan > 0) {
+    return transaction.infaq_tambahan;
+  }
+  
+  // For mal, calculate from surplus payment
+  if (transaction.jenis_zakat === "mal") {
+    return calculateMalInfaq(transaction);
+  }
+  
+  return 0;
+};
+
+// Calculate total fitrah uang (per orang × jumlah orang)
+const calculateTotalFitrahUang = (transaction) => {
+  if (!transaction || transaction.jenis_zakat !== "fitrah" || transaction.bentuk_zakat !== "uang") {
+    return 0;
+  }
+  
+  const kelasKey = `kelas${transaction.kelas_zakat}`;
+  const perJiwa = kadarZakat.value[kelasKey] || 0;
+  return perJiwa * (transaction.jumlah_orang || 0);
+};
+
+// Calculate total fidyah uang (per hari × jumlah hari)
+const calculateTotalFidyahUang = (transaction) => {
+  if (!transaction || transaction.jenis_zakat !== "fidyah" || transaction.bentuk_zakat !== "uang") {
+    return 0;
+  }
+  
+  return kadarZakat.value.fidyahPerHari * (transaction.jumlah_hari_fidyah || 0);
 };
 
 const getDetail = (t) => {

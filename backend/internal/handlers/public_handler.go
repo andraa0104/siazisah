@@ -63,8 +63,15 @@ func (h *PublicHandler) GetPublicDashboard(c *gin.Context) {
 	// Total mustahiq
 	h.DB.QueryRow("SELECT COUNT(*) FROM mustahiq WHERE is_active = 1").Scan(&stats.TotalMustahiq)
 
-	// Total orang yang dizakati (jumlah orang dari transaksi zakat)
-	h.DB.QueryRow("SELECT COALESCE(SUM(jumlah_orang), 0) FROM transaksi_zakat").Scan(&stats.TotalOrangDizakati)
+	// Total orang yang dizakati (fitrah by jumlah_orang, mal/fidyah count per transaksi, exclude infaq)
+	h.DB.QueryRow(`
+		SELECT COALESCE(SUM(CASE
+			WHEN jenis_zakat = 'fitrah' THEN jumlah_orang
+			WHEN jenis_zakat IN ('mal', 'fidyah') THEN 1
+			ELSE 0
+		END), 0)
+		FROM transaksi_zakat
+	`).Scan(&stats.TotalOrangDizakati)
 
 	// Total zakat fitrah (semua bentuk)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE jenis_zakat = 'fitrah'").Scan(&stats.TotalZakatFitrah)
@@ -215,7 +222,15 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 	// Get stats
 	h.DB.QueryRow("SELECT COUNT(*) FROM muzakki WHERE masjid_id = ?", id).Scan(&stats.TotalMuzakki)
 	h.DB.QueryRow("SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ?", id).Scan(&stats.TotalMustahiq)
-	h.DB.QueryRow("SELECT COALESCE(SUM(jumlah_orang), 0) FROM transaksi_zakat WHERE masjid_id = ?", id).Scan(&stats.TotalOrangDizakati)
+	h.DB.QueryRow(`
+		SELECT COALESCE(SUM(CASE
+			WHEN jenis_zakat = 'fitrah' THEN jumlah_orang
+			WHEN jenis_zakat IN ('mal', 'fidyah') THEN 1
+			ELSE 0
+		END), 0)
+		FROM transaksi_zakat
+		WHERE masjid_id = ?
+	`, id).Scan(&stats.TotalOrangDizakati)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah'", id).Scan(&stats.TotalZakatFitrah)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'uang'", id).Scan(&stats.TotalZakatFitrahUang)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'beras'", id).Scan(&stats.TotalZakatFitrahBerasRp)
