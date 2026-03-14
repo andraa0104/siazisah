@@ -30,9 +30,7 @@
                       <div class="space-y-3 md:space-y-0 md:grid md:grid-cols-4 md:gap-3">
             <!-- Filter Jenis Zakat -->
             <div>
-              <label class="block text-xs text-gray-500 mb-1"
-                >Filter Jenis Zakat</label
-              >
+              <label class="block text-xs text-gray-500 mb-1">Filter Jenis Zakat</label>
               <select
                 v-model="filters.jenis_zakat"
                 @change="onJenisFilterChange"
@@ -48,9 +46,7 @@
 
             <!-- Bentuk Fitrah/Fidyah -->
             <div>
-              <label class="block text-xs text-gray-500 mb-1"
-                >Bentuk (Fitrah/Fidyah)</label
-              >
+              <label class="block text-xs text-gray-500 mb-1">Bentuk (Fitrah/Fidyah)</label>
               <select
                 v-model="filters.bentuk_zakat"
                 :disabled="!showBentukFilter"
@@ -65,9 +61,7 @@
 
             <!-- Cari Muzakki -->
             <div class="md:col-span-2">
-              <label class="block text-xs text-gray-500 mb-1"
-                >Cari Muzakki</label
-              >
+              <label class="block text-xs text-gray-500 mb-1">Cari Muzakki</label>
               <div class="flex flex-col sm:flex-row gap-2">
                 <input
                   v-model="filters.q"
