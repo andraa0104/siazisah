@@ -70,7 +70,7 @@
       <div v-if="lastUpdate" class="text-center mb-6">
         <p class="text-sm text-gray-500">
           <i class="fas fa-clock mr-1"></i>Data terakhir diperbarui:
-          <span class="font-medium">{{ formatDate(lastUpdate) }}</span>
+          <span class="font-medium">{{ formatDateTime(lastUpdate) }}</span>
         </p>
       </div>
 
@@ -1546,6 +1546,17 @@ const formatCurrency = (amount) => {
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString("id-ID");
+};
+
+const formatDateTime = (date) => {
+  return new Date(date).toLocaleString("id-ID", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
 };
 
 const getJenisBadgeClass = (jenis) => {
