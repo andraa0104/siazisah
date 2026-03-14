@@ -76,8 +76,17 @@ func (r *PengurusRepository) GetPengurusMasjidByMasjidID(masjidID int) ([]models
 
 // Pengurus Zakat (UPZ) methods
 func (r *PengurusRepository) SavePengurusZakat(pengurus *models.PengurusZakat) error {
+	// If ID is provided, update existing record
+	if pengurus.ID > 0 {
+		updateQuery := `UPDATE pengurus_zakat SET nama=?, jabatan=?, telepon=?, alamat=? 
+		                WHERE id=?`
+		_, err := r.DB.Exec(updateQuery, pengurus.Nama, pengurus.Jabatan, pengurus.Telepon,
+			pengurus.Alamat, pengurus.ID)
+		return err
+	}
+
+	// For Anggota UPZ, always allow multiple members
 	if pengurus.Jabatan == "Anggota UPZ" {
-		// For Anggota UPZ, always insert new since multiple members allowed
 		insertQuery := `INSERT INTO pengurus_zakat (masjid_id, nama, jabatan, telepon, alamat) 
 		                VALUES (?, ?, ?, ?, ?)`
 		result, err := r.DB.Exec(insertQuery, pengurus.MasjidID, pengurus.Nama,
@@ -90,7 +99,7 @@ func (r *PengurusRepository) SavePengurusZakat(pengurus *models.PengurusZakat) e
 		return nil
 	}
 
-	// For other jabatan (like Ketua UPZ), check if exists by jabatan
+	// For other jabatan (like Ketua UPZ), check if exists by jabatan and update if exists
 	var existingID int
 	checkQuery := `SELECT id FROM pengurus_zakat WHERE masjid_id=? AND jabatan=?`
 	err := r.DB.QueryRow(checkQuery, pengurus.MasjidID, pengurus.Jabatan).Scan(&existingID)

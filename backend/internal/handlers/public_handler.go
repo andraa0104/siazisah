@@ -62,7 +62,7 @@ func (h *PublicHandler) GetPublicDashboard(c *gin.Context) {
 	h.DB.QueryRow("SELECT COUNT(*) FROM muzakki").Scan(&stats.TotalMuzakki)
 
 	// Total mustahiq
-	h.DB.QueryRow("SELECT COUNT(*) FROM mustahiq WHERE is_active = 1").Scan(&stats.TotalMustahiq)
+	h.DB.QueryRow("SELECT COUNT(*) FROM mustahiq").Scan(&stats.TotalMustahiq)
 
 	// Total orang yang dizakati (fitrah by jumlah_orang, mal/fidyah count per transaksi, exclude infaq)
 	h.DB.QueryRow(`
@@ -129,7 +129,6 @@ func (h *PublicHandler) GetPublicDashboard(c *gin.Context) {
 	jenisRows, err := h.DB.Query(`
 		SELECT jenis_penerima, COUNT(*) as total
 		FROM mustahiq
-		WHERE is_active = 1
 		GROUP BY jenis_penerima
 		ORDER BY jenis_penerima ASC
 	`)

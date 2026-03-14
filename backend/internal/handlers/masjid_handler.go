@@ -730,7 +730,6 @@ func (h *MasjidHandler) PrintMustahiqGlobalSummary(c *gin.Context) {
 
 	query := `SELECT masjid_id, COALESCE(jenis_penerima, ''), COUNT(*)
 		FROM mustahiq
-		WHERE is_active = 1
 		GROUP BY masjid_id, COALESCE(jenis_penerima, '')`
 
 	resultRows, err := h.masjidRepo.DB.Query(query)

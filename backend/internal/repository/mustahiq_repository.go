@@ -45,7 +45,7 @@ func (r *MustahiqRepository) FindByID(id int) (*models.Mustahiq, error) {
 
 func (r *MustahiqRepository) GetByMasjidID(masjidID int) ([]models.Mustahiq, error) {
 	query := `SELECT id, masjid_id, nama, jenis_penerima, alamat, lokasi, rt, telepon, keterangan, is_active, created_at, updated_at 
-			  FROM mustahiq WHERE masjid_id = ? AND is_active = 1 ORDER BY nama ASC`
+			  FROM mustahiq WHERE masjid_id = ? ORDER BY nama ASC`
 	rows, err := r.DB.Query(query, masjidID)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (r *MustahiqRepository) GetByMasjidID(masjidID int) ([]models.Mustahiq, err
 
 func (r *MustahiqRepository) GetByMasjidIDPaginated(masjidID, limit, offset int) ([]models.Mustahiq, error) {
 	query := `SELECT id, masjid_id, nama, jenis_penerima, alamat, lokasi, rt, telepon, keterangan, is_active, created_at, updated_at
-			  FROM mustahiq WHERE masjid_id = ? AND is_active = 1 ORDER BY nama ASC LIMIT ? OFFSET ?`
+			  FROM mustahiq WHERE masjid_id = ? ORDER BY nama ASC LIMIT ? OFFSET ?`
 	rows, err := r.DB.Query(query, masjidID, limit, offset)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (r *MustahiqRepository) GetByMasjidIDPaginated(masjidID, limit, offset int)
 
 func (r *MustahiqRepository) CountByMasjidID(masjidID int) (int, error) {
 	var total int
-	query := `SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ? AND is_active = 1`
+	query := `SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ?`
 	if err := r.DB.QueryRow(query, masjidID).Scan(&total); err != nil {
 		return 0, err
 	}
@@ -99,7 +99,7 @@ func (r *MustahiqRepository) CountByMasjidID(masjidID int) (int, error) {
 }
 
 func (r *MustahiqRepository) buildFilterClause(masjidID int, jenisPenerima, q string) (string, []interface{}) {
-	whereClause := " WHERE masjid_id = ? AND is_active = 1"
+	whereClause := " WHERE masjid_id = ?"
 	args := []interface{}{masjidID}
 
 	if strings.TrimSpace(jenisPenerima) != "" {
