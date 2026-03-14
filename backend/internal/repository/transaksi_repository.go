@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"strings"
-	"github.com/yourusername/siazisah/internal/models"
+	"github.com/yourusername/siazisah/backend/internal/models"
 )
 
 type TransaksiZakatRepository struct {

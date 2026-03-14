@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yourusername/siazisah/internal/models"
+	"github.com/yourusername/siazisah/backend/internal/models"
 )
 
 type PublicHandler struct {

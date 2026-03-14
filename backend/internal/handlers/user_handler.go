@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yourusername/siazisah/internal/models"
-	"github.com/yourusername/siazisah/internal/repository"
-	"github.com/yourusername/siazisah/internal/utils"
+	"github.com/yourusername/siazisah/backend/internal/models"
+	"github.com/yourusername/siazisah/backend/internal/repository"
+	"github.com/yourusername/siazisah/backend/internal/utils"
 )
 
 type UserHandler struct {

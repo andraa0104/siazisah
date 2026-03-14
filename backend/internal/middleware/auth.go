@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/yourusername/siazisah/config"
+	"github.com/yourusername/siazisah/backend/config"
 )
 
 type Claims struct {

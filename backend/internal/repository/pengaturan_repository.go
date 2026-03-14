@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/yourusername/siazisah/internal/models"
+	"github.com/yourusername/siazisah/backend/internal/models"
 )
 
 type PengaturanRepository struct {

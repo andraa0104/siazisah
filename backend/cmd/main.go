@@ -4,13 +4,14 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yourusername/siazisah/config"
-	"github.com/yourusername/siazisah/internal/handlers"
-	"github.com/yourusername/siazisah/internal/middleware"
-	"github.com/yourusername/siazisah/internal/repository"
+	"github.com/yourusername/siazisah/backend/config"
+	"github.com/yourusername/siazisah/backend/internal/handlers"
+	"github.com/yourusername/siazisah/backend/internal/middleware"
+	"github.com/yourusername/siazisah/backend/internal/repository"
 )
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	config.LoadConfig()
 
 	db, err := config.InitDB()
@@ -42,6 +43,7 @@ func main() {
 	publicHandler := handlers.NewPublicHandler(db)
 
 	router := gin.Default()
+	router.SetTrustedProxies([]string{"127.0.0.1"})
 	router.Use(middleware.CORSMiddleware())
 
 	// Public routes (no authentication)

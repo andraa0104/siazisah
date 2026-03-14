@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yourusername/siazisah/internal/models"
-	"github.com/yourusername/siazisah/internal/repository"
+	"github.com/yourusername/siazisah/backend/internal/models"
+	"github.com/yourusername/siazisah/backend/internal/repository"
 )
 
 type PengaturanHandler struct {

@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/yourusername/siazisah/config"
-	"github.com/yourusername/siazisah/internal/middleware"
+	"github.com/yourusername/siazisah/backend/config"
+	"github.com/yourusername/siazisah/backend/internal/middleware"
 	"golang.org/x/crypto/bcrypt"
 )
 

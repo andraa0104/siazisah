@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 
-	"github.com/yourusername/siazisah/internal/models"
+	"github.com/yourusername/siazisah/backend/internal/models"
 )
 
 type PengurusRepository struct {
@@ -20,12 +20,12 @@ func (r *PengurusRepository) SavePengurusMasjid(pengurus *models.PengurusMasjid)
 	var existingID int
 	checkQuery := `SELECT id FROM pengurus_masjid WHERE masjid_id=? AND jabatan=?`
 	err := r.DB.QueryRow(checkQuery, pengurus.MasjidID, pengurus.Jabatan).Scan(&existingID)
-	
+
 	if err == sql.ErrNoRows {
 		// Insert new
 		insertQuery := `INSERT INTO pengurus_masjid (masjid_id, nama, jabatan, telepon, alamat) 
 		                VALUES (?, ?, ?, ?, ?)`
-		result, err := r.DB.Exec(insertQuery, pengurus.MasjidID, pengurus.Nama, 
+		result, err := r.DB.Exec(insertQuery, pengurus.MasjidID, pengurus.Nama,
 			pengurus.Jabatan, pengurus.Telepon, pengurus.Alamat)
 		if err != nil {
 			return err
@@ -36,11 +36,11 @@ func (r *PengurusRepository) SavePengurusMasjid(pengurus *models.PengurusMasjid)
 	} else if err != nil {
 		return err
 	}
-	
+
 	// Update existing
 	updateQuery := `UPDATE pengurus_masjid SET nama=?, telepon=?, alamat=? 
 	                WHERE id=?`
-	_, err = r.DB.Exec(updateQuery, pengurus.Nama, pengurus.Telepon, 
+	_, err = r.DB.Exec(updateQuery, pengurus.Nama, pengurus.Telepon,
 		pengurus.Alamat, existingID)
 	pengurus.ID = existingID
 	return err
@@ -54,7 +54,7 @@ func (r *PengurusRepository) GetPengurusMasjidByMasjidID(masjidID int) ([]models
 	            WHEN 'Sekretaris' THEN 2 
 	            ELSE 3 
 	          END`
-	
+
 	rows, err := r.DB.Query(query, masjidID)
 	if err != nil {
 		return []models.PengurusMasjid{}, nil
@@ -64,7 +64,7 @@ func (r *PengurusRepository) GetPengurusMasjidByMasjidID(masjidID int) ([]models
 	var pengurusList []models.PengurusMasjid
 	for rows.Next() {
 		var p models.PengurusMasjid
-		err := rows.Scan(&p.ID, &p.MasjidID, &p.Nama, &p.Jabatan, &p.Telepon, 
+		err := rows.Scan(&p.ID, &p.MasjidID, &p.Nama, &p.Jabatan, &p.Telepon,
 			&p.Alamat, &p.CreatedAt, &p.UpdatedAt)
 		if err != nil {
 			continue
@@ -76,16 +76,30 @@ func (r *PengurusRepository) GetPengurusMasjidByMasjidID(masjidID int) ([]models
 
 // Pengurus Zakat (UPZ) methods
 func (r *PengurusRepository) SavePengurusZakat(pengurus *models.PengurusZakat) error {
-	// Check if exists
+	if pengurus.Jabatan == "Anggota UPZ" {
+		// For Anggota UPZ, always insert new since multiple members allowed
+		insertQuery := `INSERT INTO pengurus_zakat (masjid_id, nama, jabatan, telepon, alamat) 
+		                VALUES (?, ?, ?, ?, ?)`
+		result, err := r.DB.Exec(insertQuery, pengurus.MasjidID, pengurus.Nama,
+			pengurus.Jabatan, pengurus.Telepon, pengurus.Alamat)
+		if err != nil {
+			return err
+		}
+		id, _ := result.LastInsertId()
+		pengurus.ID = int(id)
+		return nil
+	}
+
+	// For other jabatan (like Ketua UPZ), check if exists by jabatan
 	var existingID int
 	checkQuery := `SELECT id FROM pengurus_zakat WHERE masjid_id=? AND jabatan=?`
 	err := r.DB.QueryRow(checkQuery, pengurus.MasjidID, pengurus.Jabatan).Scan(&existingID)
-	
+
 	if err == sql.ErrNoRows {
 		// Insert new
 		insertQuery := `INSERT INTO pengurus_zakat (masjid_id, nama, jabatan, telepon, alamat) 
 		                VALUES (?, ?, ?, ?, ?)`
-		result, err := r.DB.Exec(insertQuery, pengurus.MasjidID, pengurus.Nama, 
+		result, err := r.DB.Exec(insertQuery, pengurus.MasjidID, pengurus.Nama,
 			pengurus.Jabatan, pengurus.Telepon, pengurus.Alamat)
 		if err != nil {
 			return err
@@ -96,11 +110,11 @@ func (r *PengurusRepository) SavePengurusZakat(pengurus *models.PengurusZakat) e
 	} else if err != nil {
 		return err
 	}
-	
+
 	// Update existing
-	updateQuery := `UPDATE pengurus_zakat SET nama=?, telepon=?, alamat=? 
+	updateQuery := `UPDATE pengurus_zakat SET nama=?, jabatan=?, telepon=?, alamat=? 
 	                WHERE id=?`
-	_, err = r.DB.Exec(updateQuery, pengurus.Nama, pengurus.Telepon, 
+	_, err = r.DB.Exec(updateQuery, pengurus.Nama, pengurus.Jabatan, pengurus.Telepon,
 		pengurus.Alamat, existingID)
 	pengurus.ID = existingID
 	return err
@@ -115,7 +129,7 @@ func (r *PengurusRepository) GetPengurusZakatByMasjidID(masjidID int) ([]models.
 	            WHEN 'Anggota UPZ' THEN 3 
 	            ELSE 4 
 	          END, nama ASC`
-	
+
 	rows, err := r.DB.Query(query, masjidID)
 	if err != nil {
 		return []models.PengurusZakat{}, nil
@@ -125,7 +139,7 @@ func (r *PengurusRepository) GetPengurusZakatByMasjidID(masjidID int) ([]models.
 	var pengurusList []models.PengurusZakat
 	for rows.Next() {
 		var p models.PengurusZakat
-		err := rows.Scan(&p.ID, &p.MasjidID, &p.Nama, &p.Jabatan, &p.Telepon, 
+		err := rows.Scan(&p.ID, &p.MasjidID, &p.Nama, &p.Jabatan, &p.Telepon,
 			&p.Alamat, &p.CreatedAt, &p.UpdatedAt)
 		if err != nil {
 			continue
