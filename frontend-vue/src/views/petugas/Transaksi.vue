@@ -1,36 +1,21 @@
 <template>
   <div class="flex h-screen overflow-hidden">
-    <Sidebar
-      :show="showSidebar"
-      @close="showSidebar = false"
-      :menuItems="menuItems"
-    />
-
+    <Sidebar :show="showSidebar" @close="showSidebar = false" :menuItems="menuItems" />
+    
     <div class="flex-1 flex flex-col overflow-hidden">
       <header class="bg-white shadow-sm">
         <div class="px-4 md:px-6 py-4 flex justify-between items-center">
           <div class="flex items-center">
-            <button
-              @click="showSidebar = true"
-              class="mr-3 md:hidden text-gray-600 hover:text-gray-800"
-            >
+            <button @click="showSidebar = true" class="mr-3 md:hidden text-gray-600 hover:text-gray-800">
               <i class="fas fa-bars text-xl"></i>
             </button>
-            <h1 class="text-xl md:text-2xl font-bold text-gray-800">
-              Transaksi Zakat
-            </h1>
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800">Transaksi Zakat</h1>
           </div>
           <div class="flex items-center gap-2">
-            <button
-              @click="showPrintDataModal = true"
-              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-            >
+            <button @click="showPrintDataModal = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
               <i class="fas fa-print mr-2"></i>Print Data
             </button>
-            <button
-              @click="showModal = true"
-              class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-            >
+            <button @click="showModal = true" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
               <i class="fas fa-plus mr-2"></i>Input Transaksi
             </button>
           </div>
@@ -39,7 +24,10 @@
 
       <main class="flex-1 overflow-y-auto p-4 md:p-6">
         <div class="bg-white rounded-xl shadow-md p-4 mb-4">
-          <div class="space-y-3 md:space-y-0 md:grid md:grid-cols-4 md:gap-3">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Filter Jenis Zakat</label>
+                      <div class="space-y-3 md:space-y-0 md:grid md:grid-cols-4 md:gap-3">
             <!-- Filter Jenis Zakat -->
             <div>
               <label class="block text-xs text-gray-500 mb-1"
@@ -1592,355 +1580,87 @@ const calculateTotalFidyahUang = (transaction) => {
   }
   
   return kadarZakat.value.fidyahPerHari * (transaction.jumlah_hari_fidyah || 0);
-};
-
-const getDetail = (t) => {
-  if (t.jenis_zakat === "fitrah") {
-    if (t.bentuk_zakat === "beras") {
-      // Untuk beras, tampilkan info dari keterangan
-      return t.keterangan || `${t.bentuk_zakat} - ${t.jumlah_orang} orang`;
-    }
-    return `${t.bentuk_zakat} - Kelas ${t.kelas_zakat} - ${t.jumlah_orang} orang`;
-  }
-  if (t.jenis_zakat === "mal")
-    return `${getMalJenisLabel(t.jenis_harta)} - ${formatCurrency(t.nominal_harta)} (${t.persentase_zakat}%)`;
-  if (t.jenis_zakat === "fidyah") {
-    if (t.bentuk_zakat === "beras") {
-      return t.keterangan || `Fidyah Beras`;
-    }
-    return t.keterangan || `Fidyah Uang`;
-  }
-  return "-";
-};
-
-const resetForm = () => {
-  form.value.bentuk_zakat = "";
-  form.value.jenis_harta = "";
-  form.value.nominal_harta = 0;
-  form.value.persentase_zakat = 0;
-  form.value.kelas_zakat = "";
-  form.value.jumlah_orang = 1;
-  form.value.jumlah_hari_fidyah = 1;
-  form.value.total_dibayar = 0;
-  form.value.standar_beras_per_jiwa = kadarZakat.value.fitrahBerasPerJiwa;
-  form.value.kg_beras_dibayar = 0;
-  form.value.harga_beras_per_kg = 0;
-};
-
-const setPersentase = () => {
-  form.value.persentase_zakat = Number(
-    kadarZakat.value.malRates?.[form.value.jenis_harta] || 0,
-  );
-  calculateMal();
-};
-
-const calculateMal = () => {
-  if (form.value.nominal_harta && form.value.persentase_zakat) {
-    const total =
-      form.value.nominal_harta * (form.value.persentase_zakat / 100);
-    form.value.total_dibayar = total;
-  }
-};
-
-const calculateFidyahTotal = () => {
-  if (form.value.jumlah_hari_fidyah) {
-    form.value.total_dibayar =
-      kadarZakat.value.fidyahPerHari * form.value.jumlah_hari_fidyah;
-  }
-};
-
-const calculateFidyahBerasTotal = () => {
-  if (form.value.jumlah_hari_fidyah) {
-    // Set kg_beras_dibayar to minimum required
-    form.value.kg_beras_dibayar =
-      form.value.jumlah_hari_fidyah * kadarZakat.value.fidyahBerasPerHari;
-  }
-};
-
-const calculateTotal = () => {
-  if (totalWajib.value > 0 && form.value.bentuk_zakat !== "beras") {
-    form.value.total_dibayar = totalWajib.value;
-  }
-};
-
-const calculateBerasTotal = () => {
-  // Menghitung total wajib beras sudah di-handle oleh computed property totalBerasWajib
-  // Fungsi ini untuk trigger re-calculation
-};
-
-const calculateBerasInfaq = () => {
-  // Menghitung sedekah beras tambahan sudah di-handle oleh computed property berasLebih
-  // Auto-calculate nilai rupiah jika harga per kg sudah diisi
-  if (form.value.kg_beras_dibayar && form.value.harga_beras_per_kg) {
-    form.value.total_dibayar =
-      form.value.kg_beras_dibayar * form.value.harga_beras_per_kg;
-  }
-};
-
-const calculateBerasRupiah = () => {
-  // Menghitung nilai rupiah beras
-  if (form.value.kg_beras_dibayar && form.value.harga_beras_per_kg) {
-    form.value.total_dibayar =
-      form.value.kg_beras_dibayar * form.value.harga_beras_per_kg;
-  }
-};
-
-const calculateInfaq = () => {};
-
-const loadTransaksi = async () => {
-  isLoading.value = true;
-  try {
-    const params =
-      pagination.value.pageSize === "all"
-        ? { page_size: "all" }
-        : { page: pagination.value.page, page_size: pagination.value.pageSize };
-
-    if (filters.value.jenis_zakat) {
-      params.jenis_zakat = filters.value.jenis_zakat;
-    }
-    if (showBentukFilter.value && filters.value.bentuk_zakat) {
-      params.bentuk_zakat = filters.value.bentuk_zakat;
-    }
-    if (filters.value.q && filters.value.q.trim()) {
-      params.q = filters.value.q.trim();
-    }
-
-    const { data } = await api.getTransaksi(params);
-    console.log("Transaksi Response:", data);
-    if (data.success) {
-      const payload = data.data || {};
-      if (Array.isArray(payload.items)) {
-        const filteredItems = filterLocalTransaksi(payload.items);
-        transaksiList.value = filteredItems;
-        syncPagination(payload, filteredItems.length);
-      } else if (Array.isArray(payload)) {
-        const filteredItems = filterLocalTransaksi(payload);
-        transaksiList.value = applyLocalPagination(filteredItems);
-      } else {
-        transaksiList.value = [];
-        syncPagination(payload, 0);
-      }
-      console.log("Transaksi List Length:", transaksiList.value.length);
-    }
-  } catch (error) {
-    console.error(error);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const deleteTransaksi = async (id) => {
-  if (!confirm("Yakin ingin menghapus?")) return;
-  try {
-    const { data } = await api.deleteTransaksi(id);
-    if (data.success) {
-      toast.value = { message: "Transaksi berhasil dihapus", type: "success" };
-      loadTransaksi();
-    }
-  } catch (error) {
-    toast.value = { message: "Gagal menghapus transaksi", type: "error" };
-  }
-};
-
-const viewDetail = (transaction) => {
-  selectedTransaction.value = transaction;
-  showDetailModal.value = true;
-};
-
-const printReceipt = async (id) => {
-  try {
-    const token = localStorage.getItem("token");
-    const response = await fetch(api.printTransaksi(id), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const html = await response.text();
-    const printWindow = window.open("", "_blank");
-    printWindow.document.write(html);
-    printWindow.document.close();
-  } catch (error) {
-    toast.value = { message: "Gagal mencetak bukti", type: "error" };
-  }
-};
-
-const printRekapData = async () => {
-  try {
-    const signDate = String(printSignDate.value || "").trim();
-    const response = await api.getPrintTransaksiData(signDate);
-    const html = response?.data || "";
-
-    if (!html || typeof html !== "string") {
-      throw new Error("Data print tidak valid");
-    }
-
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      throw new Error("Popup diblokir browser");
-    }
-    printWindow.document.write(html);
-    printWindow.document.close();
-    showPrintDataModal.value = false;
-  } catch (error) {
-    const status = error?.response?.status;
-    const detail =
-      error?.response?.data?.message || error?.message || "Unknown error";
-    toast.value = {
-      message: `Gagal membuka print data${status ? ` (${status})` : ""}: ${detail}`,
-      type: "error",
-    };
-  }
-};
-
-const saveTransaksi = async () => {
-  isSaving.value = true;
-  try {
-    const muzakkiData = await api.createMuzakki({
-      nama: form.value.nama_muzakki,
-      alamat: "-",
-      telepon: "-",
-    });
-    if (!muzakkiData.data.success) {
-      toast.value = { message: "Gagal menyimpan data muzakki", type: "error" };
-      isSaving.value = false;
-      return;
-    }
-
-    const payload = {
-      muzakki_id: muzakkiData.data.data.id,
-      jenis_zakat: form.value.jenis_zakat,
-      tanggal_bayar: form.value.tanggal_bayar,
-      total_dibayar: form.value.total_dibayar,
-      keterangan: "",
-    };
-
-    if (form.value.jenis_zakat === "fitrah") {
-      payload.bentuk_zakat = form.value.bentuk_zakat;
-      payload.jumlah_orang = form.value.jumlah_orang;
-      if (form.value.bentuk_zakat === "uang") {
-        payload.kelas_zakat = form.value.kelas_zakat;
-        payload.nominal_per_orang =
-          kadarZakat.value[`kelas${form.value.kelas_zakat}`];
-      } else if (form.value.bentuk_zakat === "beras") {
-        // Simpan data beras ke field database
-        payload.kg_beras_dibayar = form.value.kg_beras_dibayar;
-        payload.standar_beras_per_jiwa = form.value.standar_beras_per_jiwa;
-        payload.harga_beras_per_kg = form.value.harga_beras_per_kg;
-
-        // Untuk beras, simpan data kg beras di keterangan juga (backward compatibility)
-        payload.keterangan = `Beras: ${form.value.kg_beras_dibayar} kg (Standar: ${form.value.standar_beras_per_jiwa} kg/jiwa)`;
-        // Jika ada harga per kg, simpan juga nilai rupiah
-        if (form.value.harga_beras_per_kg) {
-          payload.total_dibayar =
-            form.value.kg_beras_dibayar * form.value.harga_beras_per_kg;
-          payload.keterangan += ` - Harga: Rp ${form.value.harga_beras_per_kg}/kg`;
-        } else {
-          payload.total_dibayar = 0;
+n Rp ${payload.infaq_tambahan} masuk infaq)`
         }
-        // Simpan info tambahan di nominal_per_orang untuk tracking (dalam rupiah per kg atau 0)
-        payload.nominal_per_orang = form.value.harga_beras_per_kg || 0;
-      }
-    } else if (form.value.jenis_zakat === "mal") {
-      payload.jenis_harta = form.value.jenis_harta;
-      payload.nominal_harta = form.value.nominal_harta;
-      payload.persentase_zakat = form.value.persentase_zakat;
-      payload.jumlah_orang = 0;
-    } else if (form.value.jenis_zakat === "fidyah") {
-      payload.bentuk_zakat = form.value.bentuk_zakat;
-      payload.jumlah_hari_fidyah = form.value.jumlah_hari_fidyah;
-      payload.jumlah_orang = form.value.jumlah_hari_fidyah; // Store hari as jumlah_orang for compatibility
-
-      if (form.value.bentuk_zakat === "uang") {
-        const totalWajibFidyah =
-          kadarZakat.value.fidyahPerHari * form.value.jumlah_hari_fidyah;
-        payload.nominal_per_orang = kadarZakat.value.fidyahPerHari;
-        payload.total_dibayar = form.value.total_dibayar;
-        payload.keterangan = `Fidyah ${form.value.jumlah_hari_fidyah} hari @ Rp ${kadarZakat.value.fidyahPerHari}`;
-
-        // Jika bayar lebih, kelebihannya masuk infaq
-        if (form.value.total_dibayar > totalWajibFidyah) {
-          payload.infaq_tambahan = form.value.total_dibayar - totalWajibFidyah;
-          payload.keterangan += ` (Kelebihan Rp ${payload.infaq_tambahan} masuk infaq)`;
-        }
-      } else if (form.value.bentuk_zakat === "beras") {
-        const totalWajibBeras =
-          form.value.jumlah_hari_fidyah * kadarZakat.value.fidyahBerasPerHari;
-
+      } else if (form.value.bentuk_zakat === 'beras') {
+        const totalWajibBeras = form.value.jumlah_hari_fidyah * kadarZakat.value.fidyahBerasPerHari
+        
         // Simpan data beras ke field database
-        payload.kg_beras_dibayar = form.value.kg_beras_dibayar;
-        payload.harga_beras_per_kg = form.value.harga_beras_per_kg;
-
-        payload.keterangan = `Fidyah Beras: ${form.value.kg_beras_dibayar} kg untuk ${form.value.jumlah_hari_fidyah} hari (Wajib: ${totalWajibBeras} kg)`;
-
+        payload.kg_beras_dibayar = form.value.kg_beras_dibayar
+        payload.harga_beras_per_kg = form.value.harga_beras_per_kg
+        
+        payload.keterangan = `Fidyah Beras: ${form.value.kg_beras_dibayar} kg untuk ${form.value.jumlah_hari_fidyah} hari (Wajib: ${totalWajibBeras} kg)`
+        
         // Jika ada harga per kg, konversi ke rupiah
         if (form.value.harga_beras_per_kg) {
-          payload.total_dibayar =
-            form.value.kg_beras_dibayar * form.value.harga_beras_per_kg;
-          payload.keterangan += ` - Harga: Rp ${form.value.harga_beras_per_kg}/kg`;
+          payload.total_dibayar = form.value.kg_beras_dibayar * form.value.harga_beras_per_kg
+          payload.keterangan += ` - Harga: Rp ${form.value.harga_beras_per_kg}/kg`
         } else {
-          payload.total_dibayar = 0;
+          payload.total_dibayar = 0
         }
-
+        
         // Jika beras lebih dari wajib, tetap dihitung sebagai beras yang dikasihkan
         if (form.value.kg_beras_dibayar > totalWajibBeras) {
-          const kelebihanBeras = form.value.kg_beras_dibayar - totalWajibBeras;
-          payload.keterangan += ` (Kelebihan ${kelebihanBeras.toFixed(1)} kg tetap diterima)`;
+          const kelebihanBeras = form.value.kg_beras_dibayar - totalWajibBeras
+          payload.keterangan += ` (Kelebihan ${kelebihanBeras.toFixed(1)} kg tetap diterima)`
         }
-
-        payload.nominal_per_orang = form.value.harga_beras_per_kg || 0;
+        
+        payload.nominal_per_orang = form.value.harga_beras_per_kg || 0
       }
     }
-
-    const { data } = await api.createTransaksi(payload);
+    
+    const { data } = await api.createTransaksi(payload)
     if (data.success) {
-      toast.value = { message: "Transaksi berhasil disimpan", type: "success" };
-      closeModal();
-      loadTransaksi();
+      toast.value = { message: 'Transaksi berhasil disimpan', type: 'success' }
+      closeModal()
+      loadTransaksi()
     }
   } catch (error) {
-    toast.value = { message: "Gagal menyimpan transaksi", type: "error" };
+    toast.value = { message: 'Gagal menyimpan transaksi', type: 'error' }
   } finally {
-    isSaving.value = false;
+    isSaving.value = false
   }
-};
+}
 
 const closeModal = () => {
-  showModal.value = false;
-  form.value = {
-    nama_muzakki: "",
-    jenis_zakat: "",
-    bentuk_zakat: "",
-    jenis_harta: "",
+  showModal.value = false
+  form.value = { 
+    nama_muzakki: '', 
+    jenis_zakat: '', 
+    bentuk_zakat: '', 
+    jenis_harta: '',
     nominal_harta: 0,
     persentase_zakat: 0,
-    kelas_zakat: "",
-    jumlah_orang: 1,
+    kelas_zakat: '', 
+    jumlah_orang: 1, 
     jumlah_hari_fidyah: 1,
-    total_dibayar: 0,
-    tanggal_bayar: new Date().toISOString().split("T")[0],
+    total_dibayar: 0, 
+    tanggal_bayar: new Date().toISOString().split('T')[0],
     standar_beras_per_jiwa: kadarZakat.value.fitrahBerasPerJiwa,
     kg_beras_dibayar: 0,
-    harga_beras_per_kg: 0,
-  };
-};
+    harga_beras_per_kg: 0
+  }
+}
 
 onMounted(async () => {
-  localStorage.removeItem("kadar_zakat");
+  localStorage.removeItem('kadar_zakat')
 
   try {
-    const { data } = await api.getPengaturanZakat();
+    const { data } = await api.getPengaturanZakat()
     if (data.success && data.data) {
       kadarZakat.value = {
         ...kadarZakat.value,
         ...data.data,
         fitrahBerasPerJiwa: data.data.fitrahBerasPerJiwa ?? 2.5,
         fidyahBerasPerHari: data.data.fidyahBerasPerHari ?? 0.6,
-        malRates: data.data.malRates || {},
-      };
+        malRates: data.data.malRates || {}
+      }
     }
   } catch (error) {
-    console.error("Error loading pengaturan zakat:", error);
+    console.error('Error loading pengaturan zakat:', error)
   }
 
-  form.value.standar_beras_per_jiwa = kadarZakat.value.fitrahBerasPerJiwa;
-  loadTransaksi();
-});
+  form.value.standar_beras_per_jiwa = kadarZakat.value.fitrahBerasPerJiwa
+  loadTransaksi()
+})
 </script>
