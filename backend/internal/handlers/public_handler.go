@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yourusername/siazisah/backend/internal/models"
@@ -146,13 +147,21 @@ func (h *PublicHandler) GetPublicDashboard(c *gin.Context) {
 		}
 	}
 
-	// Last update (tanggal transaksi terakhir)
+	// Last update (tanggal terakhir ada perubahan data)
 	var lastUpdate sql.NullString
-	h.DB.QueryRow("SELECT MAX(tanggal_bayar) FROM transaksi_zakat").Scan(&lastUpdate)
-	if lastUpdate.Valid {
+	h.DB.QueryRow(`
+		SELECT GREATEST(
+			COALESCE((SELECT MAX(tanggal_bayar) FROM transaksi_zakat), '0000-00-00'),
+			COALESCE((SELECT MAX(updated_at) FROM mustahiq), '0000-00-00'),
+			COALESCE((SELECT MAX(updated_at) FROM muzakki), '0000-00-00'),
+			COALESCE((SELECT MAX(updated_at) FROM masjid), '0000-00-00')
+		) as last_update
+	`).Scan(&lastUpdate)
+	if lastUpdate.Valid && lastUpdate.String != "0000-00-00" {
 		stats.LastUpdate = lastUpdate.String
 	} else {
-		stats.LastUpdate = ""
+		// Jika tidak ada data sama sekali, gunakan tanggal hari ini
+		stats.LastUpdate = time.Now().Format("2006-01-02")
 	}
 
 	c.JSON(http.StatusOK, models.Response{Success: true, Data: stats})

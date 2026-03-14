@@ -39,6 +39,20 @@ func normalizeJenisMustahiq(jenis string) string {
 	clean = strings.ReplaceAll(clean, "-", " ")
 	clean = strings.Join(strings.Fields(clean), " ")
 	switch clean {
+	case "fakir":
+		return "fakir"
+	case "miskin":
+		return "miskin"
+	case "amil":
+		return "amil"
+	case "mualaf":
+		return "mualaf"
+	case "riqab":
+		return "riqab"
+	case "gharim", "gharimin":
+		return "gharimin"
+	case "fisabilillah", "fi sabilillah", "fisabil lah":
+		return "fisabilillah"
 	case "ibnu sabil", "ibnusabil":
 		return "ibnu sabil"
 	default:
@@ -239,9 +253,6 @@ func (h *DistribusiHandler) PrintSummary(c *gin.Context) {
 	}
 
 	for _, mustahiq := range mustahiqList {
-		if !mustahiq.IsActive {
-			continue
-		}
 		key := normalizeJenisMustahiq(mustahiq.JenisPenerima)
 		if row, ok := rowsMap[key]; ok {
 			row.JumlahOrang++

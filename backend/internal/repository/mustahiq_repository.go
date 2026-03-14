@@ -44,7 +44,7 @@ func (r *MustahiqRepository) FindByID(id int) (*models.Mustahiq, error) {
 
 func (r *MustahiqRepository) GetByMasjidID(masjidID int) ([]models.Mustahiq, error) {
 	query := `SELECT id, masjid_id, nama, jenis_penerima, alamat, lokasi, rt, telepon, keterangan, is_active, created_at, updated_at 
-			  FROM mustahiq WHERE masjid_id = ? ORDER BY nama ASC`
+			  FROM mustahiq WHERE masjid_id = ? AND is_active = 1 ORDER BY nama ASC`
 	rows, err := r.DB.Query(query, masjidID)
 	if err != nil {
 		return nil, err
@@ -52,9 +52,7 @@ func (r *MustahiqRepository) GetByMasjidID(masjidID int) ([]models.Mustahiq, err
 	defer rows.Close()
 
 	var mustahiqs []models.Mustahiq
-	rowCount := 0
 	for rows.Next() {
-		rowCount++
 		var mustahiq models.Mustahiq
 		err := rows.Scan(&mustahiq.ID, &mustahiq.MasjidID, &mustahiq.Nama, &mustahiq.JenisPenerima,
 			&mustahiq.Alamat, &mustahiq.Lokasi, &mustahiq.RT, &mustahiq.Telepon,
@@ -64,13 +62,12 @@ func (r *MustahiqRepository) GetByMasjidID(masjidID int) ([]models.Mustahiq, err
 		}
 		mustahiqs = append(mustahiqs, mustahiq)
 	}
-	println("GetByMasjidID - MasjidID:", masjidID, "- Total Rows from DB:", rowCount, "- Successful Scans:", len(mustahiqs))
 	return mustahiqs, nil
 }
 
 func (r *MustahiqRepository) GetByMasjidIDPaginated(masjidID, limit, offset int) ([]models.Mustahiq, error) {
 	query := `SELECT id, masjid_id, nama, jenis_penerima, alamat, lokasi, rt, telepon, keterangan, is_active, created_at, updated_at
-			  FROM mustahiq WHERE masjid_id = ? ORDER BY nama ASC LIMIT ? OFFSET ?`
+			  FROM mustahiq WHERE masjid_id = ? AND is_active = 1 ORDER BY nama ASC LIMIT ? OFFSET ?`
 	rows, err := r.DB.Query(query, masjidID, limit, offset)
 	if err != nil {
 		return nil, err
@@ -93,7 +90,7 @@ func (r *MustahiqRepository) GetByMasjidIDPaginated(masjidID, limit, offset int)
 
 func (r *MustahiqRepository) CountByMasjidID(masjidID int) (int, error) {
 	var total int
-	query := `SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ?`
+	query := `SELECT COUNT(*) FROM mustahiq WHERE masjid_id = ? AND is_active = 1`
 	if err := r.DB.QueryRow(query, masjidID).Scan(&total); err != nil {
 		return 0, err
 	}
@@ -101,7 +98,7 @@ func (r *MustahiqRepository) CountByMasjidID(masjidID int) (int, error) {
 }
 
 func (r *MustahiqRepository) buildFilterClause(masjidID int, jenisPenerima, q string) (string, []interface{}) {
-	whereClause := " WHERE masjid_id = ?"
+	whereClause := " WHERE masjid_id = ? AND is_active = 1"
 	args := []interface{}{masjidID}
 
 	if strings.TrimSpace(jenisPenerima) != "" {
