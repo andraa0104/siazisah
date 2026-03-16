@@ -93,13 +93,10 @@
                         <h5>Kategori Umum</h5>
                         <ul>
                           <li>
-                            <strong>Beras/Gandum:</strong> 2,5 kg per jiwa
+                            <strong>Beras/Gandum:</strong> 2,7 kg per jiwa
                           </li>
                           <li>
-                            <strong>Uang Tunai:</strong> Rp 35.000 - Rp 55.000
-                          </li>
-                          <li>
-                            <strong>Kurma/Kismis:</strong> 2,5 kg per jiwa
+                            <strong>Uang Tunai:</strong> Rp 38.000 - Rp 68.000
                           </li>
                         </ul>
                       </div>
@@ -131,8 +128,9 @@
                   </div>
                   <div class="zakat-content">
                     <p class="description">
-                      Zakat atas harta yang dimiliki setahun (haul) dengan nisab
-                      tertentu
+                      Zakat atas harta yang halal dan berkembang, dengan
+                      ketentuan nisab serta waktu penunaian yang berbeda sesuai
+                      jenis hartanya
                     </p>
 
                     <div class="kategori-list">
@@ -140,25 +138,48 @@
                         <h5>Jenis Harta & Kadar</h5>
                         <ul>
                           <li>
-                            <strong>Emas:</strong> Nisab 87 gram, Zakat 2,5%
+                            <strong>Emas dan perak:</strong> zakatnya 2,5%
+                            setelah mencapai nisab dan berlalu satu haul
                           </li>
                           <li>
-                            <strong>Perak:</strong> Nisab 612 gram, Zakat 2,5%
+                            <strong>Harta usaha/perdagangan:</strong> meliputi
+                            modal usaha, barang dagangan, stok barang, dan
+                            keuntungan usaha; dikeluarkan 2,5% saat nilainya
+                            mencapai nisab setara emas dan telah berlalu haul
                           </li>
                           <li>
-                            <strong>Uang:</strong> Disamakan emas, Zakat 2,5%
+                            <strong>Hasil pertanian:</strong> 10% jika diairi
+                            oleh hujan atau aliran air alami, dan 5% jika
+                            diairi dengan biaya
                           </li>
-                          <li><strong>Ternak:</strong> Zakat sesuai jumlah</li>
+                          <li>
+                            <strong>Ternak:</strong> kambing, sapi, dan unta
+                            memiliki kadar zakat bertingkat sesuai jumlah
+                          </li>
+                          <li>
+                            <strong>Rikaz:</strong> harta temuan terpendam
+                            dikeluarkan zakatnya sebesar 20% saat ditemukan
+                          </li>
                         </ul>
                       </div>
 
                       <div class="kategori-item">
                         <h5>Waktu Zakat</h5>
                         <ul>
-                          <li>Satu tahun (haul) dari kepemilikan</li>
-                          <li>Diambil setelah nisab tercapai</li>
-                          <li>Bisa dibayar di depan atau belakang</li>
-                          <li>Bebas pilih waktu dalam setahun</li>
+                          <li>
+                            Emas, perak, dan harta usaha ditunaikan setelah
+                            mencapai nisab dan berlalu satu tahun hijriah
+                          </li>
+                          <li>
+                            Hasil pertanian ditunaikan setiap kali panen
+                          </li>
+                          <li>
+                            Rikaz ditunaikan saat harta ditemukan
+                          </li>
+                          <li>
+                            Ternak mengikuti nisab dan hitungan jumlah yang
+                            telah ditetapkan dalam fikih zakat
+                          </li>
                         </ul>
                       </div>
                     </div>
@@ -184,10 +205,10 @@
                         <h5>Kadar Fidyah</h5>
                         <ul>
                           <li>
-                            <strong>Per hari:</strong> 2,5 kg beras/makanan
+                            <strong>Per hari:</strong> 0,7 kg beras/makanan
                           </li>
                           <li>
-                            <strong>Atau:</strong> Rp 25.000 - Rp 40.000 per
+                            <strong>Atau:</strong> Rp 30.000 per
                             hari
                           </li>
                           <li>
