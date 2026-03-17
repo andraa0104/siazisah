@@ -36,6 +36,7 @@ export default {
   getPublicPengurusZakat: (id) => api.get(`/public/masjid/${id}/pengurus-zakat`),
   
   // Superadmin
+  getSuperadminDataCompleteness: () => api.get('/superadmin/dashboard/data-completeness'),
   getMasjid: (params) => api.get('/superadmin/masjid', { params }),
   createMasjid: (data) => api.post('/superadmin/masjid', data),
   updateMasjid: (id, data) => api.put(`/superadmin/masjid/${id}`, data),

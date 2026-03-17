@@ -24,6 +24,83 @@ func NewMasjidHandler(masjidRepo *repository.MasjidRepository, pengaturanRepo *r
 	return &MasjidHandler{masjidRepo: masjidRepo, pengaturanRepo: pengaturanRepo}
 }
 
+// GetDataCompleteness menghitung keterisian data per masjid/langgar untuk kebutuhan dashboard superadmin.
+// - Muzakki dianggap "terisi" bila ada minimal 1 record muzakki pada masjid tersebut.
+// - Mustahiq dianggap "terisi" bila ada minimal 1 record mustahiq pada masjid tersebut.
+// - Pengurus dianggap "terisi" bila sudah ada Ketua (pengurus masjid) dan Ketua UPZ (pengurus zakat) dengan nama terisi.
+func (h *MasjidHandler) GetDataCompleteness(c *gin.Context) {
+	if h.masjidRepo == nil || h.masjidRepo.DB == nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Database not initialized"})
+		return
+	}
+
+	type item struct {
+		ID           int    `json:"id"`
+		Nama         string `json:"nama"`
+		MuzakkiCount int    `json:"muzakki_count"`
+		MustahiqCount int   `json:"mustahiq_count"`
+		KetuaPengurus string `json:"ketua_pengurus"`
+		KetuaUPZ      string `json:"ketua_upz"`
+	}
+
+	rows, err := h.masjidRepo.DB.Query(`
+		SELECT
+			m.id,
+			m.nama,
+			(SELECT COUNT(*) FROM muzakki WHERE masjid_id = m.id) AS muzakki_count,
+			(SELECT COUNT(*) FROM mustahiq WHERE masjid_id = m.id) AS mustahiq_count,
+			COALESCE((SELECT nama FROM pengurus_masjid WHERE masjid_id = m.id AND jabatan = 'Ketua' LIMIT 1), '') AS ketua_pengurus,
+			COALESCE((SELECT nama FROM pengurus_zakat WHERE masjid_id = m.id AND jabatan = 'Ketua UPZ' LIMIT 1), '') AS ketua_upz
+		FROM masjid m
+		WHERE m.is_active = 1
+		ORDER BY m.nama ASC
+	`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to query data completeness"})
+		return
+	}
+	defer rows.Close()
+
+	items := make([]item, 0, 64)
+	totalMasjid := 0
+	filledMuzakki := 0
+	filledMustahiq := 0
+	filledPengurus := 0
+
+	for rows.Next() {
+		var it item
+		if err := rows.Scan(&it.ID, &it.Nama, &it.MuzakkiCount, &it.MustahiqCount, &it.KetuaPengurus, &it.KetuaUPZ); err != nil {
+			continue
+		}
+		totalMasjid++
+		if it.MuzakkiCount > 0 {
+			filledMuzakki++
+		}
+		if it.MustahiqCount > 0 {
+			filledMustahiq++
+		}
+		if strings.TrimSpace(it.KetuaPengurus) != "" && strings.TrimSpace(it.KetuaUPZ) != "" {
+			filledPengurus++
+		}
+		items = append(items, it)
+	}
+	if err := rows.Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to read data completeness"})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.Response{
+		Success: true,
+		Data: gin.H{
+			"total_masjid":        totalMasjid,
+			"filled_muzakki":      filledMuzakki,
+			"filled_mustahiq":     filledMustahiq,
+			"filled_pengurus":     filledPengurus,
+			"items":              items,
+		},
+	})
+}
+
 func (h *MasjidHandler) Create(c *gin.Context) {
 	var masjid models.Masjid
 	if err := c.ShouldBindJSON(&masjid); err != nil {

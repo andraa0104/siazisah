@@ -77,6 +77,7 @@ func main() {
 		superadmin := api.Group("/superadmin")
 		superadmin.Use(middleware.SuperAdminOnly())
 		{
+			superadmin.GET("/dashboard/data-completeness", masjidHandler.GetDataCompleteness)
 			superadmin.GET("/masjid", masjidHandler.GetAll)
 			superadmin.POST("/masjid", masjidHandler.Create)
 			superadmin.GET("/masjid/:id", masjidHandler.GetByID)
