@@ -244,9 +244,22 @@ func (r *DistribusiZakatRepository) GetInsight(masjidID int) (*models.Distribusi
 		return nil, err
 	}
 
-	r.DB.QueryRow(`SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'uang'`, masjidID).Scan(&insight.TotalFitrahUang)
-	r.DB.QueryRow(`SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fidyah' AND bentuk_zakat = 'uang'`, masjidID).Scan(&insight.TotalFidyahUang)
-	r.DB.QueryRow(`SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'mal'`, masjidID).Scan(&insight.TotalZakatMalUang)
+	// Exclude infaq surplus: pool uang hanya dari zakat (total_dibayar - infaq_tambahan).
+	r.DB.QueryRow(`
+		SELECT COALESCE(SUM(total_dibayar - COALESCE(infaq_tambahan, 0)), 0)
+		FROM transaksi_zakat
+		WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'uang'
+	`, masjidID).Scan(&insight.TotalFitrahUang)
+	r.DB.QueryRow(`
+		SELECT COALESCE(SUM(total_dibayar - COALESCE(infaq_tambahan, 0)), 0)
+		FROM transaksi_zakat
+		WHERE masjid_id = ? AND jenis_zakat = 'fidyah' AND bentuk_zakat = 'uang'
+	`, masjidID).Scan(&insight.TotalFidyahUang)
+	r.DB.QueryRow(`
+		SELECT COALESCE(SUM(total_dibayar - COALESCE(infaq_tambahan, 0)), 0)
+		FROM transaksi_zakat
+		WHERE masjid_id = ? AND jenis_zakat = 'mal'
+	`, masjidID).Scan(&insight.TotalZakatMalUang)
 
 	fitrahKg, err := r.sumBerasFromTransaksi(masjidID, "fitrah")
 	if err != nil {

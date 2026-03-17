@@ -78,7 +78,12 @@ func (h *PublicHandler) GetPublicDashboard(c *gin.Context) {
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE jenis_zakat = 'fitrah'").Scan(&stats.TotalZakatFitrah)
 
 	// Total zakat fitrah uang
-	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE jenis_zakat = 'fitrah' AND bentuk_zakat = 'uang'").Scan(&stats.TotalZakatFitrahUang)
+	// Exclude infaq surplus: zakat = total_dibayar - infaq_tambahan
+	h.DB.QueryRow(`
+		SELECT COALESCE(SUM(total_dibayar - COALESCE(infaq_tambahan, 0)), 0)
+		FROM transaksi_zakat
+		WHERE jenis_zakat = 'fitrah' AND bentuk_zakat = 'uang'
+	`).Scan(&stats.TotalZakatFitrahUang)
 
 	// Total zakat fitrah beras (dalam rupiah)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE jenis_zakat = 'fitrah' AND bentuk_zakat = 'beras'").Scan(&stats.TotalZakatFitrahBerasRp)
@@ -240,7 +245,12 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 		WHERE masjid_id = ?
 	`, id).Scan(&stats.TotalOrangDizakati)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah'", id).Scan(&stats.TotalZakatFitrah)
-	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'uang'", id).Scan(&stats.TotalZakatFitrahUang)
+	// Exclude infaq surplus: zakat = total_dibayar - infaq_tambahan
+	h.DB.QueryRow(`
+		SELECT COALESCE(SUM(total_dibayar - COALESCE(infaq_tambahan, 0)), 0)
+		FROM transaksi_zakat
+		WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'uang'
+	`, id).Scan(&stats.TotalZakatFitrahUang)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'beras'", id).Scan(&stats.TotalZakatFitrahBerasRp)
 
 	// Total kg beras fitrah
