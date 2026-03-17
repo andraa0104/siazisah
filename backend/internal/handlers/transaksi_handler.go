@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -198,6 +199,7 @@ func (h *TransaksiHandler) Create(c *gin.Context) {
 	// This prevents partial writes when client/network fails between separate requests.
 	tx, err := h.transaksiRepo.DB.Begin()
 	if err != nil {
+		log.Printf("Create transaksi: begin tx failed: %v", err)
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to start transaction"})
 		return
 	}
@@ -219,6 +221,7 @@ func (h *TransaksiHandler) Create(c *gin.Context) {
 		if err == nil && existingID > 0 {
 			transaksi.MuzakkiID = existingID
 		} else if err != nil && err != sql.ErrNoRows {
+			log.Printf("Create transaksi: lookup muzakki failed (masjid_id=%d nama=%q): %v", transaksi.MasjidID, nama, err)
 			c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to lookup muzakki"})
 			return
 		} else {
@@ -230,6 +233,7 @@ func (h *TransaksiHandler) Create(c *gin.Context) {
 				strings.TrimSpace(transaksi.MuzakkiTelepon),
 			)
 			if err != nil {
+				log.Printf("Create transaksi: insert muzakki failed (masjid_id=%d nama=%q): %v", transaksi.MasjidID, nama, err)
 				c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to create muzakki"})
 				return
 			}
@@ -266,6 +270,7 @@ func (h *TransaksiHandler) Create(c *gin.Context) {
 		transaksi.TanggalBayar,
 	)
 	if err != nil {
+		log.Printf("Create transaksi: insert transaksi failed (masjid_id=%d muzakki_id=%d jenis=%q): %v", transaksi.MasjidID, transaksi.MuzakkiID, transaksi.JenisZakat, err)
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to create transaksi"})
 		return
 	}
@@ -273,6 +278,7 @@ func (h *TransaksiHandler) Create(c *gin.Context) {
 	transaksi.ID = int(newID)
 
 	if err := tx.Commit(); err != nil {
+		log.Printf("Create transaksi: commit failed (masjid_id=%d muzakki_id=%d): %v", transaksi.MasjidID, transaksi.MuzakkiID, err)
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to commit transaction"})
 		return
 	}
