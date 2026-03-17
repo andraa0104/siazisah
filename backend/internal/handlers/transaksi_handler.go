@@ -373,14 +373,11 @@ func (h *TransaksiHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	// If this muzakki is no longer referenced by any transaksi, delete it as well.
-	var remaining int
-	if err := tx.QueryRow(`SELECT COUNT(*) FROM transaksi_zakat WHERE muzakki_id = ?`, muzakkiID).Scan(&remaining); err != nil {
-		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to check muzakki usage"})
+	// Delete the linked muzakki as well (domain rule: 1 muzakki record is tied to 1 transaksi).
+	// Note: FK cascade means deleting muzakki will also delete any remaining transaksi that still reference it.
+	if _, err := tx.Exec(`DELETE FROM muzakki WHERE id = ? AND masjid_id = ?`, muzakkiID, *masjidID.(*int)); err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to delete muzakki"})
 		return
-	}
-	if remaining == 0 {
-		_, _ = tx.Exec(`DELETE FROM muzakki WHERE id = ? AND masjid_id = ?`, muzakkiID, *masjidID.(*int))
 	}
 
 	if err := tx.Commit(); err != nil {
