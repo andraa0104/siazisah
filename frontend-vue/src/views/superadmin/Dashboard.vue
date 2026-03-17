@@ -504,9 +504,94 @@ const loadDataCompleteness = async () => {
     }
   } catch (error) {
     console.error(error)
+    // Fallback for deployments that still use old backend binary without this endpoint.
+    // We derive completeness from public endpoints (more requests, but no backend change required).
+    if (error?.response?.status === 404) {
+      try {
+        await loadDataCompletenessFallback()
+        completenessError.value = ''
+        return
+      } catch (fallbackErr) {
+        console.error(fallbackErr)
+      }
+    }
     completenessError.value = 'Gagal memuat data keterisian'
   } finally {
     completenessLoading.value = false
+  }
+}
+
+const mapWithConcurrency = async (items, concurrency, mapper) => {
+  const list = Array.isArray(items) ? items : []
+  const limit = Math.max(1, Number(concurrency || 1))
+  const results = new Array(list.length)
+  let index = 0
+
+  const workers = new Array(Math.min(limit, list.length)).fill(0).map(async () => {
+    while (true) {
+      const current = index
+      index += 1
+      if (current >= list.length) return
+      results[current] = await mapper(list[current], current)
+    }
+  })
+
+  await Promise.all(workers)
+  return results
+}
+
+const loadDataCompletenessFallback = async () => {
+  const masjidRes = await api.getPublicMasjid()
+  if (!masjidRes?.data?.success) throw new Error(masjidRes?.data?.message || 'Failed to load masjid')
+
+  const masjids = Array.isArray(masjidRes.data.data) ? masjidRes.data.data : []
+  const totalMasjid = masjids.length
+
+  const items = await mapWithConcurrency(masjids, 5, async (m) => {
+    const id = m?.id
+    const nama = m?.nama || ''
+
+    const [statsRes, pengurusMasjidRes, pengurusZakatRes] = await Promise.all([
+      api.getPublicMasjidStats(id),
+      api.getPublicPengurusMasjid(id),
+      api.getPublicPengurusZakat(id)
+    ])
+
+    const stats = statsRes?.data?.success ? (statsRes.data.data || {}) : {}
+    const muzakkiCount = Number(stats.total_muzakki || 0)
+    const mustahiqCount = Number(stats.total_mustahiq || 0)
+
+    const pengurusMasjid = pengurusMasjidRes?.data?.success ? (pengurusMasjidRes.data.data || []) : []
+    const pengurusZakat = pengurusZakatRes?.data?.success ? (pengurusZakatRes.data.data || []) : []
+
+    const ketuaPengurus = Array.isArray(pengurusMasjid)
+      ? (pengurusMasjid.find((p) => p?.jabatan === 'Ketua')?.nama || '')
+      : ''
+
+    const ketuaUpz = Array.isArray(pengurusZakat)
+      ? (pengurusZakat.find((p) => p?.jabatan === 'Ketua UPZ')?.nama || '')
+      : ''
+
+    return {
+      id,
+      nama,
+      muzakki_count: muzakkiCount,
+      mustahiq_count: mustahiqCount,
+      ketua_pengurus: ketuaPengurus,
+      ketua_upz: ketuaUpz
+    }
+  })
+
+  const filledMuzakki = items.filter((it) => Number(it?.muzakki_count || 0) > 0).length
+  const filledMustahiq = items.filter((it) => Number(it?.mustahiq_count || 0) > 0).length
+  const filledPengurus = items.filter((it) => String(it?.ketua_pengurus || '').trim() !== '' && String(it?.ketua_upz || '').trim() !== '').length
+
+  completeness.value = {
+    total_masjid: totalMasjid,
+    filled_muzakki: filledMuzakki,
+    filled_mustahiq: filledMustahiq,
+    filled_pengurus: filledPengurus,
+    items
   }
 }
 
