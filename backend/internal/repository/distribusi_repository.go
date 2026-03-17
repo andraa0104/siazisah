@@ -251,12 +251,22 @@ func (r *DistribusiZakatRepository) GetInsight(masjidID int) (*models.Distribusi
 		WHERE masjid_id = ? AND jenis_zakat = 'fitrah' AND bentuk_zakat = 'uang'
 	`, masjidID).Scan(&insight.TotalFitrahUang)
 	r.DB.QueryRow(`
-		SELECT COALESCE(SUM(total_dibayar - COALESCE(infaq_tambahan, 0)), 0)
+		SELECT COALESCE(SUM(
+			CASE
+				WHEN COALESCE(total_wajib, 0) > 0 THEN LEAST(total_dibayar, total_wajib)
+				ELSE (total_dibayar - COALESCE(infaq_tambahan, 0))
+			END
+		), 0)
 		FROM transaksi_zakat
 		WHERE masjid_id = ? AND jenis_zakat = 'fidyah' AND bentuk_zakat = 'uang'
 	`, masjidID).Scan(&insight.TotalFidyahUang)
 	r.DB.QueryRow(`
-		SELECT COALESCE(SUM(total_dibayar - COALESCE(infaq_tambahan, 0)), 0)
+		SELECT COALESCE(SUM(
+			CASE
+				WHEN COALESCE(total_wajib, 0) > 0 THEN LEAST(total_dibayar, total_wajib)
+				ELSE (total_dibayar - COALESCE(infaq_tambahan, 0))
+			END
+		), 0)
 		FROM transaksi_zakat
 		WHERE masjid_id = ? AND jenis_zakat = 'mal'
 	`, masjidID).Scan(&insight.TotalZakatMalUang)

@@ -331,6 +331,7 @@ func (h *MasjidHandler) PrintZakatSummary(c *gin.Context) {
 			masjid_id,
 			COALESCE(jenis_zakat, ''),
 			COALESCE(bentuk_zakat, ''),
+			COALESCE(total_wajib, 0),
 			COALESCE(total_dibayar, 0),
 			COALESCE(infaq_tambahan, 0),
 			COALESCE(kg_beras_dibayar, 0),
@@ -352,6 +353,7 @@ func (h *MasjidHandler) PrintZakatSummary(c *gin.Context) {
 		var masjidID int
 		var jenis string
 		var bentuk string
+		var totalWajib float64
 		var totalDibayar float64
 		var infaqTambahan float64
 		var kgBeras float64
@@ -364,6 +366,7 @@ func (h *MasjidHandler) PrintZakatSummary(c *gin.Context) {
 			&masjidID,
 			&jenis,
 			&bentuk,
+			&totalWajib,
 			&totalDibayar,
 			&infaqTambahan,
 			&kgBeras,
@@ -394,7 +397,16 @@ func (h *MasjidHandler) PrintZakatSummary(c *gin.Context) {
 		if jenis == "infaq" {
 			row.TotalInfaq += totalDibayar
 		} else {
-			nilaiZakatMurni := totalDibayar - infaqTambahan
+			// Prefer deriving surplus from total_wajib (more reliable for older rows), but keep infaq_tambahan as fallback.
+			surplus := infaqTambahan
+			if totalWajib > 0 && totalDibayar > totalWajib {
+				derived := totalDibayar - totalWajib
+				if derived > surplus {
+					surplus = derived
+				}
+			}
+
+			nilaiZakatMurni := totalDibayar - surplus
 			if nilaiZakatMurni < 0 {
 				nilaiZakatMurni = 0
 			}
@@ -432,8 +444,8 @@ func (h *MasjidHandler) PrintZakatSummary(c *gin.Context) {
 				}
 			}
 
-			if infaqTambahan > 0 {
-				row.TotalInfaq += infaqTambahan
+			if surplus > 0 {
+				row.TotalInfaq += surplus
 			}
 		}
 	}

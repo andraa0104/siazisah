@@ -155,7 +155,10 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
-                  {{ getDetail(t) }}
+                  <div class="text-gray-900">{{ getDetail(t) }}</div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    Wajib: <span class="font-semibold">{{ formatCurrency(t.total_wajib || 0) }}</span>
+                  </div>
                 </td>
                 <td class="px-6 py-4">
                   <div class="font-bold text-gray-900">
@@ -228,6 +231,9 @@
             </div>
             <div class="space-y-1 text-sm mb-3">
               <div class="text-gray-600">{{ getDetail(t) }}</div>
+              <div class="text-gray-700">
+                Wajib: <span class="font-semibold">{{ formatCurrency(t.total_wajib || 0) }}</span>
+              </div>
               <div class="font-bold text-gray-900">
                 Total Uang: {{ formatCurrency(t.total_dibayar) }}
               </div>

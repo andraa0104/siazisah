@@ -102,13 +102,33 @@ func (h *PublicHandler) GetPublicDashboard(c *gin.Context) {
 	}
 
 	// Total zakat mal
-	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE jenis_zakat = 'mal'").Scan(&stats.TotalZakatMal)
+	// Exclude surplus/infaq: zakat mal uang = min(total_dibayar, total_wajib) when total_wajib is available.
+	h.DB.QueryRow(`
+		SELECT COALESCE(SUM(
+			CASE
+				WHEN COALESCE(total_wajib, 0) > 0 THEN LEAST(total_dibayar, total_wajib)
+				ELSE (total_dibayar - COALESCE(infaq_tambahan, 0))
+			END
+		), 0)
+		FROM transaksi_zakat
+		WHERE jenis_zakat = 'mal'
+	`).Scan(&stats.TotalZakatMal)
 
 	// Total fidyah
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE jenis_zakat = 'fidyah'").Scan(&stats.TotalFidyah)
 
 	// Total fidyah uang
-	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE jenis_zakat = 'fidyah' AND bentuk_zakat = 'uang'").Scan(&stats.TotalFidyahUang)
+	// Exclude infaq surplus: fidyah uang = min(total_dibayar, total_wajib) when total_wajib is available.
+	h.DB.QueryRow(`
+		SELECT COALESCE(SUM(
+			CASE
+				WHEN COALESCE(total_wajib, 0) > 0 THEN LEAST(total_dibayar, total_wajib)
+				ELSE (total_dibayar - COALESCE(infaq_tambahan, 0))
+			END
+		), 0)
+		FROM transaksi_zakat
+		WHERE jenis_zakat = 'fidyah' AND bentuk_zakat = 'uang'
+	`).Scan(&stats.TotalFidyahUang)
 
 	// Total fidyah beras (dalam rupiah)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE jenis_zakat = 'fidyah' AND bentuk_zakat = 'beras'").Scan(&stats.TotalFidyahBerasRp)
@@ -266,9 +286,29 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 		}
 	}
 
-	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'mal'", id).Scan(&stats.TotalZakatMal)
+	// Exclude surplus/infaq: zakat mal uang = min(total_dibayar, total_wajib) when total_wajib is available.
+	h.DB.QueryRow(`
+		SELECT COALESCE(SUM(
+			CASE
+				WHEN COALESCE(total_wajib, 0) > 0 THEN LEAST(total_dibayar, total_wajib)
+				ELSE (total_dibayar - COALESCE(infaq_tambahan, 0))
+			END
+		), 0)
+		FROM transaksi_zakat
+		WHERE masjid_id = ? AND jenis_zakat = 'mal'
+	`, id).Scan(&stats.TotalZakatMal)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fidyah'", id).Scan(&stats.TotalFidyah)
-	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fidyah' AND bentuk_zakat = 'uang'", id).Scan(&stats.TotalFidyahUang)
+	// Exclude infaq surplus: fidyah uang = min(total_dibayar, total_wajib) when total_wajib is available.
+	h.DB.QueryRow(`
+		SELECT COALESCE(SUM(
+			CASE
+				WHEN COALESCE(total_wajib, 0) > 0 THEN LEAST(total_dibayar, total_wajib)
+				ELSE (total_dibayar - COALESCE(infaq_tambahan, 0))
+			END
+		), 0)
+		FROM transaksi_zakat
+		WHERE masjid_id = ? AND jenis_zakat = 'fidyah' AND bentuk_zakat = 'uang'
+	`, id).Scan(&stats.TotalFidyahUang)
 	h.DB.QueryRow("SELECT COALESCE(SUM(total_dibayar), 0) FROM transaksi_zakat WHERE masjid_id = ? AND jenis_zakat = 'fidyah' AND bentuk_zakat = 'beras'", id).Scan(&stats.TotalFidyahBerasRp)
 
 	// Total kg beras fidyah
@@ -292,7 +332,9 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 	if includeLists {
 		// Get transaksi list
 		tRows, err := h.DB.Query(`
-			SELECT t.id, COALESCE(m.nama, 'Unknown') as muzakki_nama, t.jenis_zakat, COALESCE(t.bentuk_zakat, ''), COALESCE(t.jumlah_orang, 0), COALESCE(t.jumlah_hari_fidyah, 0), t.total_dibayar, COALESCE(t.infaq_tambahan, 0), t.tanggal_bayar, COALESCE(t.keterangan, '')
+			SELECT t.id, COALESCE(m.nama, 'Unknown') as muzakki_nama, t.jenis_zakat, COALESCE(t.bentuk_zakat, ''),
+				COALESCE(t.jumlah_orang, 0), COALESCE(t.jumlah_hari_fidyah, 0), COALESCE(t.kelas_zakat, ''), COALESCE(t.total_wajib, 0),
+				t.total_dibayar, COALESCE(t.infaq_tambahan, 0), t.tanggal_bayar, COALESCE(t.keterangan, '')
 			FROM transaksi_zakat t
 			LEFT JOIN muzakki m ON t.muzakki_id = m.id
 			WHERE t.masjid_id = ?
@@ -305,10 +347,12 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 			for tRows.Next() {
 				var tid int
 				var nama, jenis, bentuk, tanggal, keterangan string
+				var kelasZakat string
 				var jumlah int
 				var jumlahHari int
+				var totalWajib float64
 				var total, infaq float64
-				err := tRows.Scan(&tid, &nama, &jenis, &bentuk, &jumlah, &jumlahHari, &total, &infaq, &tanggal, &keterangan)
+				err := tRows.Scan(&tid, &nama, &jenis, &bentuk, &jumlah, &jumlahHari, &kelasZakat, &totalWajib, &total, &infaq, &tanggal, &keterangan)
 				if err != nil {
 					log.Printf("Error scan transaksi: %v", err)
 					continue
@@ -318,8 +362,10 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 					"muzakki_nama":       nama,
 					"jenis_zakat":        jenis,
 					"bentuk_zakat":       bentuk,
+					"kelas_zakat":        kelasZakat,
 					"jumlah_orang":       jumlah,
 					"jumlah_hari_fidyah": jumlahHari,
+					"total_wajib":        totalWajib,
 					"total_dibayar":      total,
 					"infaq_tambahan":     infaq,
 					"tanggal_bayar":      tanggal,
@@ -395,8 +441,17 @@ func (h *PublicHandler) GetMasjidStats(c *gin.Context) {
 
 	// Last update (tanggal transaksi terakhir untuk masjid ini)
 	var lastUpdate sql.NullString
-	h.DB.QueryRow("SELECT MAX(tanggal_bayar) FROM transaksi_zakat WHERE masjid_id = ?", id).Scan(&lastUpdate)
-	if lastUpdate.Valid {
+	// Use updated_at timestamps to include time component.
+	h.DB.QueryRow(`
+		SELECT GREATEST(
+			COALESCE((SELECT MAX(updated_at) FROM transaksi_zakat WHERE masjid_id = ?), '0000-00-00 00:00:00'),
+			COALESCE((SELECT MAX(updated_at) FROM distribusi_zakat WHERE masjid_id = ?), '0000-00-00 00:00:00'),
+			COALESCE((SELECT MAX(updated_at) FROM mustahiq WHERE masjid_id = ?), '0000-00-00 00:00:00'),
+			COALESCE((SELECT MAX(updated_at) FROM muzakki WHERE masjid_id = ?), '0000-00-00 00:00:00'),
+			COALESCE((SELECT updated_at FROM masjid WHERE id = ?), '0000-00-00 00:00:00')
+		) as last_update
+	`, id, id, id, id, id).Scan(&lastUpdate)
+	if lastUpdate.Valid && lastUpdate.String != "0000-00-00 00:00:00" {
 		stats.LastUpdate = lastUpdate.String
 	} else {
 		stats.LastUpdate = ""
@@ -449,7 +504,8 @@ func (h *PublicHandler) GetMasjidTransaksi(c *gin.Context) {
 
 	query := `
 		SELECT t.id, COALESCE(m.nama, 'Unknown') as muzakki_nama, t.jenis_zakat, COALESCE(t.bentuk_zakat, ''),
-			COALESCE(t.jumlah_orang, 0), COALESCE(t.jumlah_hari_fidyah, 0), COALESCE(t.kg_beras_dibayar, 0), t.total_dibayar,
+			COALESCE(t.jumlah_orang, 0), COALESCE(t.jumlah_hari_fidyah, 0), COALESCE(t.kg_beras_dibayar, 0),
+			COALESCE(t.kelas_zakat, ''), COALESCE(t.total_wajib, 0), t.total_dibayar,
 			COALESCE(t.infaq_tambahan, 0), t.tanggal_bayar, COALESCE(t.keterangan, '')
 		FROM transaksi_zakat t
 		LEFT JOIN muzakki m ON t.muzakki_id = m.id
@@ -478,8 +534,10 @@ func (h *PublicHandler) GetMasjidTransaksi(c *gin.Context) {
 		var jumlah int
 		var jumlahHari int
 		var kgBeras float64
+		var kelasZakat string
+		var totalWajib float64
 		var totalDibayar, infaq float64
-		if err := rows.Scan(&tid, &nama, &jenis, &bentuk, &jumlah, &jumlahHari, &kgBeras, &totalDibayar, &infaq, &tanggal, &keterangan); err != nil {
+		if err := rows.Scan(&tid, &nama, &jenis, &bentuk, &jumlah, &jumlahHari, &kgBeras, &kelasZakat, &totalWajib, &totalDibayar, &infaq, &tanggal, &keterangan); err != nil {
 			continue
 		}
 		items = append(items, map[string]interface{}{
@@ -487,9 +545,11 @@ func (h *PublicHandler) GetMasjidTransaksi(c *gin.Context) {
 			"muzakki_nama":       nama,
 			"jenis_zakat":        jenis,
 			"bentuk_zakat":       bentuk,
+			"kelas_zakat":        kelasZakat,
 			"jumlah_orang":       jumlah,
 			"jumlah_hari_fidyah": jumlahHari,
 			"kg_beras_dibayar":   kgBeras,
+			"total_wajib":        totalWajib,
 			"total_dibayar":      totalDibayar,
 			"infaq_tambahan":     infaq,
 			"tanggal_bayar":      tanggal,

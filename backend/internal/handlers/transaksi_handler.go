@@ -549,14 +549,23 @@ func (h *TransaksiHandler) PrintSummary(c *gin.Context) {
 		if jenis == "infaq" {
 			row.Uang += transaksi.TotalDibayar
 		} else {
-			nilaiZakatMurni := transaksi.TotalDibayar - infaqTambahan
+			// Prefer deriving surplus from total_wajib (more reliable for older rows), but keep infaq_tambahan as fallback.
+			surplus := infaqTambahan
+			if transaksi.TotalWajib > 0 && transaksi.TotalDibayar > transaksi.TotalWajib {
+				derived := transaksi.TotalDibayar - transaksi.TotalWajib
+				if derived > surplus {
+					surplus = derived
+				}
+			}
+
+			nilaiZakatMurni := transaksi.TotalDibayar - surplus
 			if nilaiZakatMurni < 0 {
 				nilaiZakatMurni = 0
 			}
 			row.Uang += nilaiZakatMurni
 
-			if infaqTambahan > 0 {
-				rowTemplate["infaq"].Uang += infaqTambahan
+			if surplus > 0 {
+				rowTemplate["infaq"].Uang += surplus
 				if transaksi.MuzakkiID > 0 {
 					muzakkiSet["infaq"][transaksi.MuzakkiID] = struct{}{}
 				}

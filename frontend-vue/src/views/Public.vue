@@ -141,7 +141,7 @@
               <p v-if="modalData?.last_update" class="text-xs opacity-75 mt-1">
                 <i class="fas fa-clock mr-1"></i>
                 <span class="hidden sm:inline">Update terakhir: </span>
-                {{ formatDate(modalData.last_update) }}
+                {{ formatDateTime(modalData.last_update) }}
               </p>
             </div>
             <button
@@ -452,6 +452,18 @@
                           t.jenis_zakat
                         }}</span>
                         <span
+                          v-if="formatBentukZakat(t) !== '-'"
+                          class="block text-xs text-gray-500 mt-1"
+                        >
+                          Bentuk: <span class="font-semibold">{{ formatBentukZakat(t) }}</span>
+                        </span>
+                        <span
+                          v-if="String(t?.jenis_zakat || '').toLowerCase() === 'fitrah' && String(t?.bentuk_zakat || '').toLowerCase() === 'uang'"
+                          class="block text-xs text-gray-500 mt-1"
+                        >
+                          Kelas: <span class="font-semibold">{{ formatKelasFitrah(t) }}</span>
+                        </span>
+                        <span
                           v-if="t.bentuk_zakat === 'beras'"
                           class="block text-xs text-amber-600 mt-1"
                         >
@@ -463,7 +475,10 @@
                         {{ formatJumlah(t) }}
                       </td>
                       <td class="px-4 py-2 text-sm font-medium text-gray-900">
-                        {{ formatTotalUang(t) }}
+                        <div>{{ formatTotalUang(t) }}</div>
+                        <div class="text-xs text-gray-500 mt-1">
+                          Wajib: <span class="font-semibold">{{ formatCurrency(t.total_wajib || 0) }}</span>
+                        </div>
                       </td>
                       <td class="px-4 py-2 text-sm text-gray-900">
                         {{ formatTotalBerasKg(t) }}
@@ -501,6 +516,12 @@
                         <i class="fas fa-seedling mr-1"></i
                         >{{ t.keterangan || "Beras" }}
                       </span>
+                      <span
+                        v-if="String(t?.jenis_zakat || '').toLowerCase() === 'fitrah' && String(t?.bentuk_zakat || '').toLowerCase() === 'uang'"
+                        class="text-xs text-gray-500 mt-1 block"
+                      >
+                        Kelas: <span class="font-semibold">{{ formatKelasFitrah(t) }}</span>
+                      </span>
                     </div>
                     <span :class="getJenisBadgeClass(t.jenis_zakat)">{{
                       t.jenis_zakat
@@ -513,6 +534,14 @@
                     >
                       <span class="text-gray-600">Jumlah:</span
                       ><span class="font-medium">{{ formatJumlah(t) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">Bentuk:</span
+                      ><span class="font-medium">{{ formatBentukZakat(t) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">Wajib:</span
+                      ><span class="font-medium">{{ formatCurrency(t.total_wajib || 0) }}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-gray-600">Total Uang:</span
@@ -1610,6 +1639,29 @@ const formatTotalUang = (t) => {
   if (!t) return "-";
   if (String(t.bentuk_zakat || "").toLowerCase() === "beras") return "-";
   return formatCurrency(t.total_dibayar);
+};
+
+const formatBentukZakat = (t) => {
+  const jenis = String(t?.jenis_zakat || "").toLowerCase();
+  const bentuk = String(t?.bentuk_zakat || "").toLowerCase();
+  if (jenis === "fitrah" || jenis === "fidyah") {
+    if (bentuk === "beras") return "Beras";
+    if (bentuk === "uang") return "Uang";
+    return "-";
+  }
+  // Mal/Infaq: bentuk tidak relevan, tapi tetap tampilkan jika ada.
+  if (bentuk === "beras") return "Beras";
+  if (bentuk === "uang") return "Uang";
+  return "-";
+};
+
+const formatKelasFitrah = (t) => {
+  const jenis = String(t?.jenis_zakat || "").toLowerCase();
+  const bentuk = String(t?.bentuk_zakat || "").toLowerCase();
+  const kelas = String(t?.kelas_zakat || "").trim();
+  if (jenis !== "fitrah") return "";
+  if (bentuk !== "uang") return "";
+  return kelas || "-";
 };
 
 const formatTotalBerasKg = (t) => {
