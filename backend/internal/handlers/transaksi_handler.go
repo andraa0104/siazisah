@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -193,8 +194,86 @@ func (h *TransaksiHandler) Create(c *gin.Context) {
 		transaksi.InfaqTambahan = transaksi.TotalDibayar - transaksi.TotalWajib
 	}
 
-	if err := h.transaksiRepo.Create(&transaksi); err != nil {
+	// Atomic create: ensure muzakki + transaksi saved together in one DB transaction.
+	// This prevents partial writes when client/network fails between separate requests.
+	tx, err := h.transaksiRepo.DB.Begin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to start transaction"})
+		return
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	if transaksi.MuzakkiID <= 0 {
+		nama := strings.TrimSpace(transaksi.MuzakkiNama)
+		if nama == "" {
+			c.JSON(http.StatusBadRequest, models.Response{Success: false, Message: "Muzakki wajib diisi"})
+			return
+		}
+
+		var existingID int
+		err := tx.QueryRow(
+			`SELECT id FROM muzakki WHERE masjid_id = ? AND LOWER(TRIM(nama)) = LOWER(TRIM(?)) LIMIT 1`,
+			transaksi.MasjidID,
+			nama,
+		).Scan(&existingID)
+		if err == nil && existingID > 0 {
+			transaksi.MuzakkiID = existingID
+		} else if err != nil && err != sql.ErrNoRows {
+			c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to lookup muzakki"})
+			return
+		} else {
+			res, err := tx.Exec(
+				`INSERT INTO muzakki (masjid_id, nama, alamat, telepon) VALUES (?, ?, ?, ?)`,
+				transaksi.MasjidID,
+				nama,
+				strings.TrimSpace(transaksi.MuzakkiAlamat),
+				strings.TrimSpace(transaksi.MuzakkiTelepon),
+			)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to create muzakki"})
+				return
+			}
+			id, _ := res.LastInsertId()
+			transaksi.MuzakkiID = int(id)
+		}
+	}
+
+	result, err := tx.Exec(
+		`INSERT INTO transaksi_zakat (masjid_id, muzakki_id, jenis_zakat, bentuk_zakat, jenis_harta,
+			  nominal_harta, persentase_zakat, kelas_zakat, jumlah_orang, jumlah_hari_fidyah,
+			  standar_beras_per_jiwa, kg_beras_dibayar, harga_beras_per_kg, nominal_per_orang, total_wajib,
+			  total_dibayar, infaq_tambahan, keterangan, tahun, tanggal_bayar)
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		transaksi.MasjidID,
+		transaksi.MuzakkiID,
+		transaksi.JenisZakat,
+		transaksi.BentukZakat,
+		transaksi.JenisHarta,
+		transaksi.NominalHarta,
+		transaksi.PersentaseZakat,
+		transaksi.KelasZakat,
+		transaksi.JumlahOrang,
+		transaksi.JumlahHariFidyah,
+		transaksi.StandarBerasPerJiwa,
+		transaksi.KgBerasDibayar,
+		transaksi.HargaBerasPerKg,
+		transaksi.NominalPerOrang,
+		transaksi.TotalWajib,
+		transaksi.TotalDibayar,
+		transaksi.InfaqTambahan,
+		transaksi.Keterangan,
+		transaksi.Tahun,
+		transaksi.TanggalBayar,
+	)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to create transaksi"})
+		return
+	}
+	newID, _ := result.LastInsertId()
+	transaksi.ID = int(newID)
+
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to commit transaction"})
 		return
 	}
 
@@ -254,9 +333,58 @@ func (h *TransaksiHandler) GetByID(c *gin.Context) {
 }
 
 func (h *TransaksiHandler) Delete(c *gin.Context) {
+	masjidID, _ := c.Get("masjid_id")
 	id, _ := strconv.Atoi(c.Param("id"))
-	if err := h.transaksiRepo.Delete(id); err != nil {
+	if id <= 0 {
+		c.JSON(http.StatusBadRequest, models.Response{Success: false, Message: "Invalid transaksi id"})
+		return
+	}
+
+	tx, err := h.transaksiRepo.DB.Begin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to start transaction"})
+		return
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	var muzakkiID int
+	err = tx.QueryRow(
+		`SELECT muzakki_id FROM transaksi_zakat WHERE id = ? AND masjid_id = ? LIMIT 1`,
+		id,
+		*masjidID.(*int),
+	).Scan(&muzakkiID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, models.Response{Success: false, Message: "Transaksi not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to lookup transaksi"})
+		return
+	}
+
+	res, err := tx.Exec(`DELETE FROM transaksi_zakat WHERE id = ? AND masjid_id = ?`, id, *masjidID.(*int))
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to delete transaksi"})
+		return
+	}
+	affected, _ := res.RowsAffected()
+	if affected == 0 {
+		c.JSON(http.StatusNotFound, models.Response{Success: false, Message: "Transaksi not found"})
+		return
+	}
+
+	// If this muzakki is no longer referenced by any transaksi, delete it as well.
+	var remaining int
+	if err := tx.QueryRow(`SELECT COUNT(*) FROM transaksi_zakat WHERE muzakki_id = ?`, muzakkiID).Scan(&remaining); err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to check muzakki usage"})
+		return
+	}
+	if remaining == 0 {
+		_, _ = tx.Exec(`DELETE FROM muzakki WHERE id = ? AND masjid_id = ?`, muzakkiID, *masjidID.(*int))
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to commit transaction"})
 		return
 	}
 

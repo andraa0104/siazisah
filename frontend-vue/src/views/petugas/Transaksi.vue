@@ -1752,9 +1752,10 @@ const ensureMuzakki = async () => {
 const saveTransaksi = async () => {
   isSaving.value = true;
   try {
-    const muzakkiId = await ensureMuzakki();
     const payload = {
-      muzakki_id: muzakkiId,
+      // Let backend ensure/create muzakki atomically with transaksi (single request).
+      // This avoids partial writes when network is unstable.
+      muzakki_nama: String(form.value.nama_muzakki || "").trim(),
       jenis_zakat: form.value.jenis_zakat,
       bentuk_zakat: form.value.bentuk_zakat || null,
       jenis_harta: form.value.jenis_harta || null,

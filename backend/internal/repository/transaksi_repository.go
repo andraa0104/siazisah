@@ -287,3 +287,9 @@ func (r *TransaksiZakatRepository) Delete(id int) error {
 	_, err := r.DB.Exec(query, id)
 	return err
 }
+
+func (r *TransaksiZakatRepository) DeleteByIDAndMasjid(id int, masjidID int) error {
+	query := `DELETE FROM transaksi_zakat WHERE id=? AND masjid_id=?`
+	_, err := r.DB.Exec(query, id, masjidID)
+	return err
+}

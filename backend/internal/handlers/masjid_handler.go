@@ -252,6 +252,15 @@ func (h *MasjidHandler) UpdateMyMasjid(c *gin.Context) {
 
 	id := masjidID.(*int)
 	masjid.ID = *id
+
+	// Prevent petugas updates from accidentally toggling activation status.
+	// Frontend only sends nama/alamat/telepon; a missing bool field would default to false.
+	if existing, err := h.masjidRepo.FindByID(*id); err == nil && existing != nil {
+		masjid.IsActive = existing.IsActive
+	} else {
+		// Safe default: keep active for petugas edits.
+		masjid.IsActive = true
+	}
 	if err := h.masjidRepo.Update(&masjid); err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{Success: false, Message: "Failed to update masjid"})
 		return
