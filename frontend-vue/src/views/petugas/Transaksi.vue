@@ -1655,7 +1655,15 @@ const getDetail = (transaction) => {
     if (transaction.bentuk_zakat === "uang") {
       return `Fitrah uang, ${transaction.jumlah_orang || 0} orang, kelas ${transaction.kelas_zakat || "-"}`;
     }
-    return `Fitrah beras ${formatKg(getTotalBerasKg(transaction))} kg`;
+    const standarPerJiwa = Number(
+      transaction.standar_beras_per_jiwa ||
+        kadarZakat.value.fitrahBerasPerJiwa ||
+        2.5,
+    );
+    const jumlahOrang = Number(transaction.jumlah_orang || 0);
+    const totalWajib = formatKg(standarPerJiwa * jumlahOrang);
+
+    return `Fitrah beras, ${jumlahOrang} orang, wajib ${totalWajib} kg`;
   }
 
   if (transaction.jenis_zakat === "mal") {
@@ -1666,7 +1674,12 @@ const getDetail = (transaction) => {
     if (transaction.bentuk_zakat === "uang") {
       return `Fidyah uang ${transaction.jumlah_hari_fidyah || 0} hari`;
     }
-    return `Fidyah beras ${formatKg(getTotalBerasKg(transaction))} kg`;
+    const jumlahHari = Number(transaction.jumlah_hari_fidyah || 0);
+    const wajibPerHari = Number(
+      kadarZakat.value.fidyahBerasPerHari || 0.6,
+    );
+    const totalWajib = formatKg(jumlahHari * wajibPerHari);
+    return `Fidyah beras, ${jumlahHari} hari, wajib ${totalWajib} kg`;
   }
 
   if (transaction.jenis_zakat === "infaq") {
